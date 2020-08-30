@@ -1,0 +1,711 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Changelog</title>
+</head>
+<body>
+
+<span style="font-weight: bold;">Changelog History<br></span>
+<br>
+<br>
+</span><span style="font-weight: bold;"><big>Version .40 (643k)</big></span>
+Argh. When I added the option to extract the small caps markup from the RTF files, I broke the handler for small caps if you WEREN'T extracting the markup. Fixed now.<br>
+<br>
+Modified how the Precessing functions displayed progress. They used to just print a dot to the screen for each page (file) that was completed. That worked fine as long as there weren't any problems. If the WAS a problem, it was extremely tedious to try to count the dots to figure out which file was causing it. Changed it to print an incremented counter mod 10. It will print the digits from 123456789012345... and so on. That should make it much easier to figure out which file causes a problem when one occurs.<br>
+<br>
+Fixed an obscure problem with code page handling during RTF extraction. Set it to have a reasonable default if it couldn't determine the codepage.
+<br>
+<br>
+Tightened up a bunch of code in the font table and codepage handling code. Made it much more memory efficient (and probably faster, though negligibly so.)
+
+<br>
+<br>
+</span><span style="font-weight: bold;"><big>Version .39 (643k)</big></span>
+Added option to extract small caps markup from the rtf during the
+extraction routine. Markup will be added as &lt;sc&gt; .. &lt;/sc&gt;
+around the text that is marked as small caps in the RTF file. It
+doesn't do too bad, but there are problems trying to convert RTF markup
+(which is strictly presentational) into semantic sensitive markup.<br>
+<br>
+Added an entry box to the Process Text tab where you can specify what
+number to start with when renaming the text and/or png files. By
+default it is set to 1, but if you want to offset the pages by 127,
+enter 127 in the box and the files will be renamed starting at
+127.&nbsp; IF you want to force four digit numbers even for texts that
+nominally would only need three (say an early volume of a multi-volume
+work,) left pad the start number out to 4 places with zeros, e.g. 0001.
+Sorry, no negative numbers, no skipping numbers in the sequence after
+the start offset. If you don't like the offset you have, change it and
+rename again, filename collisions will be automatically avoided.<br>
+<br>
+Modified file renaming routine to be able to deal with offset start
+points. Rewrote it to be more robust about avoiding filename
+collisions. As a side effect, I sped it up about two to three times as
+fast as it used to be.<br>
+<br>
+Modified Search tab to be able to deal with file names that don't
+correspond to their index.<br>
+<br>
+Twiddled with the layout of the options tab slightly. Mostly cosmetic
+changes.<br>
+<br>
+Got tired of the default palette and changed it. Shouldn't affect most
+current users, only new users, and you can still change it to whatever
+you prefer.<br>
+<br>
+<span style="font-weight: bold;"><br>
+</span><span style="font-weight: bold;"><big>Version .38 (642k)</big></span>
+Added a whole bunch of tweaks suggested by lorax. <br>
+<br>
+Tweaked "Remove garbage punctuation " regexes a bit. Broke apart the
+"Strip from front" and "Strip from end" regexes into separate options. <br>
+<br>
+Modified Header Removal functions to not display pages where the only
+text is the "Blank Page" text string from the options page.<br>
+<br>
+Fixed improper calling of nohyph.dict&nbsp; loading function. Sigh.<br>
+<br>
+Included a basic English nohyph.dict courtesy of lorax. <br>
+<br>
+Tweaked quote handling a bit to try to intelligently resolve quote
+spacing a bit better.<br>
+<br>
+Added function that will try to find and change the case of ALL CAPS
+words at the start of a chapter. It isn't very aggressive to prevent
+unwanted case changes, but it should help a little.<br>
+<br>
+Fixed bug with Convert &pound; to "Pounds" option&nbsp; where it would
+erroneously split numeric quantities at commas. E.G., &pound;100,000
+would become 100 Pounds ,000 rather than 100,000 Pounds. Note, this
+option is little used and somewhat discouraged, but it is available.<br>
+<br>
+Fiddled around with the "Move punctuation outside of markup" functions
+to avoid a few undesirable side effects. Most obnoxious of which was ,
+the &lt;i&lt;/i&gt;&gt; problem.<br>
+<br>
+Fixed a bug in the Extraction routine where if a page contained a
+table, any text after the table would have its spaces changed to
+non-breaking spaces. Normally this would be a non-issue since the
+filter routine changes all non-breaking space back to regular spaces,
+however, in rare instances they seemed to be slipping through.<br>
+<span style="font-weight: bold;"><big><br>
+</big></span>Added an option to save two files during dehyphenization;
+hyphens.txt and dehyphen.txt. The hyphens.txt will contain all of the
+end-of-line hyphenated words that the script found during the
+dehyphenate routine where the words remained hyphenated. The
+dehyphen.txt will contain all of the words where a hyphen was removed.
+The script has been capable of generating these files for some time as
+a debugging aid, however it required editing the source to set a
+debugging flag. Since the addition of the nohyph.dict dictionary file
+though, these could be more useful to general users so I made the
+generation optional in the program. The files will be placed in the
+base directory of the project, (the directory that contains the textw,
+textwo, text and pngs directories.) They will be overwritten each time
+the dehyphenate routine is run.<br>
+<span style="font-weight: bold;"></span><br>
+Messed around with the layout of the options page a bit. The layout
+manager I was using was very automatic, but I didn't like the staggered
+columns of checkboxes.<br>
+<br>
+<br>
+<span style="font-weight: bold;"><big>Version .37 (638k)</big></span>
+Fixed problem where guiprep would occasionally lock up while running
+Filter Files with the "Move punctuation outside of markup" selected.<br>
+<br>
+Added an option for the&nbsp; "Remove garbage punctuation at ends of
+line" to the
+options page. Made filter regex much more aggressive.<br>
+<br>
+Tweaked a few other filters a bit. <br>
+<span style="font-weight: bold;"><big><br>
+<br>
+</big></span><span style="font-weight: bold;"><big>Version .36 (638k)</big></span>
+It's a veritable bug fest.<br>
+<br>
+Fixed problem with semicolons being turned into question marks.&nbsp;
+Stupidity errer :-(&nbsp; <br>
+<br>
+Think I finally fixed the problem with disappering punctuation after
+hyphenated words. (Actually lorax spotted the error.)<br>
+<br>
+Fixed some other mistakes I made while trying to implement dehyphenate
+code modifications submitted by lorax. The problems should not have
+caused any errors in the processed texts, though they limited the
+effectiveness of the dehyphenate routine a bit.<br>
+<br>
+Added a new filter to the filter routine to try to clean up junk at the
+end of lines. Often, OCR will erroneously put a bunch of junk
+puntuation at the end of lines, (typically where the page runs off into
+the gutter.) This will try to detect and clean up the worst of it.<br>
+<br>
+Was not able to replicate problem with emdash being rendered as
+&acirc;", so that hasn't been fixed yet if it is truly a problem.<br>
+<br>
+Remembered to update version number this time.<br>
+<br>
+<br>
+<span style="font-weight: bold;"><big><br>
+</big></span><span style="font-weight: bold;"><big>Version .35 (638k)</big></span>
+Phooey. Yet more bugs. (Well, bug fixes, one would hope.)<br>
+<br>
+Fixed&nbsp; bug where Filter function would lock up on certain files.
+Root cause was a regex to move punctuation outside of markup that had
+adverse reactions to characters outside of Latin-1.<br>
+<br>
+Fixed a few warnings about printing wide (multi-byte UTF-8) characters.<br>
+<br>
+<span style="font-weight: bold;"><big><br>
+</big></span><span style="font-weight: bold;"><big>Version .34 (637k)</big></span>
+A few tweaks and bug fixes.<br>
+<br>
+Added option to use an external file of words that are not hyphenated.
+If there is a file named nohyph.dict in the guiprep directory, it will
+be loaded and used to help determin which words should be dehyphenated
+during the dehyphenization routine. (Similar to Nicola's DPEU version.)
+<br>
+<br>
+Fixed problem with the Convert to ISO-8859-1 routine that was causing
+some bizarre u &lt;-&gt; y substitutions.<br>
+<br>
+Revised dehyphen routine to be a little more agressive. Changed to
+agressivly lower false negatives without significantly raising false
+positives. Based on code sample by lorax.<br>
+<br>
+Twiddled around with FTP routines a bit. Nothing substantial, most
+visible change is the "activity indicator". Used to just append
+vertical bars to the log, now just has a "spinning" line.<br>
+<span style="font-weight: bold;"><big><br>
+<br>
+</big></span><span style="font-weight: bold;"><big>Version .33 (636k)</big></span>
+Updated program to deal with Unicode files gracefully. Now works
+natively in UTF-8. File for the original DP site NEED to be in ISO
+8859-1 (Latin-1). There is an extra button on the Process Text tab
+"Convert to ISO 8859-1" PLEASE down convert files for the original DP
+site. (At least until the UTF-8 mods get activated.) No such
+restreictions for DPEU. UTF-8 files are PREFERRED at DPEU. Note the
+Convert to ISO8859-1 function will do transliteration of any Greek it
+finds. (It uses the guiguts beta code to denote accented characters.)
+Other characters outside of Latin-1 will be converted to question marks
+at this time. If I get some transliteration tables, I could make auto
+transliterion for other character sets too. I don't really want to
+spend lots of time on it though because hopefully, in the near future,
+DP will convert to UTF-8.&nbsp; A very large Thank You to <span
+ id="_user_smolensk@eunet.yu">Nikola Smolenski</span>, one of the lead
+developers for the DPEU site who worked out the bulk of the UTF-8
+character extraction code.<br>
+<br>
+Fixed problem with pngcrush under Win2000 and WinXP.&nbsp; It was easy
+enough, once I figured out what was causing the problem. The fix
+consisted mostly of downloading a version of pngcrush that works
+correctly under 32 bit Windows. Argh. Note: for Win 95, 98 and ME
+users. The 32 bit version will not work crrectly under DOS. The old
+version is still included as pngcrush16.exe. Rename pngcrush.exe to
+pngcrush32.exe and pngcrush16.exe to pngcrush.exe. The 32 bit version
+will not work correctly under DOS.<br>
+<br>
+A few other small (and mostly invisible) tweaks.<br>
+<span style="font-weight: bold;"><br>
+</span><span style="font-weight: bold;"><big>Version .32 (550k)</big></span>
+Fixed bug where if an italicized word was at the start of a line after
+a line that ended with a hyphen, the word would be removed during
+dehyphenization.<br>
+<br>
+Modified guiprep to fix markup that closes at the end of a line to not
+leave the ending markup at the beginning of the next line. <br>
+<br>
+Modified guiprep to use the spawn.pl spawning script for external
+programs instead of runner.pl for the same reasons I changed it in
+guiguts. More compact, and better Linux compatability.<br>
+<br>
+Added check for common italicized scholarly abbreviations to move
+markup outside of punctuation. (e.g., ibid., loc., cit., Ib., cf., op.,
+et seq., viz., etc.)<br>
+<br>
+Cut out 100k of extreaneous images from the manual.<br>
+<span style="font-weight: bold;"><br>
+</span><br>
+<span style="font-weight: bold;"><big>Version .31 (659k)</big></span>
+Major update of the code to work with the Tk:804 series. Rewrote and
+updated user interface to work with the new unicode aware Tk. The basic
+operation is as near to identical to previous versions as I could make
+it. It uses the same layout, though button and font sizes are subtly
+different.<br>
+<br>
+I have split apart the libraries from the executable version and am
+including the windows exe along with the perl script. The executable
+version uses the same prl03 perl runtime libraries as guiguts. If you
+already have prl03 (<a
+ href="http://mywebpages.comcast.net/thundergnat/prl03.zip">prl03.zip</a>)
+for guiguts installed, there is no need to download it again. <br>
+<br>
+Added unicode handling code to all of the functions. There was very
+basic unicode handling in the extract routines before, but all it would
+do was substitute question marks for any&nbsp; unicode character
+outside the Latin-1 character space. Will now deal with unicode in all
+routines. **NOTE** The PGDP site is still not able to work with multi
+byte characters. If you have a unicode encoded text, you are better off
+putting
+it through DPEU.<br>
+<br>
+Puttered around with FTP functions to try to get more accurate tracking
+of transfer rates and estimated times.<br>
+<br>
+Worked on making things that SHOULD be impossible to do, harder to do
+accidentally.&nbsp; :-\<br>
+<br>
+Lots of little tweaks and tuning that are not worth mentioning
+individually but which added up to a substantial amount of time.<br>
+<br>
+Played around with optionally marking up texts with questionable word
+markup as determined by ABBYY during OCR but after messing with
+it a bit, have serious reservations about it's usefulness, and have
+removed it again.<br>
+<br>
+<span style="font-weight: bold;"><br>
+</span><span style="font-weight: bold;"><big>Version .30 (590k)</big></span>
+Modified FTP reporting code, now
+reports
+on instantaneous and average speed of file transfers. Reports real
+throughput after overhead. Selectable readout in Kilobytes per second
+(KBps) or Kilobits per second (Kbps). Makes an estimate of seconds
+remaining to transfer
+the current file. Not going to be very accurate for small files. <br>
+Fixed problem where script would dump you in the wrong directory if
+processing was interrupted during&nbsp; the scannos routine. <br>
+Made rename functions report file counts. Useful to check that you have
+the same number of text and image files. <br>
+When building a batch for FTP upload, the build routine will now check
+for and warn about zero byte files.<br>
+Changed Change Directory tab to use double click instead of single
+click to navigate. (Made it the same as the navigate function in the
+FTP window.)<br>
+When making a new directory on the FTP server, the script automatically
+issues a CHMOD 0777 command to set the permissions on the new directory.<br>
+<br>
+<span style="font-weight: bold;"><br>
+</span><span style="font-weight: bold;">Version .29 (590k)</span> Fixed
+"Change initial X not followed by e to
+N"
+to also ignore X followed by hyphen.<br>
+Tweaked a few more thing on FTP tab. Added a "percentage done" on
+upload or download to status box.<br>
+Found and fixed bug where search window would add a blank line to the
+bottom of each file every time it was opened.<br>
+Ripped out the original two set dehyphenization function and wrote a
+new one based on the single set dehyphenization function. Actually both
+dehyphenization function use the same code&nbsp; to perform the
+dehyphenization, they just use different dictionary building code. The
+new two set function has all of the robustness and flexibility of the
+single set, with as good accuracy (potentially even better, in fact)
+than the original two set.<br>
+Found and fixed bug in dehyphenization where it was getting confused by
+italic markup (and likely bold too, though I didn't confirm that.)<br>
+Rewrote large portions of the logging and error reporting code to be
+much more compact and less error prone. Reduced script size by 10
+percent in the process.<br>
+Added capability to use German style "=" instead of "-" as the hyphen
+symbol&nbsp; for dehyphenization.<br>
+Removed some of the more problematic scannos from the scanno
+dictionary. "cf" =&gt; "of", "au"=&gt;"an" and "dont"=&gt;"don't".<br>
+Did a fair amount of updating to the manual.<br>
+<br>
+<span style="font-weight: bold;">Version .28(601k)</span> Fixed a few
+spelling errors in the user interface.<br>
+Made "Change initial X not followed by e to N" option not change Roman
+numerals. (Basically it will ignore an initial X followed by eEIVXDCML
+or space.)<br>
+Made "rnp" to "mp" fix ignore turnpike as a special case.<br>
+Tinkered around with the dehyphenate routine to try to figure out what
+could be causing the intermittent moving of whole lines instead of just
+word halves. Was not really able to find a specific fix. Was not able
+to make it fail on any of the texts I have. Still waiting on some
+sample files that show the symptom from someone, so I can try to track
+it down. Was not able to make it happen, even by downloading some
+images from the FTP server that have text files exhibiting the symptom
+and OCRing them myself. Oh well, if I can't duplicate it, I can't
+rectify it. I made a few changes that may help, but, as it worked for
+me both before and after the changes, it is difficult to tell whether
+they will be of any use.<br>
+Puttered around with the FTP client a bit. Added a preferred "Home"
+directory option as suggested by sjg1978. (Actually, adapted a working
+patch he submitted) Will automatically switch to this directory on the
+FTP server when you log on. Made the client a little more general
+purpose. Now able to save and recall different host names. User names,
+passwords and Home directories will be saved with the different host
+names (if that option is selected.) Status box has been moved down to
+just below the log window (to make room for the home directory box up
+on the top row) Status box now gives a lot more useful information
+during transfers. Actually keeps track of progress instead of just
+saying uploading/downloading.<br>
+Added ability to customize superscript markup. It still defaults to
+^{xx} but can be changed to whatever you want. It is not sanity
+checked, so if you put markup like "&lt;&lt;&lt;&lt;KYpR%J&gt;"
+"$$$$+=*", it will cheerfully use it without a second glance.<br>
+<span style="font-weight: bold;"><br>
+Version .27 (612k)</span> Added code to handle mouse wheel events in
+WinXP (and apparently some installations of Win 2K, though it always
+worked for me on my Win2K system).<br>
+Fixed problem where zip file name was being incorrectly added to the
+FTP batch.<br>
+Removed limitation on uploading into root directory.<br>
+Changed order of operations for changing / to ,' and change '' to " to
+catch some occurrences that were slipping through.<br>
+Modified "cb" fixing code to be a little less greedy. Will no longer
+"fix" Macbeth to Macheth<br>
+Made "Convert solitary 1 to I"&nbsp; ignore a 1 followed by a full stop.<br>
+Added convert initial VV to W option.<br>
+Added convert initial !! to H option.<br>
+Added convert initial X not followed by e to N option.<br>
+Added convert ! in a word to l option.<br>
+Changed empty file handling code and average file size calculation to
+be more efficient based on suggestions by <span class="genmed">Elronse</span>.
+(Thanks!)<br>
+Changed page switching code on search tab to automatically save the
+page file if you have made edits.<br>
+Changed Search page text window to have some undo capability. WILL ONLY
+UNDO CHANGES DONE TO A SINGLE PAGE. once you switch pages, the changes
+are written and the undo buffer is cleared.<br>
+Debated quite a bit about how best to implement the spaced double
+quotes repair option that papeters requested. Decided to make it
+universal rather than hard coding it for double quotes. Added two more
+"Alternate" replacement text fields with some more Replace and Replace
+&amp; Search buttons beside the corresponding field. Now you can have
+up to three alternate replacement terms. The "Replace All" function
+uses the first alternate. Tried to make the button layout easy and
+quick to use with a mouse.<br>
+Changed the FTP tab password entry to be a little more secure. Will now
+keep your 5 year old nephew from figuring it out.&nbsp; :roll:&nbsp;
+Displays **** instead of the actual password.<br>
+Lots and lots of minor tune ups and enhancements to make it more user
+friendly. Too many to list (or remember).<br>
+<br>
+<span style="font-weight: bold;"><br>
+In Version .26 ( K)</span> Added option to not extract sub/superscript
+from RTF files.<br>
+Fixed fcanno (Olde Englifh) routine to skip words that have a
+capitalized F at the beginning. For instance, Fire will not be changed
+to *ire, since the capital F is unambiguous.<br>
+Back ported some of the external program calling routines I developed
+for guiguts. Now all the external program calls will work in both
+guiprep and winprep<br>
+Added "See Image" Button to search page. Allows you to easily compare
+text and image for the project pages.<br>
+<br>
+<br>
+<span style="font-weight: bold;">In version .25 (601 k)</span> Added
+function very similar to Jon Ingrams de-fcanno script he published in
+the developers forum. Ported from python to perl and integrated into
+the text processing page. Added a new button on text processing page
+"Fix Olde Englifh". This will comb through the text and replace any
+words spelled with long esses (f) with the modern English equivalent.
+(They are not really misspelled. The long s really <span
+ style="font-style: italic;">is</span> an s, it is just very, very
+close to looking like an f.) The script will preserve the case of the
+original word when it replaces it.<br>
+&nbsp;I based the de-fcanno function off of my scannos function, but as
+the fcannos dictionary was about 35 times the size of dictionary used
+by the scannos function (and <span style="font-style: italic;">that</span>
+wasn't any speed demon,) running the fcannos function was nearly
+grinding my computer to a halt. I couldn't leave it like that so I went
+back and optimized both functions a bit and sped them up by close to 2
+orders of magnitude. (found some really, really inefficient code in
+there....)&nbsp; Anyway, they are both pretty spritely now. After some
+experimentation, I decided not to use the Moby <span
+ style="font-weight: bold;">SINGLE.TXT</span> word list to generate my
+dictionary. It was TOO complete. There were way too many extremely
+uncommon words that were getting pushed as replacements, generating way
+too many false positives. After some hunting around I settled on
+generating it from the <span style="font-weight: bold;">2of4brif.txt</span>
+word list from the <span style="font-weight: bold;">12dicts-4.0.zip</span>
+package available at <a href="http://wordlist.sourceforge.net">Kevins's
+Word List Page</a> This was somewhat arbitrary, but it generated a much
+more reasonably sized list, (23000 words instead of 132000) and seems
+to generate a lot fewer false positives in practice. It is a heavily
+slanted toward British spellings as well, which fits in rather well
+with the period of most of the texts we are seeing. I've included the
+dictionary generation script in the distribution if you want to try
+others. It is named fwordgen.pl and requires perl to run. The name of
+the word list is hard coded. If you want to try different ones, you'll
+need to change the line -- open (WLIST, "&lt;2of4brif.txt"); -- to have
+the name of your file instead of 2of4brif.txt. That will generate
+fcannos.bin, a serialized hash of words in the format needed by the
+script.<br>
+If you are planning to run both the scannos fix up and the Olde Englifh
+fixup routines, you should definitely run the scannos routine first. Do
+not run the scannos routine after the Olde Englifh routine, it will
+find <span style="font-style: italic;">lots</span> of false positives<br>
+Fixed a few other minor user interface bugs.<br>
+<span style="font-weight: bold;"><br>
+<br>
+In version .24</span> (383k) More user requests. Improved how script
+deals with tabular data. Optionally insert bar "|" surrounding each
+"cell" in a table and try to retain original table spacing as much as
+possible. Added automated markup for super and sub script text. Right
+now these are hard coded to be TEXish markup: caret-braces "^{X}" for
+superscript and underscore-braces "_{X}" for subscript. These may be
+made editable markup in a future version, similar to the bold and
+italics markup so different projects can use different styles. <span
+ style="font-weight: bold;"><br>
+</span>Found and fixed bug with underscore handling in the filter
+routine that made it impossible to use an underscore for italics markup
+(the nominal Gutenberg standard).<br>
+Added new filter options&nbsp; "Convert double commas to a double
+quote", "Remove space after doublequote if it is the first character on
+a line" and "Remove space before doublequote if it is the last
+character on a line". (Thanks for the suggestions, Curtis.)<br>
+<span style="font-weight: bold;"><br>
+In version .23</span> (376k)&nbsp; Sigh... fixed bug on search page
+where an edited page wouldn't save unless you were in the midst of a
+search.<br>
+Poked around in the source of gutcheck and stole a few more checks for
+unlikely letter combinations - added to options page. (Thanks Jim!)<br>
+Fixed last thing keeping script from running under Linux, thanks to
+jneves for bug reports and feedback Still not 100% functionality,
+external programs (text editor, image viewer, pngcrush) still are not
+functioning, but that's fairly minor. All of the internal routines
+should work now. There is essentially a built in text editor on the
+search page anyway, and you can run pngcrush as a separate program if
+desired.<br>
+<span style="font-weight: bold;"><br>
+In version .22</span> (374k) Added some more functionality to search
+tab. Now allows you to cycle through the text files or jump to a
+particular file with out actually doing a search. Changed logic to
+automatically load the first file from the text directory when search
+tab is activated. Now caching the list of filenames between calls to
+the different search functions to generally speed up operation,
+especially for large numbers of files. Altered changed file save
+semantics slightly to better fit with the new functionality.<br>
+Added Zip function to batch upload in FTP client in anticipation of the
+option being available soon on the site. Automatically adds all the
+files in the upload batch to a zip file named the same as your working
+directory. Should make uploads a little faster since it is not
+constantly have to negotiate transfers with the FTP server for each
+file. Added option to build zip file during batch mode. Paves the way
+to make the FTP upload batchable along with the pre-processing.<br>
+Moved both new batch options to options page where they should have
+been originally.<br>
+Changed a few more things which were blocking Linux compatibility.<br>
+Trapped error which would sometimes result in the saved settings file
+being corrupted and losing your personalized settings.<br>
+Trapped bizarre behavior if italics or bold markup is extracted with a
+blank markup string.<br>
+Updated Manual.<br>
+<span style="font-weight: bold;"><br>
+In version .21</span> (350k)&nbsp; Added a bunch of user requested
+items.<br>
+Tuned a few few things in the newer dehyphenization routine. Deals
+better with spaced hyphens at end of line now.<br>
+You can now choose the directory name where your png files are stored.
+It is no longer hard coded to be "pngs". Change it on the Program Prefs
+tab.<br>
+Header Removal is now selectably automated for batch processing. It
+will automatically remove the top line from every text file. THIS MAY
+POSSIBLY REMOVE LINES THAT SHOULDN'T BE REMOVED. USE WITH CARE. It is
+highly recommended that header removal be done in interactive mode if
+feasible.<br>
+The header removal function has been made a little smarter. It will no
+longer remove lines that contain the zero byte file text marker -
+[Blank page], by default.<br>
+If header removal is run in batch mode, it will automatically run the
+Fix Zero Byte Files routine <span style="font-style: italic;">after</span>
+it finishes. In this case, it is not necessary to select it on the
+Process Text tab since that will only make it run twice.<br>
+There is a new tab with basic search &amp; replace functions that you
+can run against the text files. Will automatically search through all
+of the text files. Useful for project specific spell checks that you'd
+like to run. Select Case Insensitive search or Whole Word search or
+combinations thereof to further narrow down the search target.<br>
+Disabled the "standard project directory name" check in the "make
+remote directory" function of the FTP client. Has become moot with
+recent changes to the site code.<br>
+Fixed a few inconsistencies in the FTP download logic.<br>
+Combed through code trying to reduce Linux incompatibilities. As far as
+I can tell without actually trying to run it, there are only three
+places where the code is Linux incompatible: the three external program
+hook subroutines - testart(), ivstart() &amp; pngcrushstart() [text
+editor start, image viewer start and pngcrush start] Need to get access
+to a Linux system to get them working. There may be others, but they
+are the ones I know about.<br>
+Went through most of program , cleaned up code, improved commenting and
+indenting. Generally tried to make program more maintainable. Updated
+manual.<br>
+<span style="font-weight: bold;"><br>
+In version .20</span> (353k) Major update. Added new dehyphenate
+routine. The original dehyphenate routine is still there and is far
+more comprehensive than the new one, but the new one has a huge
+advantage in that it only needs one set of text files and is not
+dependent on Abbyy FineReaders' dehyphenization feature. The new
+routine builds a dictionary of all of the words in the text files that <span
+ style="font-style: italic;">do not</span> have a hyphen in them, then
+uses that dictionary to decide whether to remove the hyphen from a
+split word or not. It will rejoin hyphenated words whether it removes
+the hyphen or not. It will make a few educated guesses when it sees
+some very common prefixes or suffixes. The new routine looks for a set
+of text or RTF files in a "textw" directory. If there is <span
+ style="font-style: italic;">also</span> a "textwo" directory, the
+script will automatically use the original dehyphenate routine. Changed
+original dehyphenate routine to automatically fall back to the breaking
+text if a threshold of synchronization errors was reached (currently 3)
+in any one file.<br>
+Added much better reporting of what is going on during filtering of
+"improbable letter combinations" and scanno replacement. Changed order
+that routines run in to make reporting more useful. (Moved rename text
+files to before any of the routines that do progress reporting so I
+could include a file name.) Changed button order to match. Added a
+button and logic to save a copy of the processing log to a file from
+the process text tab. Added buttons and logic to the process text tab
+to save and revert to backups of the text files.<br>
+Moved conversion of Windows codepage 1252 glyphs 80-9F (decimal
+128-159) from the extract routine to the filter routine where it really
+belonged. Added option for it on Select Options tab.<br>
+Made Remove Headers routine more tolerant of filenames with spaces in
+them.<br>
+When downloading a directory in the FTP client, it will now
+automatically make a directory in the selected local directory with the
+same name as the selected remote directory and download the files into <span
+ style="font-style: italic;">that</span> directory.<br>
+Added a file name filter to the FTP directory download dialog box.
+Default (blank) is 'download all files in directory'. If you want to
+download only the text files in a directory, put <span
+ style="font-weight: bold;">.txt</span> in the filter box. For all of
+the PNG files put <span style="font-weight: bold;">.png</span> , etc.
+You can build more complex pattern matching filters too, if you like.
+It uses perl regular expressions to evaluate the pattern, so <span
+ style="font-style: italic;">don't</span> use DOS wildcard expressions
+(*.*, *.txt, etc). Added some more word pairs to the scannos list.<br>
+<br>
+<span style="font-weight: bold;">&nbsp;In version .19:</span> (354k)
+Fixed up a bunch of minor non-fatal errors (warnings). Changed default
+watchdog timer to allow longer subroutines to run without raising a
+fatal timeout exception. Was giving problems with some users.(Well, one
+specific user, but I'm sure it would crop up again sooner or later.)
+Made a few of the routines a little more robust/error resistant. The
+dehyphenate routine now marks the word in question with "**" when it
+gets a synchronization error. Added a few more word pairs to the common
+scannos list. Removed the check for double backslashes, no longer
+necessary after site update.<br>
+<br>
+<span style="font-weight: bold;">&nbsp;In version .18:</span> (357k)
+Fixed pngcrush feedback mechanism to work consistently across windows
+platforms. Changed it to work predictably no matter what your pngcrush
+option settings. Added capability to edit pngcrush command line options
+to the Program Prefs tab and changed default pngcrush settings to
+something a little more generic.<br>
+Tweaked a few of the markup filters to catch boundary conditions
+better. Fixed FTP client to understand directory names with spaces in
+them. Changed FTP directory download dialog box to custom built one, a
+little easier to work with, I think. Added directory download list
+display. Change default FTP host to pgdp01.archive.org. Changed client
+to allow editing host name. Tuned a bunch of the FTP functions to work
+more intuitively. Just does the right thing. Double clicking on a
+directory name on the remote server will change to that directory.
+Double clicking on a file name will download that file. Double clicking
+on a local file name will open a viewer for the file. Made all of the
+FTP routines less fragile.<br>
+Wrote modified FTP::put and FTP::get routines that won't block the
+calling Tk window to replace the ones in the standard FTP module which
+blocks Tk very badly. Updates at least once for every 10KB of upload or
+download. (You'll get a tick mark in the log box for every 10K of data
+transferred).<br>
+Changed how external programs are invoked on the header removal page to
+be more consistent with other pages.<br>
+Fixed missing last drive problem under NT / 2K.<br>
+Changed some code in the script which caused problems under WinXP and
+perl 5.6.<br>
+Lots of code cleanup, added and formatted comments, remove some unused
+routines, made indenting style more uniform. Updated manual.<span
+ style="font-weight: bold;"><br>
+</span><br>
+<span style="font-weight: bold;">In version .17:</span> (377k) Better
+resynchronization after error during Dehyphenization and better
+trapping of errors. Finally dehyphenization is as stable as I would
+like. In the worst case, it will use the text with line breaks as its
+fall back if there are too many errors. Provides more information on
+exactly what problem is on Dehyphenization error condition. More
+efficient markup pattern matching in Filtering routine. Combined about
+14 pattern matching searches down to 4. Reworked Pngcrush calling
+routine to be compatible with NT based Windows platforms. Provide more
+feedback during the pngcrush routine. Improved the FTP client
+drastically. Added buttons for Change directory, Download, Rename and
+Delete as alternatives to the arcane mouse button - key press
+combinations. Added Rename function. Works with both files and
+directories. Improved Download function to allow automatic batch
+downloading of all the files in a directory. Disabled floppy drive
+search on startup. Get rid of annoying "No Disk" acknowledge in XP. Not
+really realistic that a project would be on a floppy anyway. Fixed
+problem with small caps text not being upper cased on some occasions.
+Updated Manual. Added history section. Miscellaneous bug fixes.<br>
+<br>
+&nbsp;<span style="font-weight: bold;">In version 16:</span> (374k)
+Reworked Process Text tab layout. Combined Process Batch and Do All
+Selected button into one Start Processing button. Just does the right
+thing depending on mode. Added routine to run pngcrush on your png
+image files. Pngcrush is a png size optimizer. Most image generating
+programs are not particularly efficient about making the smallest
+possible lossless png file. Since the images are uploaded and
+downloaded 4 - 6 times during a project, it makes sense to make it as
+efficient as possible. Added pop up help buttons on most pages. Added
+download and remote delete functionality to FTP client. Updated Manual.
+Miscellaneous bug fixes<br>
+<br>
+<span style="font-weight: bold;">In version 15:</span> (319k) Added
+basic FTP client to help automatically upload preprocessed projects to
+site. Added hook to link in external Image viewer. Added routine to
+automatically rename png files in pngs directory under project. Changed
+help box to a button activated pop up window on Change Directory page
+to make more room for directory and batch listing boxes. Started
+putting version number in program title bar to make it easier to track.
+Updated Manual. Miscellaneous bug fixes<br>
+<br>
+<span style="font-weight: bold;">In version 14:</span> (202k) Improved
+the hooks for the external programs to run them non blocking. (Able to
+run more than one at once without locking up guiprep) No longer any
+reasonable expectation of Linux compatibility. Added some more
+filtering options. Fixed some race conditions.Script now remembers the
+window size and location from session to session. Added much better
+reporting on processing progress. Renamed guiprepe to winprep. Updated
+Manual. Other miscellaneous bug fixes.<br>
+<br>
+<span style="font-weight: bold;">In version 13:</span> (202k) Added
+hook to link in external text editor so you can view files easily
+during Header Removal. Added more filtering options. Improved batch
+processing . Added Program Preferences tab to allow you to choose some
+settings that don't directly affect the text processing. Script will
+remember preference settings. Script now remembers the last directory
+you were working in and reopens to there. Modified Interrupt Processing
+to interrupt whether in batch OR interactive mode. Script will
+interrupt processing if you switch away from the processing window.
+Reworked layout to be usable down to VGA resolution. Debut of guiprepe,
+(guiprep executable) a compiled windows version of guiprep. Updated
+Manual. Miscellaneous bug fixes.<br>
+<br>
+<span style="font-weight: bold;">In version 12:</span> (194k) Jon
+Ingram edition. Now does batching. Queue up several projects in a batch
+and run processing on them sequentially. Updated Manual.<br>
+<br>
+<span style="font-weight: bold;">In version 11:</span> (193k)Added
+Check For Common Scannos routine &amp; list. Check for 3400 or so
+common scannos. Added lots of new filtering options for improbable
+letter combinations and others. Made Text Processing routines batchable
+with check boxes to select which one to do.Updated Manual. Lots of bug
+fixes.<br>
+<br>
+<span style="font-weight: bold;">In version 10:</span> (123k) First gui
+version. Made a gui interface to the prep.pl script to allow runtime
+option selection without huge command line lists. Renamed to guiprep.pl
+to reflect interface change. Linked hrtk.pl header removal tool into
+the script as a separate tab. Updated Manual. Created lots and lots of
+bugs<br>
+<br>
+<span style="font-weight: bold;">In version 9:</span> (0k)There was no
+version nine.<br>
+<br>
+<span style="font-weight: bold;">In version 8:</span> (94k) Last
+command line version of prep.pl. Added basic header removal command
+line scripts and gui tool that implements them (hrtk.pl).<br>
+<br>
+<br>
+<hr style="width: 100%; height: 2px;"> <br>
+<br>
+</body>
+</html>
