@@ -1,0 +1,5 @@
+# program artifacts
+settings.rc
+
+# editor backup files
+*.bak

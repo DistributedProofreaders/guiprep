@@ -1,13 +1,14 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
+  <meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1">
   <title>Guiprep user guide</title>
 </head>
 <body>
 <h1 style="margin-left: 40px;"><a
  href="http://mywebpages.comcast.net/thundergnat/guiprep.zip">guiprep.pl</a>&nbsp;
 <small style="font-weight: normal;"><small><small>Preprocessing toolkit
-- Current version .41b (manual not updated since .40, however)</small></small></small></h1>
+- Current version .41c (manual not fully updated since .40, however)</small></small></small></h1>
 <br>
 <a href="http://mywebpages.comcast.net/thundergnat/guiprep.zip">guiprep.pl</a>&nbsp;
 (644k)Includs both a perl script version and a compiled Windows
@@ -123,7 +124,7 @@ Prefs tab</a></span><br>
 <span style="font-weight: bold;"><a href="#FTP_tab">FTP tab</a></span></div>
 <span style="font-weight: bold;"><a href="#Troubleshooting:_">Troubleshooting</a><br>
 <a href="#Known_bugs_and_odd_behavior:">Known Bugs</a><br>
-<a href="#Changlog_History">Changlog History</a><br>
+<a href="#Changlog_History">Changelog History</a><br>
 <br>
 </span>
 <hr style="width: 100%; height: 2px;"> <big><span
@@ -146,31 +147,55 @@ built in that automates uploading a project to the site.<br>
 *[A scanno is like a typo... only from a scanner instead of a typist.]<br>
 <br>
 <hr style="width: 100%; height: 2px;"> <br>
-<span style="font-weight: bold;"><a name="Whats_new"></a><big>Whats new?<br>
+<span style="font-weight: bold;"><a name="Whats_new"></a><big>Whats new?</big></span><br>
 <br>
-</big></span><span style="font-weight: bold;"><big>Version .40 (644k)</big></span>
-Argh. When I added the option to extract the small caps markup from the
-RTF files, I broke the handler for small caps if you WEREN'T extracting
-the markup. Fixed now. <br>
+<span style="font-weight: bold;"><big>Version .41c</big></span>
+(By windymilla):
+<ul>
+<li>Treat a file containing just a BOM as empty so [Blank page] will be added</li>
+<li>Fix '.' not in @INC error reported by later Perl releases</li>
+</ul>
+<span style="font-weight: bold;"><big>Version .41b</big></span>
+(By wfarrell):
+<ul>
+<li>Minor reformatting of guiprep source for readability</li>
+<li>Compatibility fix for later Perl releases (remove several uses of "defined" function)</li>
+</ul>
+<span style="font-weight: bold;"><big>Version .41 through .41a</big></span>
 <br>
-Modified how the Precessing functions displayed progress. They used to
-just print a dot to the screen for each page (file) that was completed.
-That worked fine as long as there weren't any problems. If the WAS a
-problem, it was extremely tedious to try to count the dots to figure
-out which file was causing it. Changed it to print an incremented
-counter mod 10. It will print the digits from 123456789012345... and so
-on. That should make it much easier to figure out which file causes a
-problem when one occurs.<br>
 <br>
-Fixed an obscure problem with code page handling during RTF extraction.
-Set it to have a reasonable default if it couldn't determine the
-codepage.<br>
+(By grythumn): fix for directory lock problems when renaming
 <br>
-Tightened up a bunch of code in the font table and codepage handling
-code. Made it much more memory efficient (and probably faster, though
-negligibly so.)<br>
-<span style="font-weight: bold;"></span><br>
-<span style="font-weight: bold;"></span><span style="font-weight: bold;"></span><br>
+(By Dave Morgan): fix for images/directories
+<br>
+(By Malcolm Farmer):
+<ul>
+<li>minor Typo fixes</li>
+<li>testart, ivstart & startpngcrush calls made Linux compatible</li>
+<li>Don't dehyphenate numbers (makes indexes work better)</li>
+<li>Page footers removal subroutine added</li>
+<li>merged in these options from rfrank's cpprep:
+<ul>
+<li>Remove HTML markup (bold, italic, small caps)</li>
+<li>Remove space before 'll</li>
+<li>Remove space from I 'm,</li>
+<li>Remove space from (s)he 's</li>
+<li>Remove space from we 've</li>
+<li>Remove space from we 'll</li>
+<li>Remove space before n't</li>
+<li>Remove space from I 'll</li>
+<li>Remove space from I 've</li>
+<li>Remove space from I 's</li>
+<li>Convert '11 -> 'll</li>
+<li>some of the "Spaceyquotes" regexps</li>
+<li>mark possible missing spaces between words/sentences</li></ul></li>
+<li>remove footers in batch mode.</li>
+<li>mark blank pages after header/footer removal</li></ul>
+<br>
+(By lvl): don't convert solitary l to I  followed by ' and text (corrects behavour for French)
+<br>
+<br>
+
 <span style="font-weight: bold;"></span><a href="#Changlog_History"> <span
  style="font-weight: bold;">History.</span></a><br>
 <hr style="width: 100%; height: 2px;"> <span style="font-weight: bold;"><br>
@@ -1187,7 +1212,30 @@ working.<br>
 <br>
 <br>
 <hr style="width: 100%; height: 2px;"> <span style="font-weight: bold;"><a
- name="Changlog_History"></a>Changlog History<br>
+ name="Changlog_History"></a>Changelog History<br>
+<br>
+<br>
+<span style="font-weight: bold;"><big>Version .40 (644k)</big></span>
+Argh. When I added the option to extract the small caps markup from the
+RTF files, I broke the handler for small caps if you WEREN'T extracting
+the markup. Fixed now. <br>
+<br>
+Modified how the Precessing functions displayed progress. They used to
+just print a dot to the screen for each page (file) that was completed.
+That worked fine as long as there weren't any problems. If the WAS a
+problem, it was extremely tedious to try to count the dots to figure
+out which file was causing it. Changed it to print an incremented
+counter mod 10. It will print the digits from 123456789012345... and so
+on. That should make it much easier to figure out which file causes a
+problem when one occurs.<br>
+<br>
+Fixed an obscure problem with code page handling during RTF extraction.
+Set it to have a reasonable default if it couldn't determine the
+codepage.<br>
+<br>
+Tightened up a bunch of code in the font table and codepage handling
+code. Made it much more memory efficient (and probably faster, though
+negligibly so.)<br>
 <br>
 <br>
 </span><span style="font-weight: bold;"><big>Version .39 (643k)</big></span>
@@ -1360,7 +1408,7 @@ at this time. If I get some transliteration tables, I could make auto
 transliterion for other character sets too. I don't really want to
 spend lots of time on it though because hopefully, in the near future,
 DP will convert to UTF-8.&nbsp; A very large Thank You to <span
- id="_user_smolensk@eunet.yu">Nikola Smolenski</span>, one of the lead
+ id="id_user_smolensk_at_eunet.yu">Nikola Smolenski</span>, one of the lead
 developers for the DPEU site who worked out the bulk of the UTF-8
 character extraction code.<br>
 <br>
