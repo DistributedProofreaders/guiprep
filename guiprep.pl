@@ -2,7 +2,7 @@
 #
 # guiprep.pl
 #
-my $currentver = '.41b';
+my $currentver = '.41c';
 #
 # A perl script designed to help automate preparation of text files for Distributed Proofreaders.
 #esponse
@@ -63,6 +63,10 @@ my $currentver = '.41b';
 # wfarrell: 
 #   Minor reformatting of guiprep source for readability
 #   Compatibility fix for later Perl releases (remove several uses of "defined" function)
+# Version .41c
+# windymilla:
+#   Treat a file containing just a BOM as empty so [Blank page] will be added
+#   Fix '.' not in @INC error reported by later Perl releases
 
 
 
@@ -90,6 +94,8 @@ if ($^O =~ /Win/) {require 'Win32API\File.pm'};
 use locale;
 use Time::HiRes qw( gettimeofday tv_interval );
 use Encode::Unicode;
+use charnames ':full';
+use lib '.';
 my $debug = 0;
 
 # Global vars ########################################################################################
@@ -2749,7 +2755,7 @@ sub fixempty{
 	foreach $file(@listing) {				# Step through the list.
 		p1log(++$tracker % 10);			# Let the user know that something is happening
 		if ($interrupt){break(); return 0};
-		if (-z $file) {
+		if (-z $file or justabom($file)) {
 			open (OUTFILE, ">>$file");		# Handle the zero byte files
 			print OUTFILE $zerobytetext;
 			close (OUTFILE);
@@ -2758,6 +2764,24 @@ sub fixempty{
 	 	 $size += (-s $file); # Gets file size (post zero length fix)  and counts total size
 	}
 	if ((scalar @listing) > 0) {p1log("\nAverage file size - ".int($size / scalar @listing) ." bytes.\n");}; #
+}
+##################################################################################################################
+
+##################################################################################################################
+# Return true if file is "empty" - it might contain just a BOM, but that's still empty
+#
+
+sub justabom {
+	my $file = shift;
+	my $isempty = 1;
+	open(INFILE, "<$file");
+	# read first line including newline to distinguish empty line from empty file
+	if (my $line = readline INFILE) { 
+		# Allow line to be empty, or with BOM, or with BOM as bytes
+		$isempty = ($line eq "" or $line eq "\N{BOM}" or $line eq "\xEF\xBB\xBF");
+	}
+	close (INFILE);
+	return $isempty;
 }
 ##################################################################################################################
 
