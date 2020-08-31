@@ -2,7 +2,7 @@
 #
 # guiprep.pl
 #
-my $currentver = '.41a';
+my $currentver = '.41b';
 #
 # A perl script designed to help automate preparation of text files for Distributed Proofreaders.
 #esponse
@@ -27,8 +27,8 @@ my $currentver = '.41a';
 #  are your problem and not mine. If not satisfied, your purchase price will be cheerfully refunded.
 
 # Modifications
-#
-# grythumn
+# Versions .41 through .41a:
+# grythumn: 
 #   fix for directory lock problems when renaming
 #
 # Dave Morgan
@@ -59,7 +59,11 @@ my $currentver = '.41a';
 #
 # lvl
 #   don't convert solitary l to I  followed by ' and text (corrects behavour for French)
-#
+# Version .41b
+# wfarrell: 
+#   Minor reformatting of guiprep source for readability
+#   Compatibility fix for later Perl releases (remove several uses of "defined" function)
+
 
 
 
@@ -2339,47 +2343,50 @@ my($i);
 			if($shape eq 0) {
 
 			if ($token_type eq "control"){					# If the token is a control, take the appropriate action
-				if ($argument eq "pard") {
+				if ($argument eq "pard") {                  # why doesn't the opening brace show up in the debugger?
 						if ($pardflag) {print TXTFILE ("\n")};  # For more info about the different control tokens
 					  	$pardflag=0; 				# read the help file for RTF::Tokenizer at
 					  	$italflag=$boldflag=$capsflag=0;	# http:\\www.cpan.org
-				}elsif ($argument eq "par")     { print TXTFILE "\n\n"; 		# Paragraph, insert 2 newlines
-				}elsif ($argument eq "line")    { print TXTFILE "\n"; $space = 1; 	# New line, (soft return), insert 1 new line. Trap end of line markup spacing errors
-				}elsif ($argument eq "tab")     { print TXTFILE "      ";  		# Tab, insert spaces
-				}elsif ($argument eq "endash")  { print TXTFILE "-"; 			# Convert named endash to -
-				}elsif ($argument eq "emdash")  { print TXTFILE "--"; 			# Convert named emdash to --
-				}elsif ($argument eq "pict")    { $picture = 1; 			# Flag binary data
-				}elsif ($argument eq "\\")      { print TXTFILE "\\"; 			# Convert rtf control character
-				}elsif ($argument eq "\{")      { print TXTFILE "{";  			# Convert rtf control character
-				}elsif ($argument eq "\}")      { print TXTFILE "}";  			# Convert rtf control character
-				}elsif ($argument eq "\~")      { print TXTFILE " ";  			# Convert rtf control character
-				}elsif ($argument eq "\-")      { print TXTFILE "-";  			# Convert rtf control character
-				}elsif ($argument eq "f")		{
+				} elsif ($argument eq "par")     { print TXTFILE "\n\n"; 		# Paragraph, insert 2 newlines
+				} elsif ($argument eq "line")    { print TXTFILE "\n"; $space = 1; 	# New line, (soft return), insert 1 new line. Trap end of line markup spacing errors
+				} elsif ($argument eq "tab")     { print TXTFILE "      ";  		# Tab, insert spaces
+				} elsif ($argument eq "endash")  { print TXTFILE "-"; 			# Convert named endash to -
+				} elsif ($argument eq "emdash")  { print TXTFILE "--"; 			# Convert named emdash to --
+				} elsif ($argument eq "pict")    { $picture = 1; 			# Flag binary data
+				} elsif ($argument eq "\\")      { print TXTFILE "\\"; 			# Convert rtf control character
+				} elsif ($argument eq "\{")      { print TXTFILE "{";  			# Convert rtf control character
+				} elsif ($argument eq "\}")      { print TXTFILE "}";  			# Convert rtf control character
+				} elsif ($argument eq "\~")      { print TXTFILE " ";  			# Convert rtf control character
+				} elsif ($argument eq "\-")      { print TXTFILE "-";  			# Convert rtf control character
+                } elsif ($argument eq "ansicpg") {
+                                    $curcpg = "cp".$parameter;  # wbf
+                                    print("found ansicpg");
+				} elsif ($argument eq "f")		{
 									if($fonts{$parameter}) {
 										$curcpg = "cp".$fonts{$parameter};
 									} else {
 										$curcpg="ascii"
 									}
-				}elsif ($argument eq "sub")     { $sub = 1 if $opt[67];
-				}elsif ($argument eq "super")   { $sup = 1 if $opt[67];
-				}elsif ($argument eq "nosupersub")  {
-									print TXTFILE ("}")if ($sub&&$opt[67]);
+				} elsif ($argument eq "sub")     { $sub = 1 if $opt[67];
+				} elsif ($argument eq "super")   { $sup = 1 if $opt[67];
+				} elsif ($argument eq "nosupersub")  {
+                                    print TXTFILE ("}")if ($sub&&$opt[67]);
 									print TXTFILE ("$supclose")if ($sup&&$opt[67]);
 									$sub = $sup = 0;
-				}elsif ($argument eq "intbl") { $intable = 1; print TXTFILE ('|')if $opt[61];
-				}elsif ($argument eq "row")     { @row=(); print TXTFILE ("\n"); $lastcell = 0;
-				}elsif ($argument eq "cellx")   {
+				} elsif ($argument eq "intbl") { $intable = 1; print TXTFILE ('|')if $opt[61];
+				} elsif ($argument eq "row")     { @row=(); print TXTFILE ("\n"); $lastcell = 0;
+				} elsif ($argument eq "cellx")   {
 									push @row, (int(($parameter-$lastcell)/120)+1);
 									$lastcell = $parameter;
 									#print "$lastcell @row\n";
-				}elsif ($argument eq "cell")    {
+				} elsif ($argument eq "cell")    {
 									$cellsz = shift @row;
 									print TXTFILE ("\xA0" x ($cellsz-$textsz-1));
 									#print "$cellsz $textsz\n";
 									$textsz = 0;
 									$intable = 0;
 
-				}elsif ($argument eq "i" )      { 	if ($parameter eq "0" ) { 	# Italics markup
+				} elsif ($argument eq "i" )      { 	if ($parameter eq "0" ) { 	# Italics markup
 										if  ($italflag) {
 											print TXTFILE $italicsclose;
 											pop @flag;
@@ -2393,7 +2400,7 @@ my($i);
 											push @flag,$italicsclose;
 										}
 									}
-				}elsif ($argument eq "b" )      { 	if ($parameter eq "0" ){	# Bold markup
+				} elsif ($argument eq "b" )      { 	if ($parameter eq "0" ){	# Bold markup
 										if  ($boldflag) {
 											print TXTFILE $boldclose;
 											pop @flag;
@@ -2409,7 +2416,7 @@ my($i);
 											}
 										}
 									}
-				}elsif ($argument eq "scaps" )  { 	if ($parameter eq "0" ){	# Small caps markup
+				} elsif ($argument eq "scaps" )  { 	if ($parameter eq "0" ){	# Small caps markup
 										if ($capsflag and $opt[78]){
 											print TXTFILE '</sc>';
 											pop @flag;
@@ -2425,23 +2432,23 @@ my($i);
 										$capsflag = 1;
 									}
 
-				}elsif ($argument eq "u")       {
+				} elsif ($argument eq "u")       {
 									my $unicode = chr($parameter);
 									utf8::encode $unicode;
 									print TXTFILE $unicode;	# unicode
 
-				}elsif ($argument eq "cf")       {
+				} elsif ($argument eq "cf")       {
 									#print TXTFILE "\x8d";	# unknown character from ABBYY
 
-				}elsif ($argument eq "'" )      {	#hex encoded characters
+				} elsif ($argument eq "'" )      {	#hex encoded characters
 									next if ($parameter eq '3f');	# Throw away hex question marks. Abbyy adds one after EVERY unicode char. :-(
 									$chnum = hex($parameter);	# Handle characters > 128
 									$chr=pack('C',$chnum);
 									Encode::from_to($chr,$curcpg,"utf-8");
 									print TXTFILE $chr;
-				}elsif ($argument eq "shp")       {
+				} elsif ($argument eq "shp")       {
 									$shape=$level;
-				}elsif ($argument eq "fonttbl")       {
+				} elsif ($argument eq "fonttbl")       {
 									$fonttable=$level;
 				}
 			}
@@ -4317,7 +4324,7 @@ sub ftpgetdir{
 			ftpstatusnc();
 			$ftp = 0;
 		}
-		if (defined(@{$ftpdircache{$thisftpdir}})){
+		if (@{$ftpdircache{$thisftpdir}}){
     			@ftpdirlist = @{$ftpdircache{$thisftpdir}}; #Set directory listing equal to cached listing
 			$fentries = pop @ftpdirlist; #Extract number of files in directory from end of list
     			$dentries = pop @ftpdirlist; #Extract number of directories in directory from end of list
@@ -4576,7 +4583,7 @@ sub ftpdownload{
 					ftplogger("Changing to ".$ftpdownloadname." directory...  Please wait.\n");
 					ftpgetdir();
 					my $dwnldftpdir = $ftp->pwd();
-					unless (defined(@{$ftpdircache{$dwnldftpdir}})){
+					unless (@{$ftpdircache{$dwnldftpdir}}){
 						$ftplog->insert('end',"This directory is not cached...\n");
 						$ftplog->update;
 						$ftplog->yviewMoveto('1.'); # Scroll if necessary
