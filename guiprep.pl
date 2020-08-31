@@ -2,7 +2,7 @@
 #
 # guiprep.pl
 #
-my $currentver = '.41c';
+my $currentver = '.41d';
 #
 # A perl script designed to help automate preparation of text files for Distributed Proofreaders.
 #esponse
@@ -67,6 +67,11 @@ my $currentver = '.41c';
 # windymilla:
 #   Treat a file containing just a BOM as empty so [Blank page] will be added
 #   Fix '.' not in @INC error reported by later Perl releases
+# Version .41d
+# windymilla:
+#   Tidy up/mark dubious spaced curly quotes
+#   Fix spaced close single curly quotes (not mark as unknown)
+#     - leave unchecked if book has apostrophes at start of word, e.g. 'orrible
 
 
 
@@ -117,7 +122,7 @@ our @opt = (
 1,0,0,0,0,1,1,1,1,1,
 1,1,1,1,1,1,0,1,1,1,
 1,1,0,0,1,1,1,0,0,1,
-1,1,1); # 82
+1,1,1,0,1,0); # 85
 
 # $opt[0] = Convert multiple spaces to single space.
 # $opt[1] = Remove end of line spaces.
@@ -204,6 +209,8 @@ our @opt = (
 # $opt[81] = Convert '11 to 'll and remove any preceding space
 # $opt[82] = despace quotes/mark dubious spaces
 # $opt[83] = mark missing space between words/sentences
+# $opt[84] = Tidy up/mark dubious spaced curly quotes
+# $opt[85] = Fix spaced close single curly quotes (not mark as unknown)
 
 our $gpalette = 'grey80';
 our $gcrushoptions =  '-bit_depth 1 -reduce ';
@@ -1134,12 +1141,25 @@ my $p2cb82 = $p2opts->Checkbutton(
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 
-my $p2cb82 = $p2opts->Checkbutton(
+my $p2cb83 = $p2opts->Checkbutton(
 	-variable => 	\$opt[83],
 	-selectcolor => 'white',
 	-text =>	'Mark possible missing spaces between word/sentences.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
+++$grow;
+
+my $p2cb84 = $p2opts->Checkbutton(
+	-variable => 	\$opt[84],
+	-selectcolor => 'white',
+	-text =>	'Tidy up/mark dubious spaced curly quotes.',
+)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
+
+my $p2cb85 = $p2opts->Checkbutton(
+	-variable => 	\$opt[85],
+	-selectcolor => 'white',
+	-text =>	'Fix spaced close single curly quotes (not mark as unknown).',
+)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 ###################################################################################################################################
 
@@ -2913,6 +2933,26 @@ sub filter {
 			if ($opt[69]){while($line =~ s/\!\!(\w+)/H$1/){push @{$fixup{$file}},"!!$1 to H$1";$impossibles++;}};	# Convert !! at the beginning of a word to H
 			if ($opt[70]){while($line =~ s/(?<=\b)X([^eEIVXDLMC\s-]\w*)/N$1/){push @{$fixup{$file}},"X$1 to N$1";$impossibles++;}};	# Convert X at the beginning of a word not followed by e to N
 			if ($opt[71]){while($line =~ s/(\w+)\!(\w+)/$1l$2/){push @{$fixup{$file}},"$1!$2 to $1l$2";$impossibles++;}};	# Convert ! in the middle of a word to l
+			
+			if ($opt[84]){ # Tidy up/mark dubious spaced curly quotes
+				$line =~ s/\x{201c} +/\x{201c}/g;		# open-doublequote space
+				$line =~ s/ +\x{201d}/\x{201d}/g;		# space close-doublequote
+				$line =~ s/\x{2018} +/\x{2018}/g;		# open-singlequote space
+				# Can't automatically remove space from before every close-singlequote,
+				# because it could be an apostrophe at start of word.
+				# However, if end of line, it can't be an apostrophe,
+				# and if start of line, it can't be a close quote, so remove spaces
+				$line =~ s/ +\x{2019} *$/\x{2019}/;		# end of line close-singlequote
+				$line =~ s/^ *\x{2019} +/\x{2019}/;		# start of line apostrophe	      
+				# Also, if space both sides, then something's wrong.
+				# Depending on opt[85], either fix(1) or mark(0 - dialect in book)
+				if ($opt[85]){
+					$line =~ s/( +)\x{2019}( +)/\x{2019}$2/g;
+				} else {
+					$line =~ s/( +)\x{2019}( +)/$1\x{2019}\[*spaced curly quote]$2/g;
+				}					
+			}
+
 			if ($opt[72]){          	# Convert !! to  ll
                                       while($line =~ s/[(\w*)| ]'11\b/$1'll/){
                                           push @{$fixup{$file}},"$1'11 to $1'll";
