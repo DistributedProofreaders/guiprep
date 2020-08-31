@@ -2,10 +2,10 @@
 #
 # guiprep.pl
 #
-my $currentver = '.40';
+my $currentver = '.41a';
 #
 # A perl script designed to help automate preparation of text files for Distributed Proofreaders.
-#
+#esponse
 #
 # The guiprep / Winprep pre-processing toolkit.   Written by Stephen Schulze.
 #
@@ -25,6 +25,43 @@ my $currentver = '.40';
 #
 #  Any damages to your computer, your data, your mental health or anything else as a result of using this software
 #  are your problem and not mine. If not satisfied, your purchase price will be cheerfully refunded.
+
+# Modifications
+#
+# grythumn
+#   fix for directory lock problems when renaming
+#
+# Dave Morgan
+#   fix for images/directories
+#
+# Malcolm Farmer:
+#   minor Typo fixes
+#   testart, ivstart & startpngcrush calls made Linux compatible
+#   Don't dehyphenate numbers (makes indexes work better)
+#   Page footers removal subroutine added
+#   merged in these options from rfrank's cpprep:
+#      Remove HTML markup (bold, italic, small caps)
+#      Remove space before 'll
+#      Remove space from I 'm,
+#      Remove space from (s)he 's
+#      Remove space from we 've
+#      Remove space from we 'll
+#      Remove space before n't
+#      Remove space from I 'll
+#      Remove space from I 've
+#      Remove space from I 's
+#      Convert '11 -> 'll
+#      some of the "Spaceyquotes" regexps
+#      mark possible missing spaces between words/sentences
+#  remove footers in batch mode.
+#  mark blank pages after header/footer removal
+#
+#
+# lvl
+#   don't convert solitary l to I  followed by ' and text (corrects behavour for French)
+#
+
+
 
 
 use 5.008;
@@ -67,10 +104,10 @@ our @opt = (
 1,1,1,1,0,1,1,1,1,1,
 1,1,1,1,1,1,1,1,0,0,
 0,1,1,1,1,1,1,0,1,0,
-1,0,1,0,1,1,1,1,1,1,
+1,0,0,0,0,1,1,1,1,1,
 1,1,1,1,1,1,0,1,1,1,
-1,1,0,0,1,1,1,0,0
-); # 78
+1,1,0,0,1,1,1,0,0,1,
+1,1,1); # 82
 
 # $opt[0] = Convert multiple spaces to single space.
 # $opt[1] = Remove end of line spaces.
@@ -125,7 +162,7 @@ our @opt = (
 # $opt[50] = Convert Windows codepage 1252 glyphs 80-9F to Latin1 equivalents
 # $opt[51] = Search case insensitive
 # $opt[52] = Automatically Remove Headers during batch processing.
-# $opt[53] = Search whole word
+# $opt[53] = Automatically Remove Footers during batch processing
 # $opt[54] = Build a standard upload batch and zip it to the project directory
 # $opt[55] = Convert cb in a word to ch.
 # $opt[56] = Convert gbt in a word to ght.
@@ -134,6 +171,7 @@ our @opt = (
 # $opt[59] = Convert \v or \\\\ to w.
 # $opt[60] = Convert double commas to double quote.
 # $opt[61] = Insert cell delimiters, "|" in tables.
+# $opt[62] = Search whole word
 # $opt[62] = Strip space after start & before end doublequotes.
 # $opt[63] = Convert cl at the end of a word to d.
 # $opt[64] = Convert pbt in a word to pht.
@@ -144,13 +182,18 @@ our @opt = (
 # $opt[69] = Convert !! at the beginning of a word to H
 # $opt[70] = Convert X at the beginning of a word not followed by e to N
 # $opt[71] = Convert ! in the middle of a word to l
-# $opt[72] = Convert '11 to 'll
+# $opt[72] = Convert '!! to 'll
 # $opt[73] = Use German style hyphens; "="
 # $opt[74] = Convert to ISO 8859-1
 # $opt[75] = Strip garbage punctuation from beginning of line.
 # $opt[76] = Strip garbage punctuation from end of line.
 # $opt[77] = Save files containing hyphenated and dehyphenated words
 # $opt[78] = Extract <sc> </sc> maarkup for small caps
+# $opt[79] = Remove HTML markup
+# $opt[80] = Remove space from words with apostrophes
+# $opt[81] = Convert '11 to 'll and remove any preceding space
+# $opt[82] = despace quotes/mark dubious spaces
+# $opt[83] = mark missing space between words/sentences
 
 our $gpalette = 'grey80';
 our $gcrushoptions =  '-bit_depth 1 -reduce ';
@@ -166,7 +209,9 @@ our $supclose = $gsupclose;
 our $palette = $gpalette;
 our $editstart;
 our $viewerstart;
-our @headerlines;
+our $linelength;
+our @deletelines;
+our $headersel;
 our $startdir = getpwd();
 our $lastrundir;
 our $geometry = '640x480';
@@ -234,7 +279,7 @@ my $main = MainWindow->new(
 	-title =>		'Guiprep Pre-processing Toolkit - '.$currentver,
 );
 
-# Set widow size (pixels) the script TRIES to open with.
+# Set window size (pixels) the script TRIES to open with.
 $main->geometry($geometry);
 
 # Set the minimum window size.
@@ -259,7 +304,7 @@ my $page2 = $book->add("page2", -label => "Select Options", -raisecmd => sub {$i
 my $page1 = $book->add("page1", -label => "Process Text", -raisecmd => \&updateblist);
 my $page8 = $book->add("page8", -label => "Search", -raisecmd => sub{$interrupt = 1; searchclear(); $filesearchindex1 = 1;
 									@searchfilelist=(); $main->update; $main->Busy; searchincdec(); $main->Unbusy;});
-my $page3 = $book->add("page3", -label => "Remove Headers", -raisecmd => sub {emptybox(); $interrupt = 1;chdir $pwd;});
+my $page3 = $book->add("page3", -label => "Headers & Footers", -raisecmd => sub {emptybox(); $interrupt = 1;chdir $pwd;});
 my $page4 = $book->add("page4", -label => "Change Directory", -raisecmd => sub {$interrupt = 1;chdir $pwd;});
 my $page6 = $book->add("page6", -label => "Program Prefs", -raisecmd => sub {$interrupt = 1;chdir $pwd;});
 my $page7 = $book->add("page7", -label => "FTP", -raisecmd => sub {$interrupt = 1; });
@@ -557,6 +602,7 @@ my $p2cb61 = $p2o4->Checkbutton(
 	-text =>	'Insert cell delimiters, "|" in tables.',
 )->grid(-row=>0, -column =>2 ,-padx => '5', -sticky => 'w');
 
+
 my $p2cb67 = $p2o4->Checkbutton(
 	-variable => 	\$opt[67],
 	-selectcolor => 'white',
@@ -584,17 +630,26 @@ my $p2cb77 = $p2o4->Checkbutton(
 	-command =>	sub{if ($opt[73]){$hyphen = "="}else{$hyphen = "-"}},
 )->grid(-row=>3, -column =>1, -columnspan => 2, -padx => '5', -sticky => 'w');
 
+
 my $batchremove = $p2o4->Checkbutton(
 	-variable => 	\$opt[52],
 	-selectcolor => 'white',
 	-text =>	"Automatically Remove Headers during batch processing. Be sure you understand the implications before enabling.",
 )->grid(-row=>4, -column =>1, -columnspan => 2, -padx => '5', -sticky => 'w');
 
+
+my $batchremove = $p2o4->Checkbutton(
+	-variable => 	\$opt[53],
+	-selectcolor => 'white',
+	-text =>	"Automatically Remove Footers during batch processing. Be sure you understand the implications before enabling.",
+)->grid(-row=>5, -column =>1, -columnspan => 2, -padx => '5', -sticky => 'w');
+
+
 my $batchzip = $p2o4->Checkbutton(
 	-variable => 	\$opt[54],
 	-selectcolor => 'white',
 	-text =>	"Build a standard upload batch and zip it to the project directory during batch processing.",
-)->grid(-row=>5, -column =>1, -columnspan => 2, -padx => '5', -sticky => 'w');
+)->grid(-row=>6, -column =>1, -columnspan => 2, -padx => '5', -sticky => 'w');
 
 my $p2o5 = $page2->Frame(-relief => 'groove', -borderwidth => 2
 )->pack(-side => 'top', -fill => 'both', -expand => 'y', -pady=>'4',-padx =>'2');
@@ -704,311 +759,379 @@ my $p2cb41 = $p2opts->Checkbutton(
 
 ++$grow;
 
-my $p2cb62 = $p2opts->Checkbutton(
-	-variable => 	\$opt[62],
-	-selectcolor => 'white',
-	-text =>	'Strip space after start & before end doublequotes.',
-)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
-
 my $p2cb9 = $p2opts->Checkbutton(
 	-variable => 	\$opt[9],
 	-selectcolor => 'white',
 	-text =>	'Ensure space before ellipsis(except after period).',
-)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-++$grow;
 
 my $p2cb10 = $p2opts->Checkbutton(
 	-variable => 	\$opt[10],
 	-selectcolor => 'white',
 	-text =>	'Convert two single quotes to one double.',
-)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+
+
+++$grow;
+
 
 my $p2cb12 = $p2opts->Checkbutton(
 	-variable => 	\$opt[12],
 	-selectcolor => 'white',
 	-text =>	'Convert solitary 1 to I.',
-)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-++$grow;
+
 
 my $p2cb37 = $p2opts->Checkbutton(
 	-variable => 	\$opt[37],
 	-selectcolor => 'white',
 	-text =>	'Convert solitary lower case l to I.',
-)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+
+++$grow;
 
 my $p2cb13 = $p2opts->Checkbutton(
 	-variable => 	\$opt[13],
 	-selectcolor => 'white',
 	-text =>	'Convert solitary 0 to O.',
-)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-++$grow;
 
 my $p2cb14 = $p2opts->Checkbutton(
 	-variable => 	\$opt[14],
 	-selectcolor => 'white',
 	-text =>	'Convert vulgar fractions (¼,½,¾) to written out.',
-)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+
+++$grow;
+
 
 my $p2cb15 = $p2opts->Checkbutton(
 	-variable => 	\$opt[15],
 	-selectcolor => 'white',
 	-text =>	'Convert ² and ³ to ^2 and ^3.',
-)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-++$grow;
+
 
 my $p2cb38 = $p2opts->Checkbutton(
 	-variable => 	\$opt[38],
 	-selectcolor => 'white',
 	-text =>	'Convert £ to "Pounds".',
-)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+
+
+++$grow;
+
+
 
 my $p2cb39 = $p2opts->Checkbutton(
 	-variable => 	\$opt[39],
 	-selectcolor => 'white',
 	-text =>	'Convert ¢ to "cents".',
-)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-++$grow;
 
 my $p2cb40 = $p2opts->Checkbutton(
 	-variable => 	\$opt[40],
 	-selectcolor => 'white',
 	-text =>	'Convert § to "Section".',
-)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+
+
+++$grow;
 
 my $p2cb24 = $p2opts->Checkbutton(
 	-variable => 	\$opt[24],
 	-selectcolor => 'white',
 	-text =>	'Convert ° to "degrees".',
-)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
-
-++$grow;
+)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb45 = $p2opts->Checkbutton(
 	-variable => 	\$opt[45],
 	-selectcolor => 'white',
 	-text =>	'Convert forward slash to comma apostrophe.',
-)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+
+++$grow;
 
 my $p2cb59 = $p2opts->Checkbutton(
 	-variable => 	\$opt[59],
 	-selectcolor => 'white',
 	-text =>	'Convert \v or \\\\ to w.',
-)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
-
-++$grow;
+)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb46 = $p2opts->Checkbutton(
 	-variable => 	\$opt[46],
 	-selectcolor => 'white',
 	-text =>	'Convert solitary j to semicolon.',
-)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+
+
+++$grow;
 
 my $p2cb16 = $p2opts->Checkbutton(
 	-variable => 	\$opt[16],
 	-selectcolor => 'white',
 	-text =>	'Convert tli at the beginning of a word to th.',
-)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
-
-++$grow;
+)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb11 = $p2opts->Checkbutton(
 	-variable => 	\$opt[11],
 	-selectcolor => 'white',
 	-text =>	'Convert tii at the beginning of a word to th.',
-)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+
+
+++$grow;
+
 
 my $p2cb25 = $p2opts->Checkbutton(
 	-variable => 	\$opt[25],
 	-selectcolor => 'white',
 	-text =>	'Convert tb at the beginning of a word to th.',
-)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-++$grow;
 
 my $p2cb26 = $p2opts->Checkbutton(
 	-variable => 	\$opt[26],
 	-selectcolor => 'white',
 	-text =>	'Convert wli at the beginning of a word to wh.',
-)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+
+++$grow;
+
 
 my $p2cb27 = $p2opts->Checkbutton(
 	-variable => 	\$opt[27],
 	-selectcolor => 'white',
 	-text =>	'Convert wb at the beginning of a word to wh.',
-)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-++$grow;
 
 my $p2cb17 = $p2opts->Checkbutton(
 	-variable => 	\$opt[17],
 	-selectcolor => 'white',
 	-text =>	'Convert rn at the beginning of a word to m.',
-)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+
+++$grow;
 
 my $p2cb34 = $p2opts->Checkbutton(
 	-variable => 	\$opt[34],
 	-selectcolor => 'white',
 	-text =>	'Convert hl at the beginning of a word to bl.',
-)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
-
-++$grow;
+)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb35 = $p2opts->Checkbutton(
 	-variable => 	\$opt[35],
 	-selectcolor => 'white',
 	-text =>	'Convert hr at the beginning of a word to br.',
-)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+
+++$grow;
 
 my $p2cb43 = $p2opts->Checkbutton(
 	-variable => 	\$opt[43],
 	-selectcolor => 'white',
 	-text =>	'Convert rnp in a word to mp.',
-)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
-
-++$grow;
+)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb68 = $p2opts->Checkbutton(
 	-variable => 	\$opt[68],
 	-selectcolor => 'white',
 	-text =>	'Convert vv at the beginning of a word to w.',
-)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+
+++$grow;
 
 my $p2cb69 = $p2opts->Checkbutton(
 	-variable => 	\$opt[69],
 	-selectcolor => 'white',
 	-text =>	'Convert !! at the beginning of a word to H',
-)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
-
-++$grow;
+)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb70 = $p2opts->Checkbutton(
 	-variable => 	\$opt[70],
 	-selectcolor => 'white',
 	-text =>	'Convert initial X not followed by e to N.',
-)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+
+
+++$grow;
 
 my $p2cb71 = $p2opts->Checkbutton(
 	-variable => 	\$opt[71],
 	-selectcolor => 'white',
 	-text =>	'Convert ! inside a word to l.',
-)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
-
-++$grow;
+)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb72 = $p2opts->Checkbutton(
 	-variable => 	\$opt[72],
 	-selectcolor => 'white',
-	-text =>	'Convert \'11 to \'ll.',
+	-text =>	'Convert \'!! to \'ll.',
+)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+
+++$grow;
+
+my $p2cb80 = $p2opts->Checkbutton(
+	-variable => 	\$opt[80],
+	-selectcolor => 'white',
+	-text =>	'Remove space before  apostrophes.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
+
+my $p2cb81 = $p2opts->Checkbutton(
+	-variable => 	\$opt[81],
+	-selectcolor => 'white',
+	-text =>	'Convert \'11 to \'ll.',
+)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+
+
+++$grow;
 
 my $p2cb65 = $p2opts->Checkbutton(
 	-variable => 	\$opt[65],
 	-selectcolor => 'white',
 	-text =>	'Convert rnm in a word to mm.',
-)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-++$grow;
 
 my $p2cb55 = $p2opts->Checkbutton(
 	-variable => 	\$opt[55],
 	-selectcolor => 'white',
 	-text =>	'Convert cb in a word to ch.',
-)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+
+++$grow;
 
 my $p2cb56 = $p2opts->Checkbutton(
 	-variable => 	\$opt[56],
 	-selectcolor => 'white',
 	-text =>	'Convert gbt in a word to ght.',
-)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-++$grow;
 
 my $p2cb57 = $p2opts->Checkbutton(
 	-variable => 	\$opt[57],
 	-selectcolor => 'white',
 	-text =>	'Convert [ai]hle in a word to [ai]ble.',
-)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+
+++$grow;
+
 
 my $p2cb63 = $p2opts->Checkbutton(
 	-variable => 	\$opt[63],
 	-selectcolor => 'white',
 	-text =>	'Convert cl at the end of a word to d.',
-)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-++$grow;
 
 my $p2cb64 = $p2opts->Checkbutton(
 	-variable => 	\$opt[64],
 	-selectcolor => 'white',
 	-text =>	'Convert pbt in a word to pht.',
-)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+
+++$grow;
 
 my $p2cb58 = $p2opts->Checkbutton(
 	-variable => 	\$opt[58],
 	-selectcolor => 'white',
 	-text =>	'Convert he to be if it follows to.',
-)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-++$grow;
 
 my $p2cb44 = $p2opts->Checkbutton(
 	-variable => 	\$opt[44],
 	-selectcolor => 'white',
 	-text =>	'Move punctuation outside of markup.',
-)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+
+
+++$grow;
+
 
 my $p2cb75 = $p2opts->Checkbutton(
 	-variable => 	\$opt[75],
 	-selectcolor => 'white',
 	-text =>	'Strip garbage punctuation from beginning of line.',
-)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-++$grow;
 
 my $p2cb18 = $p2opts->Checkbutton(
 	-variable => 	\$opt[18],
 	-selectcolor => 'white',
 	-text =>	'Remove empty lines at top of page.',
-)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+
+++$grow;
+
 
 my $p2cb76 = $p2opts->Checkbutton(
 	-variable => 	\$opt[76],
 	-selectcolor => 'white',
 	-text =>	'Strip garbage punctuation from end of line.',
-)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-++$grow;
 
 my $p2cb19 = $p2opts->Checkbutton(
 	-variable => 	\$opt[19],
 	-selectcolor => 'white',
 	-text =>	'Convert multi consecutive blank lines to single.',
-)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+
+
+++$grow;
 
 my $p2cb20 = $p2opts->Checkbutton(
 	-variable => 	\$opt[20],
 	-selectcolor => 'white',
 	-text =>	'Remove top line if number.',
-)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
-
-++$grow;
+)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb21 = $p2opts->Checkbutton(
 	-variable => 	\$opt[21],
 	-selectcolor => 'white',
 	-text =>	'Remove bottom line if number.',
-)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
+)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+
+
+++$grow;
 
 my $p2cb22 = $p2opts->Checkbutton(
 	-variable => 	\$opt[22],
 	-selectcolor => 'white',
 	-text =>	'Remove empty lines from bottom of page.',
+)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
+
+
+my $p2cb79 = $p2opts->Checkbutton(
+	-variable => 	\$opt[79],
+	-selectcolor => 'white',
+	-text =>	'Remove HTML markup (bold, italics, smallcap).',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+
+
+++$grow;
+
+my $p2cb82 = $p2opts->Checkbutton(
+	-variable => 	\$opt[82],
+	-selectcolor => 'white',
+	-text =>	'Tidy up/mark dubious spaced quotes.',
+)->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
+
+
+my $p2cb82 = $p2opts->Checkbutton(
+	-variable => 	\$opt[83],
+	-selectcolor => 'white',
+	-text =>	'Mark possible missing spaces between word/sentences.',
+)->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
+
+
+###################################################################################################################################
 
 ###################################################################################################################################
 
@@ -1016,10 +1139,10 @@ my $p2cb22 = $p2opts->Checkbutton(
 # Put some explanatory text at the top of the window.
 
 my $p3toplabel = $page3 -> Label(
-	-text => "Select the headers to delete.\nHeaders with a white background will be deleted.",
+	-text => "Select the lines to delete.\nLines with a white background will be deleted.",
 	-font => $helvb)->pack;
 
-# Make a frame to contain all the widgets.
+# Make a frame to contain  the widgets.
 my $optlist = $page3->Frame()->pack(-side => 'top', -fill => 'both', -expand => 'both');
 # Create the balloon widget used by the tooltips.
 my $b = $optlist->Balloon(
@@ -1027,45 +1150,70 @@ my $b = $optlist->Balloon(
 	-balloonposition =>	'mouse',
 );
 
-# Make a subframe and populate it.
-my $buttonbar = $optlist->Frame()->pack(-anchor=>'n',-expand=>'no', -fill => 'none');
+# Make a subframe for row one of buttons and populate it.
+my $buttonbar1 = $optlist->Frame()->pack(-anchor=>'n',-expand=>'no', -fill => 'none');
 
 # Populate it with buttons.
-my $okbut = $buttonbar ->Button(
-	-command => 		\&ok,
-	-text =>		'Remove Selected',
-	-width =>		'15'
-)->pack(-side => 'left');
 
-my $nonebut = $buttonbar ->Button(
-	-command =>		\&clearall,
-	-text =>		'Unselect All',
-	-width =>		'15'
-)->pack(-side => 'left');
-
-my $togglebut = $buttonbar ->Button(
-	-command =>		\&toggle,
-	-text =>		'Toggle Selection',
-	-width =>		'15'
-)->pack(-side => 'left');
-
-my $allbut = $buttonbar ->Button(
-	-command =>  		\&setall,
-	-text =>		'Select All',
-	-width =>		'15'
-)->pack(-side => 'left');
-
-my $gethbut = $buttonbar ->Button(
+my $gethbut = $buttonbar1 ->Button(
 	-command =>  		\&getheaders,
 	-text =>		'Get Headers',
 	-width =>		'15'
 )->pack(-side => 'left');
 
-my $headhelpbut = $buttonbar ->Button(
+
+my $getfbut = $buttonbar1 ->Button(
+	-command =>  		\&getfooters,
+	-text =>		'Get Footers',
+	-width =>		'15'
+)->pack(-side => 'left');
+
+
+my $headhelpbut = $buttonbar1 ->Button(
 	-command =>  		\&helphr,
 	-text =>		'?',
 	-width =>		'2'
-)->pack(-side => 'left', -padx => '4');
+)->pack(-side => 'left', -padx => '12');
+
+
+
+
+# now for row 2
+
+my $buttonbar2 = $optlist->Frame()->pack(-anchor=>'n',-expand=>'no', -fill => 'none');
+
+
+
+my $allbut = $buttonbar2 ->Button(
+	-command =>  		\&setall,
+	-text =>		'Select All',
+	-width =>		'15'
+)->pack(-side => 'left');
+
+
+my $nonebut = $buttonbar2 ->Button(
+	-command =>		\&clearall,
+	-text =>		'Unselect All',
+	-width =>		'15'
+)->pack(-side => 'left');
+
+
+
+my $togglebut = $buttonbar2 ->Button(
+	-command =>		\&toggle,
+	-text =>		'Toggle Selection',
+	-width =>		'15'
+)->pack(-side => 'left');
+
+my $okbut = $buttonbar2 ->Button(
+	-command => 		\&ok,
+	-text =>		'Remove Selected',
+	-width =>		'15'
+)->pack(-side => 'left');
+
+
+
+
 
 # Set up tooltip help popups
  $b->attach($okbut,
@@ -1074,12 +1222,12 @@ my $headhelpbut = $buttonbar ->Button(
           );
 
 $b->attach($nonebut,
-	     -balloonmsg => "Unselect all headers. (Remove None).",
+	     -balloonmsg => "Unselect all lines. (Remove None).",
 	     -initwait =>	'750',
           );
 
 $b->attach($allbut,
-	     -balloonmsg => "Select all headers. (Remove All).",
+	     -balloonmsg => "Select all lines. (Remove All).",
 	     -initwait =>	'750',
           );
 
@@ -1093,7 +1241,13 @@ $b->attach($gethbut,
 	     -initwait =>	'750',
           );
 
-# Add a listbox to display all of the headers.
+$b->attach($getfbut,
+	     -balloonmsg => "Get the footers from the text directory.",
+	     -initwait =>	'750',
+          );
+
+
+# Add a listbox to display all of the headers/footers.
 my $lbox = $optlist->Scrolled('Listbox',
 	-scrollbars =>		'oe',
 	-background =>		'white',
@@ -1151,6 +1305,7 @@ $lbox->bind('<<view>>', sub {
 
 		}
 });
+
 
 ###################################################################################################################################
 
@@ -1437,8 +1592,9 @@ my $crushdefaults = $p6crushframe->Button(
 )->pack(-side => 'left', -padx => '5', -pady => '3');
 
 my $crushreadme = $p6crushframe->Button(
-	-command =>		sub {testart($startdir.$separator."pngcrush".$separator."readme.txt")},
-	-text =>		'View Pngcrush Readme',
+	-command =>		sub {testart($startdir.$separator."pngcrush".$separator."README.txt")},
+
+	-text =>		'View Pngcrush Help',
 	-width =>		'20'
 )->pack(-side => 'left', -padx => '5', -pady => '5');
 
@@ -1450,7 +1606,7 @@ my $crushlab1 = $p6crushlframe->Scrolled('ROText',
 	-background => 'white',
 	-height => '6')->pack(-side => 'top', -anchor => 'n',-pady => '4');
 
-$crushlab1->insert('end', "-bit_depth 1 converts the file to single bit color (black & white).\n\n-reduce reduces the color pallette ".
+$crushlab1->insert('end', "-bit_depth 1 converts the file to single bit color (black & white).\n\n-reduce reduces the color palette ".
 	"to only contain colors actually used in the image.\n\n".
 	"You can use nearly any of the standard options, a few will not work very well because of the way the script handles files. ".
 	"For instance the -d (output directory) will definitely cause problems, as will -e (output extension). Most of the rest can be ".
@@ -1886,7 +2042,7 @@ my $p8cb51 = $p8f2->Checkbutton(
 )->pack(-side => 'left', -anchor => 'n', -pady => '1');
 
 my $p8cb53 = $p8f2->Checkbutton(
-	-variable => 	\$opt[53],
+	-variable => 	\$opt[62],
 	-selectcolor => 'white',
 	-text => 	'Whole word only'
 )->pack(-side => 'left', -anchor => 'n', -pady => '1');
@@ -2531,8 +2687,8 @@ sub dehyphen{
 				}elsif($startword eq $hyphen){
 				# hmmmm.. there wasn't a word entity starting the next line. better leave it alone.
 					$thisline =~ s/[\w']*?$hyphen$/$endword$hyphen/;
-				}elsif( $startword =~ /^[A-Z]/ ) {
-					# if the startword starts with a Captial letter, leave the hyphen
+				}elsif( $startword =~ /^[A-Z]|^[0-9]/ ) {
+					# if the startword starts with a Capital letter or a number, leave the hyphen
 					$thisline =~ s/[\w']*?( ?)$hyphen$/$endword$hyphen$1$startword$punct/;
 					print HYFILE "$endword$hyphen$1$startword \t$list  2\n" if $opt[77];
 				}elsif( exists($seen{$startword}) || (exists($seen{$endword})&&( ($endword ne 'as')&&($endword ne 'be')&&($endword ne 'in')&&($endword ne 'on')) ) ){
@@ -2594,7 +2750,7 @@ sub fixempty{
 	 	}
 	 	 $size += (-s $file); # Gets file size (post zero length fix)  and counts total size
 	}
-	p1log("\nAverage file size - ".int($size / scalar @listing) ." bytes.\n"); #
+	if ((scalar @listing) > 0) {p1log("\nAverage file size - ".int($size / scalar @listing) ." bytes.\n");}; #
 }
 ##################################################################################################################
 
@@ -2615,47 +2771,53 @@ sub filter {
 		if ($interrupt){break(); return 0};
 		open(OLD, "<$file");       		# Open the next file for reading
 		open(NEW, ">temp");			# Open a temp file for writing
-		$linecount = $newlines = $endlines = 0; # Clear out some variables
+		$linecount = $newlines = $endlines = $linelength = 0; # Clear out some variables
 		$pageno = "";
 		while ($line = <OLD>) {			# Read a line from the file  while there are any lines left
 			$linecount++;
 			utf8::decode($line);
 
 ##### Pre-processing only! Use with care after proofing! #################################################################
+			$linelength = length($line) if (length($line)> $linelength);  # for short last line check
 
 			$line =~ s/\s{3,}[\p{Punct}\s]+$// if $opt[75];
-			$line =~ s/^[\^_](?!\{)// if $opt[76];
-			$line =~ s/^([\^_]\{)/ $1/ if $opt[76];
-			$line =~ s/^\p{Punct}+(\p{Punct})/$1/ if $opt[76];
-			$line =~ s/^ ([\^_]\{)/$1/ if $opt[76];
+
+	  if ($opt[76]){          # dubious first character in line
+		       $line =~ s/^[\^_](?!\{)//;
+			$line =~ s/^([\^_]\{)/ $1/;
+			$line =~ s/^\p{Punct}+(\p{Punct})/$1/;
+			$line =~ s/^ ([\^_]\{)/$1/;
+		   };
 			$line =~ s/  / /g if $opt[0];			# Get rid of extra spaces
 			$line =~ s/\s(["'])\s(\p{Alpha}+)\s\1 / \1\2\1 /g;
 			$line =~ s/^(\s*)(\p{IsUpper}+)(\s\p{IsLower}+)/\1\u\L\2\E\3/ if $linecount < 7;
 			$line =~ s/£([\d,]*\d)(\D)/$1 Pounds $2/g if $opt[38];# Convert £ to Pounds intelligently
 			$line =~ s/(?<![ainu])j(?=\s)/;/g if $opt[46];	# Convert solitary j or at end of word (unless it follows a i n or u) to semicolon
-			$line =~ s/\x82/'/g if $opt[50];		# Convert Windows codepage 1252 glyphs 80-9F to Latin1 equivalents
-			$line =~ s/\x83/f/g  if $opt[50];
-			$line =~ s/\x84/"/g if $opt[50];
-			$line =~ s/\x85/\.\.\./g if $opt[50];
-			$line =~ s/\x86/\*/g if $opt[50];
-			$line =~ s/\x87/\*\*/g if $opt[50];
-			$line =~ s/\x88/^/g  if $opt[50];
-			$line =~ s/\x89/0\/00/g if $opt[50];
-			$line =~ s/\x8A/S/g  if $opt[50];
-			$line =~ s/\x8B/'/g if $opt[50];
-			$line =~ s/\x8C/OE/g if $opt[50];
-			$line =~ s/\x8E/Z/g  if $opt[50];
-			$line =~ s/\x91/'/g if $opt[50];
-			$line =~ s/\x92/'/g if $opt[50];
-			$line =~ s/\x93/"/g if $opt[50];
-			$line =~ s/\x94/"/g if $opt[50];
-			$line =~ s/\x95/\*/g if $opt[50];
-			$line =~ s/\x98/\~/g if $opt[50];
-			$line =~ s/\x99/TM/g if $opt[50];
-			$line =~ s/\x9A/s/g  if $opt[50];
-			$line =~ s/\x9B/'/g if $opt[50];
-			$line =~ s/\x9C/oe/g if $opt[50];
-			$line =~ s/\x9E/z/g  if $opt[50];
+                        if ($opt[50]){	# Convert Windows codepage 1252 glyphs 80-9F to Latin1 equivalents
+			           $line =~ s/\x82/'/g;
+			           $line =~ s/\x83/f/g;
+			           $line =~ s/\x84/"/g;
+			           $line =~ s/\x85/\.\.\./g;
+			           $line =~ s/\x86/\*/g;
+			           $line =~ s/\x87/\*\*/g;
+			           $line =~ s/\x88/^/g;
+			           $line =~ s/\x89/0\/00/g;
+			           $line =~ s/\x8A/S/g;
+			           $line =~ s/\x8B/'/g;
+		                   $line =~ s/\x8C/OE/g;
+			           $line =~ s/\x8E/Z/g;
+			           $line =~ s/\x91/'/g;
+			           $line =~ s/\x92/'/g;
+			           $line =~ s/\x93/"/g;
+			           $line =~ s/\x94/"/g;
+			           $line =~ s/\x95/\*/g;
+			           $line =~ s/\x98/\~/g;
+			           $line =~ s/\x99/TM/g;
+			           $line =~ s/\x9A/s/g;
+			           $line =~ s/\x9B/'/g;
+			           $line =~ s/\x9C/oe/g;
+			           $line =~ s/\x9E/z/g;
+				   }
 			$line =~ s/[\x96\xAD\x{2010}\x{2011}]/-/g;		#Convert ASCII and unicode dashes and hyphens to std DP format.
 			$line =~ s/[\x97\x{2012}\x{2013}\x{2014}\x{2015}]/--/g;	# these will cause all kinds of grief if left untrapped
 			$line =~ s/,,/"/g if $opt[60];			# Convert double commas to a Double quote
@@ -2668,16 +2830,17 @@ sub filter {
 			$line =~ s/ \?/\?/g if $opt[6];  		# Get rid of space before question marks
 			$line =~ s/ \;/\;/g if $opt[7];			# Get rid of space before semicolons
 			$line =~ s/ :/:/g if $opt[7];			# Get rid of space before colons
-			$line =~ s/ ,/,/g if $opt[8];    		# Get rid of space before commas
-			$line =~ s/^" /"/ if $opt[62];		# Remove space after doublequote if it is the first character on a line
-			$line =~ s/ "$/"/ if $opt[62];		# Remove space before doublequote if it is the last character on a line
-			$line =~ s/(?<=(\(|\{|\[)) //g if $opt[41];	# Get rid of space after opening brackets
+			$line =~ s/ ,/,/g if $opt[8];    		# Get rid of space before commas			$line =~ s/(?<=(\(|\{|\[)) //g if $opt[41];	# Get rid of space after opening brackets
 			$line =~ s/ (?=(\)|\}|\]))//g if $opt[41];	# Get rid of space before closing brackets
 			$line =~ s/(?<!\.)\.{3}(?!\.)/ \.\.\./g if $opt[9]; # Insert a space before an ellipsis except after a period
 			$line =~ s/(?<!(\W))\/(?=\W)/,'/g if $opt[45];	# Convert forward slash to comma apostrophe
 			$line =~ s/''/"/g if $opt[10];		# Convert 2 single quotes to 1 double quote
 			$line =~ s/(?<=['" ])1\b(?!\.)/I/g if $opt[12];	# Convert a solitary 1 to I if proceeded by ' or " or space
-			$line =~ s/(?<=['" ])l\b/I/g if $opt[37];	# Convert a solitary l to I if proceeded by ' or " or space
+
+                        $line =~ s/(?<=['" ])l\b(?!')/I/g if $opt[37];	# Convert a solitary l to I if proceeded by ' or " or space
+                        $line =~ s/(?<=['" ])l'(?![a-zA-ZÀ-ÖØ-öø-ÿ])/I'/g if $opt[37];  # but not if foillowed by '[text] (common in French)
+
+
 			$line =~ s/(?<=[\n'" ])0\b/O/g if $opt[13];	# Convert a solitary 0 to O if proceeded by ' or "
 			$line =~ s/¼/ 1\/4 /g if $opt[14];		# Convert vulgar 1/4 to written out
 			$line =~ s/½/ 1\/2 /g if $opt[14];		# Convert vulgar 1/2 to written out
@@ -2696,9 +2859,18 @@ sub filter {
 			if ($opt[11]){while($line =~ s/(?<=\b)tii(\w*)/th$1/){push @{$fixup{$file}},"tii$1 to th$1";$impossibles++;}};# Convert tii at the beginning of a word to th
 			if ($opt[11]){while($line =~ s/(?<=\b)Tii(\w*)/Th$1/){push @{$fixup{$file}},"Tii$1 to Th$1";$impossibles++;}};# Convert Tii at the beginning of a word to Th
 			if ($opt[17]){while($line =~ s/(?<=\b)rn(\w*)/m$1/){push @{$fixup{$file}},"rn$1 to m$1";$impossibles++;}};	# Convert rn at the beginning of a word to m
-			if ($opt[25]){while($line =~ s/(?<=\b)tb(\w*)/th$1/){push @{$fixup{$file}},"tb$1 to th$1";$impossibles++;}};	# Convert tb at the beginning of a word to th
-			if ($opt[25]){while($line =~ s/(?<=\b)(\w*)tb$/$1th/){push @{$fixup{$file}},"$1tb to $1th";$impossibles++;}};	# Convert tb at the end of a word to th
-			if ($opt[25]){while($line =~ s/(?<=\b)Tb(\w*)/Th$1/){push @{$fixup{$file}},"Tb$1 to Th$1";$impossibles++;}};	# Convert Tb at the beginning of a word to Th
+
+	     if ($opt[25]){    #convert tb -> th
+                  while($line =~ s/(?<=\b)tb(\w*)/th$1/){ #at beginning of word
+                       push @{$fixup{$file}},"tb$1 to th$1";
+                       $impossibles++;}
+ 		  while($line =~ s/(?<=\b)(\w*)tb$/$1th/){ #at the end of a word
+                       push @{$fixup{$file}},"$1tb to $1th";
+                       $impossibles++;};
+	          while($line =~ s/(?<=\b)Tb(\w*)/Th$1/){ #Tb at the beginning of a word
+                       push @{$fixup{$file}},"Tb$1 to Th$1";
+                       $impossibles++;}
+                  };
 			if ($opt[26]){while($line =~ s/(?<=\b)wli(\w*)/wh$1/){push @{$fixup{$file}},"wli$1 to wh$1";$impossibles++;}};# Convert wli at the beginning of a word to wh
 			if ($opt[26]){while($line =~ s/(?<=\b)Wli(\w*)/Wh$1/){push @{$fixup{$file}},"Wli$1 to Wh$1";$impossibles++;}};# Convert Wli at the beginning of a word to Wh
 			if ($opt[27]){while($line =~ s/(?<=\b)wb(\w*)/wh$1/){push @{$fixup{$file}},"wb$1 to wh$1";$impossibles++;}};	# Convert wb at the beginning of a word to wh
@@ -2710,11 +2882,61 @@ sub filter {
 			if ($opt[69]){while($line =~ s/\!\!(\w+)/H$1/){push @{$fixup{$file}},"!!$1 to H$1";$impossibles++;}};	# Convert !! at the beginning of a word to H
 			if ($opt[70]){while($line =~ s/(?<=\b)X([^eEIVXDLMC\s-]\w*)/N$1/){push @{$fixup{$file}},"X$1 to N$1";$impossibles++;}};	# Convert X at the beginning of a word not followed by e to N
 			if ($opt[71]){while($line =~ s/(\w+)\!(\w+)/$1l$2/){push @{$fixup{$file}},"$1!$2 to $1l$2";$impossibles++;}};	# Convert ! in the middle of a word to l
-			if ($opt[72]){while($line =~ s/(\w*)'11\b/$1'll/){push @{$fixup{$file}},"$1'11 to $1'll";$impossibles++;}};	# Convert ! in the middle of a word to l
-			if ($opt[43]){while($line =~ s/(\w*?)rnp(\w*)/$1mp$2/){push @{$fixup{$file}},"$1rnp$2 to $1mp$2";$impossibles++;};# Convert rnp in a word to mp
-				while ($line =~ s/([tT])umpike/$1urnpike/){pop @{$fixup{$file}};$impossibles--}};
-			if ($opt[55]){while($line =~ s/(\w*)cb\b/$1ch/){push @{$fixup{$file}},"$1cb to $1ch";$impossibles++;}};# Convert cb in a word to ch
-			if ($opt[55]){while($line =~ s/\bcb(\w*)/ch$1/){push @{$fixup{$file}},"cb$1 to ch$1";$impossibles++;}};# Convert cb in a word to ch
+			if ($opt[72]){          	# Convert !! to  ll
+                                      while($line =~ s/[(\w*)| ]'11\b/$1'll/){
+                                          push @{$fixup{$file}},"$1'11 to $1'll";
+                                          $impossibles++;
+                                          }
+                                     }
+                         if ($opt[81]){                 #convert '11 to 'll  space before 'll
+                                      while($line =~ s/'11/'ll/){
+                                              push @{$fixup{$file}},"'11 converted to 'll";
+				              }
+                                      }
+
+
+                        if ($opt[80]){      #remove spaces from apostrophe'd words...
+                                      $line =~ s/ 'll/'ll/g;
+                                      $line =~s/\bI\s'm\b/I'm/g;
+                                      $line =~ s/\bhe\s's\b/he's/g;
+                                      $line =~ s/\bHe\s's\b/He's/g;
+                                      $line =~ s/\bshe\s's\b/she's/g;
+                                      $line =~ s/\bShe\s's\b/She's/g;
+                                      $line =~ s/\bwe\s'll\b/we'll/g;
+                                      $line =~ s/ n't\b/n't/g;
+                                      $line =~s/\bI\s'll\b/I'll/g;
+                                      $line =~s/\bI\s've\b/I've/g;
+                                      $line =~s/\bI\s's\b\b/I's/g;
+                                      $line =~s/\bI\s'd\b/\bI'd/g;
+                                      $line =~s/\s've\b/'ve/g;
+                                     }
+
+if ($opt[82]){        #remove extra spaces from quotes
+              $line =~ s/^" /"/;  # start of line doublequote	      
+              $line =~ s/ "$/"/;  #  end of line doublequote
+              $line =~s/\s"-/"-/g;
+              $line =~s/the\s"\s/the\s"/g;
+              $line =~s/([.,!]) (["'] )/$1$2/g;      # punctuation, space, quote, space
+              $line =~s/(\s["']\s)/$1\[*double spaced quote?]/g; #mark if unresolvable
+             }
+
+if ($opt[83]){    # mark potential missing space between words 
+               $line =~s/([a-z][?!,;\.])([a-zA-Z])/$1\[\*Missing space?\]$2/g;
+              }
+
+		if ($opt[43]){while($line =~ s/(\w*?)rnp(\w*)/$1mp$2/){push @{$fixup{$file}},"$1rnp$2 to $1mp$2";$impossibles++;};# Convert rnp in a word to mp
+				while ($line =~ s/([tT])umpike/$1urnpike/){pop @ {$fixup{$file}};$impossibles--}};
+
+       if ($opt[55]){# Convert cb in a word to ch
+	   while($line =~ s/(\w*)cb\b/$1ch/){
+                     push @{$fixup{$file}},"$1cb to $1ch";
+                     $impossibles++;
+		 };
+	   while($line =~ s/\bcb(\w*)/ch$1/){
+                     push @{$fixup{$file}},"cb$1 to ch$1";
+                     $impossibles++;
+                 };
+           };
 			if ($opt[56]){while($line =~ s/(\w*?)gbt(\w*)/$1ght$2/){push @{$fixup{$file}},"$1gbtp$2 to $1ght$2";$impossibles++;}};# Convert gbt in a word to ght
 			if ($opt[64]){while($line =~ s/(\w*?)pbt(\w*)/$1pht$2/){push @{$fixup{$file}},"$1pbtp$2 to $1pht$2";$impossibles++;}};# Convert pbt in a word to pht
 			if ($opt[65]){while($line =~ s/(\w*?)mrn(\w*)/$1mm$2/){push @{$fixup{$file}},"$1mrn$2 to $1mm$2";$impossibles++;}};# Convert mrn in a word to mm
@@ -2724,6 +2946,15 @@ sub filter {
 			$line =~ s/([?!]) "/$1"/g;
 			$line =~ s/ !/!/g if $opt[5];  							# Get rid of space before exclamation points
  			$line =~ s/ $// if $opt[1];							# Get rid of spaces at end of line
+
+                        if ($opt[79]){           # remove HTML markup if required-- done before any other markup operation)
+                                    $line =~ s/$italicsopen//g;
+                                    $line =~ s/$italicsclose//g;
+                                    $line =~ s/$boldopen//g;
+                                    $line =~ s/$boldclose//g;
+                                    $line =~s/<\/sc>//g;
+                                    $line =~s/<sc>//g;
+                                   }
  			$line =~ s/(\p{Punct}+)(<\/sc>)/$2$1/g if $opt[78];				# Move punctuation outside of markup
 			$line =~ s/ $italicsclose/$italicsclose/g;					# Close up spaces in markup
 			$line =~ s/$italicsclose(\p{Alpha})/$italicsclose $1/g;				# Close up spaces in markup
@@ -2770,9 +3001,13 @@ sub filter {
 			$line = <INPUT>;
 		}
 		utf8::decode($line);
-		$line =~ s/(\s+)(<\/sc>)/$2$1/g if $opt[78];					# Close up spaces in markup
- 		$line =~ s/(<sc>)(\s+)/$2$1/g if $opt[78];					# Close up spaces in markup
- 		$line =~ s/(\p{Punct}+)(<\/sc>)/$2$1/g if $opt[78];				# Move punctuation outside of markup
+
+  if ($opt[78]){	            # Close up spaces in markup
+		$line =~ s/(\s+)(<\/sc>)/$2$1/g;
+ 		$line =~ s/(<sc>)(\s+)/$2$1/g;
+ 		$line =~ s/(\p{Punct}+)(<\/sc>)/$2$1/g; # Move punctuation outside of markup
+             }
+
 		$line =~ s/ *?\n(<\/[IiBb]>) ?/$1\n/g;		# fix up any ending markup at the beginning of a line.
 		for my $abbr('e.g', 'i.e', 'ibid', 'etc','loc', 'cit', 'Ib', 'cf', 'op', 'et seq'){
 			$line =~ s/<i>(\Q$abbr\E)<\/i>\./<i>$1.<\/i>/ig;
@@ -2791,7 +3026,7 @@ sub filter {
 			foreach $value(@{$fixup{$key}}){
 				p1log("$value;\n");
 			}
-		}
+ 		}
 	}
 }
 ##########################################################################################################
@@ -2799,14 +3034,15 @@ sub filter {
 ##########################################################################################################
 # A basic file renamer
 # The glob function has sort semantics built in to it so sort is not necessary
+# with grythumn's (partial) fix for directory lock problems, avoiding renaming directories
 
 sub ren {
 	my ($extension,$directory) = @_;
 	chdir'..';
 	my $tempdir = time;
-	rename $directory,$tempdir;
-	mkdir ($directory,0777);
-	chdir $tempdir;
+	# rename $directory,$tempdir;
+	mkdir ($tempdir,0777);
+	chdir $directory;
 	my ($list, $newname);
 	my $filecnt = $startrnm; 						#Initialize and localize some variables
 	my @listing = glob("*.$extension");					# Get a list of files in the current directory.
@@ -2818,6 +3054,7 @@ sub ren {
 	}
 	chdir'..';
 	my $tracker;
+        my @filelist;
 	foreach $list(@listing) {						# Step through the list.
 	   	p1log(++$tracker % 10);							# Let the user know that something is happening.
 		if ($interrupt){break(); return 0};
@@ -2828,15 +3065,22 @@ sub ren {
 		} else {							# If there is more than 9999 files, use 00000.xxx format.
 			$newname = sprintf('%05s%s', $filecnt, ".$extension");
 		}
-		unless (rename("$tempdir/$list","$directory/$newname")){
-			p1log("Could not rename file $list to $newname. File already exists or is in use.\n");	# Rename the file.
-		}
-		$filecnt++;
-	}
+
+  if (rename("$directory/$list","$tempdir/$newname")){
+         push(@filelist,$newname); } else {
+         p1log("Could not rename file $list to $newname. File already exists or is in use.\n");   # Rename the file.
+      }
+      $filecnt++;
+   }
+   my $file;
+   p1log("\nMoving files back to original directory:\n");
+   foreach $file(@filelist) { p1log("."); rename("$tempdir/$file","$directory/$file"); }
+
 	rmdir $tempdir;
 	chdir'text';
 	return $filecnt-$startrnm;
 }
+
 ##########################################################################################################
 
 sub splchk{
@@ -3011,7 +3255,7 @@ sub pngcrush{
 		}
 	}
 	chdir $thisdir;
-	rename "$imagesdir",'_pngsback_';				# fast backup... may be problem cross platform...
+	rename "$imagesdir",'_pngsback_';				# fast backup... may be problem cross platform..
 	mkdir ("$imagesdir",0777);					# make a directory to hold shrunken files
 	$crushoptions = $crushentry->get;				# get the options from the prefs tab
 	chomp $crushoptions;						# remove any stray newlines
@@ -3059,8 +3303,12 @@ sub pngcrushstart{
 		print BAT "\"$crushstart\" $crushoptions \"$infile\" \"$outfile\" > err\n\n";
 		close BAT;
 		system "run.bat";
-		unlink "run.bat";
-	}				#Broken for Linux, need some shell script guru to figure out what I need to do to call it under Linux
+#		unlink "run.bat";
+	}				#if not windows, assume Linux, the following works under Slackware at least...
+	else {	$crushstart="pngcrush ";
+                system $crushstart." ".$crushoptions." ".$infile." ".$outfile." >err\n\n";
+
+	}
 }
 
 sub  pthelp{
@@ -3245,24 +3493,43 @@ sub defaults{					# Revert to default markup on Save option tab
 }
 
 ###################################################################################################################################
-#  Subroutines used by page 3 - Remove Headers
 
-# Subroutine to handle Remove Headers button.
+#  Subroutines used by page 3 - Remove Headers/footers
+
+# Subroutine to handle Remove Headers/footers button.
 
 sub ok{
 	my ($head, $line);
-	my @selected = $lbox->curselection;
-	foreach $head(@selected) {
-		undef $headerlines[$head];
-	}
-	open (HEADS, ">headers.xxx");
-	foreach $line(@headerlines){
+ 	my @selected = $lbox->curselection;
+        foreach $head(@selected) {
+		undef $deletelines[$head];
+                }
+           if ($headersel==1)
+         {
+
+	 open (HEADS, ">headers.xxx");
+	 foreach $line(@deletelines){
 		print HEADS ("$line\n") if defined $line;
+	 }
+	 close (HEADS);
+	 delheaders();
+	 emptybox();
+	 unlink "headers.xxx";
+
+}
+else
+{
+
+	open (FEET, ">footers.xxx");
+	foreach $line(@deletelines){
+		print FEET ("$line\n") if defined $line;
 	}
-	close (HEADS);
-	delheaders();
+	close (FEET);
+	delfooters();
 	emptybox();
-	unlink "headers.xxx";
+	unlink "footers.xxx";
+  }
+ 
 }
 
 sub emptybox{
@@ -3290,8 +3557,9 @@ sub setall{
 }
 
 sub getheaders{
+        $headersel=1;
 	$lbox->delete(0, 'end');
-	while (scalar (@headerlines)){ pop @headerlines};
+	while (scalar (@deletelines)){ pop @deletelines};
 	my ($file, $line, @listing);
 	my $topline = '';
 	if (chdir"text"){
@@ -3305,12 +3573,12 @@ sub getheaders{
 		chomp $topline;
 		unless($topline =~ /\Q$zerobytetext\E/) {
 			$line = sprintf "%-12s  %s",$file,$topline;	# Record top line of file
-			push @headerlines, $line;
+			push @deletelines, $line;
 		}
 		close(TXT);
 	}
-	unless (scalar @headerlines) {
-		my $repsonse = $main->messageBox(
+	unless (scalar @deletelines) {
+		my $response = $main->messageBox(
 			-icon => 'error',
 			-message => 'Could not find text directory or directory was empty.',
 			-title => 'No Headers',
@@ -3318,24 +3586,76 @@ sub getheaders{
 		);
 	}
 	# Populate the list box with the header array.
-	$lbox->insert('end', @headerlines );
+	$lbox->insert('end', @deletelines );
 	$lbox->yview('scroll',1,'units');
 	$lbox->update;
 	$lbox->yview('scroll',-1,'units');
 	clearall();
 	if ($batchmode){
 		open (HEADS, ">headers.xxx");			# special section for batch mode - bypasses a lot of display logic which won't be seen
-		foreach $line(@headerlines){
+		foreach $line(@deletelines){
 			print HEADS ("$line\n");
 		}
 		close (HEADS);
 	}
 }
 
+
+sub getfooters{
+        $headersel=2;
+        $lbox->delete(0, 'end');
+	while (scalar (@deletelines)){ pop @deletelines};
+	my ($file, $line, @listing);
+	my $bottomline = '';
+	my $textin = '';
+        if (chdir"text"){
+		@listing = glob("*.txt");			# Get a list of text files.
+		chdir"..";
+	}
+	foreach $file(@listing) {				# Step through the list.
+		open (TXT, "<text/$file");			# Open a file.
+		while ( $textin = <TXT>)
+                {
+		    if (eof(TXT)){$bottomline=$textin}
+		}
+
+
+	utf8::decode($bottomline);
+		chomp $bottomline;
+		unless($bottomline =~ /\Q$zerobytetext\E/) {
+			$line = sprintf "%-12s  %s",$file,$bottomline;	# Record last line of file
+			push @deletelines, $line;
+		}
+		close(TXT);
+	}
+	unless (scalar @deletelines) {
+		my $response = $main->messageBox(
+			-icon => 'error',
+			-message => 'Could not find text directory or directory was empty.',
+			-title => 'No Footers',
+			-type => 'OK',
+		);
+	}
+	# Populate the list box with the header array.
+	$lbox->insert('end', @deletelines );
+	$lbox->yview('scroll',1,'units');
+	$lbox->update;
+	$lbox->yview('scroll',-1,'units');
+	clearall();
+	if ($batchmode){
+		open (FEET, ">footers.xxx");			# special section for batch mode - bypasses a lot of display logic which won't be seen
+		foreach $line(@deletelines){
+			print FEET ("$line\n");
+		}
+		close (FEET);
+	}
+}
+
+
 sub delheaders {
 	my (@headers, $topline, $line, $lines, $file, $filename);
 	unless (open (HEADS, "<headers.xxx")){			# Open a file to write changes to.
-		 my $repsonse = $main->messageBox(
+		 my $response = $main->messageBox(
 		-icon => 'error',
 		-message => 'Could not open headers.txt processing file.',
 		-title => 'File Not Found',
@@ -3354,12 +3674,54 @@ sub delheaders {
    		$lines = 0;
 		if (open(TXT, "<$file")){		# Open a file.
 			open(NEW, ">temp");		# Open a temp file for writing
-			while ($line = <TXT>) {
-				last if ($line eq eof);
-				next if ($lines == 1 && $line eq "\n");
-				print NEW $line if $lines;	# Print line of file
+			while ($line = <TXT>){
+                            last if ($line eq eof);
+			    next if ($lines == 1 && $line eq "\n");
+			    print NEW $line if $lines;	# Print line of file
+			    $lines++;
+			    }   
+  # at this point, if $lines=1, the only line in the file has been deleted....
+		            if ($lines==1){print NEW "[Blank Page]";}	
+                        close(TXT);  		 # Clean up file handles
+			close(NEW);
+			unlink "$file";				# Delete file
+			rename("temp", $file);			# Rename temporary file to filename
+			}
+		    }
+	  
+	chdir"..";
+    }
+
+
+sub delfooters {
+	my (@footers, $lastline, $line, $lines, $file, $filename);
+	unless (open (FEET, "<footers.xxx")){			# Open a file to write changes to.
+		 my $response = $main->messageBox(
+		-icon => 'error',
+		-message => 'Could not open footers.txt processing file.',
+		-title => 'File Not Found',
+		-type => 'OK');
+	}
+	my $footerfilter = $zerobytetext;
+	#$footerfilter =~  s/([\{\}\[\]\(\)\^\$\.\|\*\+\?\\])/\\$1/g; 	#escape meta characters
+	while ($line = <FEET>){
+		$line =~ /^(.+?\.txt)(?=\s)/;
+		$filename = $1;
+		push (@footers, $filename) unless ($line =~ /\Q$footerfilter\E/);
+	}
+	close(FEET);
+	chdir "text";
+	foreach $file (@footers) {
+   		$lines = 0;
+		if (open(TXT, "<$file")){		# Open a file.
+			open(NEW, ">temp");		# Open a temp file for writing
+
+
+			while ($line = <TXT>){
+				print NEW $line if not (eof(TXT));	# Print line of file
 				$lines++;
 			}
+                        if ($lines==0){ print NEW "[Blank Page]"};
 			close(TXT);  				# Clean up file handles
 			close(NEW);
 			unlink "$file";				# Delete file
@@ -3369,19 +3731,23 @@ sub delheaders {
 	chdir"..";
 }
 
+
+
+
 sub helphr{
 	my $cdhelpbox = $main->messageBox(-title => "Help with Header Removal", -type => "OK", -icon => 'question',
-	-message => '   Click on Get Headers to get a list showing the top line from each file in the text directory. '.
-	'Check each line and if you would like to remove it, select it. Selected lines will have a white background. '.
+	-message => '   Click on Get Headers to get a list showing the fisrts line from each file in the text directory. '.
+        'Get Footers will show the last line from each file.Check each line and if you would like to remove it, select it.'.
+        'Selected lines will have a white background. '.
 	'Alternately you can use the Select All, Unselect All and Toggle Selection buttons to make bulk changes to the '.
 	'selection list. Once you are satisfied with your selection list, press Remove Selected to write all of the changes '.
-	"to the selected files. You can refresh the header list by pressing Get Headers again and repeat if desired/necessary. ".
+	"to the selected files. You can refresh the list by pressing Get Headers or Get Footers again and repeat if desired/necessary. ".
 	"\n\n   You can also open individual pages in a text editor if you want to do more significant ".
 	"changes or just want to see the whole page. If your png files are in the $imagesdir directory and are named in the ".
 	"upload format, you can also open an image viewer window to do side by side comparisons.\n\n\n".
 	"INVOKE the text editor by double left clicking on a file from the list.\n\n".
 	"INVOKE the image viewer by selecting (left click) a file from the list, then right click.\n\n".
-	"Remember to refresh your header list if you do any edits to the text files.");
+	"Remember to refresh your header/footer list if you do any edits to the text files.");
 }
 
 sub testart{
@@ -3519,6 +3885,14 @@ sub batch{
 			p1log("\nFinished automatic header removal.\n");
 			zero();
 		}
+       
+		if ($opt[53]){
+			p1log("\nBatch mode automatic footer removal in progress... - Please wait.\n");
+			getfooters();
+			delfooters();
+			p1log("\nFinished automatic header removal.\n");
+			zero();
+		}
 		if ($opt[54]){
 			p1log("\nBuilding zip file of project files... - Please wait.\n");
 			$book->raise('page7');
@@ -3546,7 +3920,7 @@ sub batch{
 
 sub updateblist
 {
-	my ($bdir, @batchlist, $twflag, $twoflag);
+	my ($bdir, @batchlist, $twflag, $twoflag, $imagesflag);
 	$p4bflabel->delete('1.0','end');
 	@dirlist6 = getdirs();
 	shift @dirlist6;
@@ -3585,15 +3959,22 @@ sub updateblist
 		}
 		if (chdir"text"){
 			chdir"..";
-			$p4bflabel->insert('end',"text directory found.\n");
+ 			$p4bflabel->insert('end',"text directory found.\n");
 		}else {
 			unless($twflag && $twoflag){
 				$p4bflabel->insert('end',"text directory not found.\n");
 			}
 		}
-	}
-	$p4bflabel->update;
-	$interrupt = 0;
+                if (chdir"images"){
+                   $imagesflag =1;
+                   chdir"..";
+                   $p4bflabel->insert('end',"illustrations directory found.\n");            }else {
+              $p4bflabel->insert('end',"illustrations directory not found.\n");
+                }
+     }
+
+     $p4bflabel->update;
+     $interrupt = 0;
 }
 
 #######################################################################################################################
@@ -3698,7 +4079,27 @@ sub ftpbuildbatch{
 	}else {
 		ftplogger("text directory not found. Are you in the correct working directory?\n");
 	}
-	if (@zerofiles){
+        if (chdir"images"){
+       $thisdir = getpwd();
+       ftplogger("Adding illustration files from $thisdir directory.");
+       @filelist = glob"*.*";
+       unless (scalar @filelist){
+          ftplogger("\nNo files in the $imagesdir directory!");
+       }
+       foreach $addfile(@filelist){
+          $thisfile = $thisdir.$separator.$addfile;
+          push @ftpbatch,$thisfile;
+          push @zerofiles, $thisfile if (-s $thisfile == 0);
+          $ftpbatchbox->insert('end',$thisfile);
+          $ftpbatchbox->update;
+          $ftplog->yviewMoveto('1.'); # Scroll if necessary
+       }
+       $howmany = scalar @filelist;
+       ftplogger(" $howmany illustration files added.\n");
+       chdir"..";
+    }
+
+       if (@zerofiles){
 		ftplogger("Warning! zero byte files:\n");
 		foreach $thisfile(@zerofiles){ftplogger("$thisfile\n");};
 	}
@@ -4592,13 +4993,13 @@ sub searchtext{
 	my $tempindex;
 	my $exactsearch = $searchterm;
 	$exactsearch =~ s/([\{\}\[\]\(\)\^\$\.\|\*\+\?\\])/\\$1/g;	# escape meta characters for whole word matching
-	if (($opt[53]) && ($opt[51])){							# use the appropriate search.
+	if (($opt[62]) && ($opt[51])){							# use the appropriate search.
 		$searchstartindex = $displaybox->search('-nocase', '-regexp','--', '(?<=\b)'.$exactsearch.'(?=\b)', $searchendindex, 'end');
-	}elsif(($opt[53]) && !($opt[51])){
+	}elsif(($opt[62]) && !($opt[51])){
 		$searchstartindex = $displaybox->search('-regexp','--','(?<=\b)'.$exactsearch.'(?=\b)', $searchendindex, 'end');
-	}elsif(!($opt[53]) && ($opt[51])){
+	}elsif(!($opt[62]) && ($opt[51])){
 		$searchstartindex = $displaybox->search('-nocase','--', $searchterm, $searchendindex, 'end');
-	}elsif(!($opt[53]) && !($opt[51])){
+	}elsif(!($opt[62]) && !($opt[51])){
 		$searchstartindex = $displaybox->search('--', $searchterm, $searchendindex, 'end');
 	}
 	$tempindex = $searchstartindex;
@@ -4639,7 +5040,7 @@ sub searchfiles{
 		}
 	}
 
-	while ($filesearchindex < $filenumber){				# while their are still files remaining
+	while ($filesearchindex < $filenumber){				# while there are still files remaining
 		$lineindex = 0;
 		{
 			local(*INFILE, $/);				# slurp file in
@@ -4653,8 +5054,8 @@ sub searchfiles{
 			$lcfile = $file;
 		}
 		$wordsearchterm = $searchterm;
-		$wordsearchterm = ('\b'.$searchterm.'\b') if $opt[53];	# build a search pattern for whole word searching
-		if (((!$opt[53])&&($lcfile =~ /$wordsearchterm/))||(($opt[53])&&($lcfile =~ /$wordsearchterm/))){ # if a word is found matching an option set
+		$wordsearchterm = ('\b'.$searchterm.'\b') if $opt[62];	# build a search pattern for whole word searching
+		if (((!$opt[62])&&($lcfile =~ /$wordsearchterm/))||(($opt[62])&&($lcfile =~ /$wordsearchterm/))){ # if a word is found matching an option set
 			utf8::decode($file);							# convert unicode
 			$displaybox->insert('end',$file);			# dump the file into the textbox
 			$displaybox->yview('scroll',1,'units');
@@ -5111,3 +5512,4 @@ sub betagreek{
 	$phrase =~ s/\x{03CD}/y\//g;
 	return fromgreektr($phrase)
 }
+

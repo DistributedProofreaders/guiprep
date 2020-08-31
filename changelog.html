@@ -8,6 +8,43 @@
 <span style="font-weight: bold;">Changelog History<br></span>
 <br>
 <br>
+<span style="font-weight: bold;"><big>Version .41 through .41a</big></span>
+<br>
+<br>
+(By grythumn): fix for directory lock problems when renaming
+<br>
+(By Dave Morgan): fix for images/directories
+<br>
+(By Malcolm Farmer):
+<ul>
+<li>minor Typo fixes</li>
+<li>testart, ivstart & startpngcrush calls made Linux compatible</li>
+<li>Don't dehyphenate numbers (makes indexes work better)</li>
+<li>Page footers removal subroutine added</li>
+<li>merged in these options from rfrank's cpprep:
+<ul>
+<li>Remove HTML markup (bold, italic, small caps)</li>
+<li>Remove space before 'll</li>
+<li>Remove space from I 'm,</li>
+<li>Remove space from (s)he 's</li>
+<li>Remove space from we 've</li>
+<li>Remove space from we 'll</li>
+<li>Remove space before n't</li>
+<li>Remove space from I 'll</li>
+<li>Remove space from I 've</li>
+<li>Remove space from I 's</li>
+<li>Convert '11 -> 'll</li>
+<li>some of the "Spaceyquotes" regexps</li>
+<li>mark possible missing spaces between words/sentences</li></ul></li>
+<li>remove footers in batch mode.</li>
+<li>mark blank pages after header/footer removal</li></ul>
+<br>
+(By lvl): don't convert solitary l to I  followed by ' and text (corrects behavour for French)
+
+<hr>
+Versions up to .40 were by Stephen Schultz:
+<br>
+<br>
 </span><span style="font-weight: bold;"><big>Version .40 (643k)</big></span>
 Argh. When I added the option to extract the small caps markup from the RTF files, I broke the handler for small caps if you WEREN'T extracting the markup. Fixed now.<br>
 <br>
