@@ -1,6 +1,7 @@
 use Storable;
 my (%words,%fwords,@multi,$word,$hold,$last,$wt,$ws,$mv,$mmv,$hold1);
 
+use Storable qw(nstore);
 
 open (WLIST, "<2of4brif.txt");
 
@@ -41,4 +42,4 @@ foreach $word(@multi){
 	$mmv++;
 }
 print "$wt total words checked, $ws fcanno words, $mv words where fcanno is a regular word, $mmv words with more than 1 variation.";
-store \%fwords, 'fcannos.bin';
+nstore \%fwords, 'fcannos.bin';
