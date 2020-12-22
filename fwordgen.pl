@@ -1,7 +1,6 @@
-use Storable;
+use Storable qw(nstore);
 my (%words,%fwords,@multi,$word,$hold,$last,$wt,$ws,$mv,$mmv,$hold1);
 
-use Storable qw(nstore);
 
 open (WLIST, "<2of4brif.txt");
 
