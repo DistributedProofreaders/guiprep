@@ -1165,7 +1165,8 @@ my $p2cb85 = $p2opts->Checkbutton(
 # Put some explanatory text at the top of the window.
 
 my $p3toplabel = $page3 -> Label(
-	-text => "Select the lines to delete.\nLines with a white background will be deleted.",
+	-text => "Select the lines to delete - lines with a white background will be deleted\n" .
+	         "Double click a line to view text. Left click then right click to view image",
 	-font => $helvb)->pack;
 
 # Make a frame to contain  the widgets.
