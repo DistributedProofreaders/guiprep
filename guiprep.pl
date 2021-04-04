@@ -2552,6 +2552,8 @@ sub filter {
 ##### Pre-processing only! Use with care after proofing! #################################################################
 			$linelength = length($line) if (length($line)> $linelength);  # for short last line check
 
+			$line =~ s/\x0C//g;		# Remove form feeds - appended to end of page by tesseract by default
+
 			$line =~ s/\s{3,}[\p{Punct}\s]+$// if $opt[75];
 
 	  if ($opt[76]){          # dubious first character in line
