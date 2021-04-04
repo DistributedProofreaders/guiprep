@@ -3710,7 +3710,7 @@ sub updateblist
 		}
 		$p4bflabel->insert('end',"$bmessg");
 	}else {
-		$bmessg = "No Batch Directories Selected. \nInteractive mode.\n\n";
+		$bmessg = "Working in interactive mode.\n\n";
 		$p4bflabel->insert('end',"$bmessg");
 		if (chdir"$imagesdir"){
 			chdir"..";
