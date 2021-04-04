@@ -3284,7 +3284,10 @@ sub ok{
 
 	 open (HEADS, ">headers.xxx");
 	 foreach $line(@deletelines){
-		print HEADS ("$line\n") if defined $line;
+		if (defined $line) {
+			utf8::encode $line;
+			print HEADS ("$line\n");
+		}
 	 }
 	 close (HEADS);
 	 delheaders();
@@ -3297,7 +3300,10 @@ else
 
 	open (FEET, ">footers.xxx");
 	foreach $line(@deletelines){
-		print FEET ("$line\n") if defined $line;
+		if (defined $line) {
+			utf8::encode $line;
+			print FEET ("$line\n");
+		}
 	}
 	close (FEET);
 	delfooters();
