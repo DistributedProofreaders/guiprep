@@ -667,7 +667,7 @@ my $batchzip = $p2o4->Checkbutton(
 my $p2o5 = $page2->Frame(-relief => 'groove', -borderwidth => 2
 )->pack(-side => 'top', -fill => 'both', -expand => 'y', -pady=>'4',-padx =>'2');
 
-my $p2opts = $p2o5->Scrolled('Pane', -scrollbars => 'w'
+my $p2opts = $p2o5->Scrolled('Pane', -scrollbars => 'e'
 )->pack(-side => 'top', -anchor => 'n', -fill => 'both', -expand => 'y', -pady=>'6',-padx =>'2');
 
 BindMouseWheel($p2opts);
