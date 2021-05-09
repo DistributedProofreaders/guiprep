@@ -2,77 +2,29 @@
 #
 # guiprep.pl
 #
-my $currentver = '.41d';
+my $currentver = '.41e';
 #
 # A perl script designed to help automate preparation of text files for Distributed Proofreaders.
-#esponse
 #
-# The guiprep / Winprep pre-processing toolkit.   Written by Stephen Schulze.
+# The guiprep pre-processing toolkit.   Written by Stephen Schulze.
 #
-#  This program is designed to help content providers prepare OCRed text files and images for the Distributed Proofreaders web site.
-#  It will extract italic and bold markup as well as text from rtf format files, rejoin end-of-line hyphenated words, filter out bad
-#  and undesirable characters and combinations, check for and fix the top 3400 or so scannos, rename the .txt and .png files into the
-#  format needed by DP, check for zero byte files, and provides a easy mechanism to semi-automatically remove headers from the text files.
+# This program is designed to help content providers prepare OCRed text files and images for the Distributed Proofreaders web site.
+# It will extract italic and bold markup as well as text from rtf format files, rejoin end-of-line hyphenated words, filter out bad
+# and undesirable characters and combinations, check for and fix the top 3400 or so scannos, rename the .txt and .png files into the
+# format needed by DP, check for zero byte files, and provides a easy mechanism to semi-automatically remove headers from the text files.
 #
-#  It provides hooks to link in your favorite text editor and image viewer to help with the preparation process.
+# It provides hooks to link in your favorite text editor and image viewer to help with the preparation process.
 #
-# For more details about use and operation, see the HTML manual included with the program and also on the web.
+# For more details about use and operation, see the HTML user guide included with the program.
 #
 # This program may be freely used, copied, modified and distributed. Reverse engineering strictly encouraged.
 #
 # This software has no guarantees as to its fitness to do this or any other task.
 #
-#  Any damages to your computer, your data, your mental health or anything else as a result of using this software
-#  are your problem and not mine. If not satisfied, your purchase price will be cheerfully refunded.
-
-# Modifications
-# Versions .41 through .41a:
-# grythumn: 
-#   fix for directory lock problems when renaming
+# Any damages to your computer, your data, your mental health or anything else as a result of using this software
+# are your problem and not mine. If not satisfied, your purchase price will be cheerfully refunded.
 #
-# Dave Morgan
-#   fix for images/directories
-#
-# Malcolm Farmer:
-#   minor Typo fixes
-#   testart, ivstart & startpngcrush calls made Linux compatible
-#   Don't dehyphenate numbers (makes indexes work better)
-#   Page footers removal subroutine added
-#   merged in these options from rfrank's cpprep:
-#      Remove HTML markup (bold, italic, small caps)
-#      Remove space before 'll
-#      Remove space from I 'm,
-#      Remove space from (s)he 's
-#      Remove space from we 've
-#      Remove space from we 'll
-#      Remove space before n't
-#      Remove space from I 'll
-#      Remove space from I 've
-#      Remove space from I 's
-#      Convert '11 -> 'll
-#      some of the "Spaceyquotes" regexps
-#      mark possible missing spaces between words/sentences
-#  remove footers in batch mode.
-#  mark blank pages after header/footer removal
-#
-#
-# lvl
-#   don't convert solitary l to I  followed by ' and text (corrects behavour for French)
-# Version .41b
-# wfarrell: 
-#   Minor reformatting of guiprep source for readability
-#   Compatibility fix for later Perl releases (remove several uses of "defined" function)
-# Version .41c
-# windymilla:
-#   Treat a file containing just a BOM as empty so [Blank page] will be added
-#   Fix '.' not in @INC error reported by later Perl releases
-# Version .41d
-# windymilla:
-#   Tidy up/mark dubious spaced curly quotes
-#   Fix spaced close single curly quotes (not mark as unknown)
-#     - leave unchecked if book has apostrophes at start of word, e.g. 'orrible
-
-
+# For modifications, see the changelog
 
 
 
@@ -1427,7 +1379,7 @@ my $p5frame =  $page5->Frame->pack(-side => 'top', -anchor => 'n', -padx => '10'
  )->pack(-expand =>'both',-fill=>'both');
  BindMouseWheel($p5rframetext);
 
-  $p5rframetext->insert('end',"\n".'The guiprep / Winprep pre-processing toolkit.   Written by Stephen Schulze.'.
+  $p5rframetext->insert('end',"\n".'The guiprep pre-processing toolkit.   Written by Stephen Schulze.'.
   	"\n\n".
  	'  This program is designed to help content providers prepare OCRed text files and images for the Distributed Proofreaders web site. '.
  	'It will extract italic and bold markup as well as text from rtf format files, rejoin end-of-line hyphenated words, '.
@@ -1437,7 +1389,7 @@ my $p5frame =  $page5->Frame->pack(-side => 'top', -anchor => 'n', -padx => '10'
  	'from the text files.'."\n It provides hooks to link ".
  	'in your favorite text editor and image viewers to help with the preparation process.'.
  	 "\n\n\n".
- 	 '  For more details about use and operation, see the HTML manual included with the program and also on the web.'.
+ 	 '  For more details about use and operation, see the HTML user guide included with the program.'.
  	 "\n\n".
  	"  This program may be freely used, copied, modified and distributed. Reverse engineering strictly encouraged.\n\nThis software has ".
  	'no guarantees as to its fitness to do this or any other task.'.

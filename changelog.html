@@ -1,34 +1,52 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-  <meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1">
   <title>Changelog</title>
 </head>
 <body>
 
 <span style="font-weight: bold;">Changelog History<br></span>
 <br>
-<br>
-<span style="font-weight: bold;"><big>Version .41d</big></span>
-(By windymilla):
+<br><span style="font-weight: bold;"><big>Version .41e</big></span>
+(By windymilla): 
 <ul>
-<li>Tidy up or mark dubious spaced <b>curly</b> quotes</li>
-<li>Fix spaced close single curly quotes (not mark as unknown) -
-leave unchecked if book has apostrophes at start of word, e.g. 'orrible</li>
+<li>Remove FTP tab. Neither DP nor DPC support the use of the FTP tab.</li>
+<li>Make fcannos.bin platform independent (which was the only portion of guiprep that was not platform independent).</li>
+<li>Tidy declaration of Storable in fwordgen.</li>
+<li>Move scrollbar to right-hand side of Select Option tab.</li>
+<li>Remove pause from run_guiprep.bat.</li>
+<li>Filter form feeds from files. (Tesseract support.)</li>
+<li>Make "Convert Windows 1252 codepage glyphs 80-9F" default to off. (UTF-8.)</li>
+<li>Make removal of headers and footers utf safe.</li>
+<li>Adjust various messages to be more accurate.</li>
+<li>Minor bug fixes.</li>
 </ul>
+(By mannyack):
+<ul><li>Rewrite of the user guide and other documentation.</li></ul>
+<br>
+
+<span style="font-weight: bold;"><big>Version .41d (396k)</big></span>
+(By windymilla): 
+<ul>
+<li>Tidy up/mark dubious spaced curly quotes</li>
+<li>Fix spaced close single curly quotes (not mark as unknown)
+<ul><li>leave unchecked if book has apostrophes at start of word, e.g. 'orrible</li></ul></li></ul>
+<br>
+
+
 <span style="font-weight: bold;"><big>Version .41c</big></span>
-(By windymilla):
+(By windymilla): 
 <ul>
 <li>Treat a file containing just a BOM as empty so [Blank page] will be added</li>
 <li>Fix '.' not in @INC error reported by later Perl releases</li>
 </ul>
-<span style="font-weight: bold;"><big>Version .41b</big></span>
-(By wfarrell):
+</span><span style="font-weight: bold;"><big>Version .41b</big></span>
+(By wfarrell): 
 <ul>
 <li>Minor reformatting of guiprep source for readability</li>
 <li>Compatibility fix for later Perl releases (remove several uses of "defined" function)</li>
 </ul>
-<span style="font-weight: bold;"><big>Version .41 through .41a</big></span>
+</span><span style="font-weight: bold;"><big>Version .41 through .41a</big></span>
 <br>
 <br>
 (By grythumn): fix for directory lock problems when renaming
@@ -65,7 +83,7 @@ leave unchecked if book has apostrophes at start of word, e.g. 'orrible</li>
 Versions up to .40 were by Stephen Schultz:
 <br>
 <br>
-<span style="font-weight: bold;"><big>Version .40 (643k)</big></span>
+</span><span style="font-weight: bold;"><big>Version .40 (643k)</big></span>
 Argh. When I added the option to extract the small caps markup from the RTF files, I broke the handler for small caps if you WEREN'T extracting the markup. Fixed now.<br>
 <br>
 Modified how the Precessing functions displayed progress. They used to just print a dot to the screen for each page (file) that was completed. That worked fine as long as there weren't any problems. If the WAS a problem, it was extremely tedious to try to count the dots to figure out which file was causing it. Changed it to print an incremented counter mod 10. It will print the digits from 123456789012345... and so on. That should make it much easier to figure out which file causes a problem when one occurs.<br>
@@ -77,7 +95,7 @@ Tightened up a bunch of code in the font table and codepage handling code. Made 
 
 <br>
 <br>
-<span style="font-weight: bold;"><big>Version .39 (643k)</big></span>
+</span><span style="font-weight: bold;"><big>Version .39 (643k)</big></span>
 Added option to extract small caps markup from the rtf during the
 extraction routine. Markup will be added as &lt;sc&gt; .. &lt;/sc&gt;
 around the text that is marked as small caps in the RTF file. It
@@ -244,10 +262,10 @@ Convert to ISO8859-1 function will do transliteration of any Greek it
 finds. (It uses the guiguts beta code to denote accented characters.)
 Other characters outside of Latin-1 will be converted to question marks
 at this time. If I get some transliteration tables, I could make auto
-transliterion for other character sets too. I don't really want to
+transliteration for other character sets too. I don't really want to
 spend lots of time on it though because hopefully, in the near future,
 DP will convert to UTF-8.&nbsp; A very large Thank You to <span
- id="id_user_smolensk_at_eunet.yu">Nikola Smolenski</span>, one of the lead
+ id="_user_smolensk@eunet.yu">Nikola Smolenski</span>, one of the lead
 developers for the DPEU site who worked out the bulk of the UTF-8
 character extraction code.<br>
 <br>
