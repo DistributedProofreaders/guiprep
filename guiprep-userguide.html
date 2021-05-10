@@ -1,0 +1,652 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Guiprep User Guide</title>
+</head>
+<body>
+
+<h1>Guiprep User Guide</h1>
+
+<h2>Table of Contents</h2>
+<ul style="list-style:none;">
+<li><a href="#Introduction">Introduction</a>
+<ul style="list-style:none;">
+<li><a href="#AboutTheSoftware">About the Software</a></li>
+<li><a href="#WhatsNew">What's New</a></li>
+<li><a href="#Installation">Installation</a></li>
+</ul></li>
+<li><a href="#OCROutput">OCR Output</a>
+<ul style="list-style:none;">
+<li><a href="#withRTF"><i>with</i> RTF Markup Extraction</a></li>
+<li><a href="#withoutRTF"><i>without</i> RTF Markup Extraction</a></li>
+<li><a href="#withoutDehyphenization"><i>without</i> RTF Markup Extraction <i>or</i> Dehyphenization</a></li>
+</ul></li>
+<li><a href="#QuickStartGuide">Quick Start Guide</a>
+<ul style="list-style:none;">
+<li><a href="#DirectorySetup">Directory Setup</a></li>
+<li><a href="#Step1">Step 1: Starting Guiprep</a></li>
+<li><a href="#Step2">Step 2: Select Options</a></li>
+<li><a href="#Step3">Step 3: Change Directory</a></li>
+<li><a href="#Step4">Step 4: Process Text</a></li>
+</ul></li>
+<li><a href="#DetailedFunctionality">Detailed Functionality</a>
+<ul style="list-style:none;">
+<li><a href="#SelectOptions">Select Options</a></li>
+<li><a href="#ProcessText">Process Text</a></li>
+<li><a href="#Search">Search</a></li>
+<li><a href="#HeadersFooters">Headers &amp; Footers</a></li>
+<li><a href="#ChangeDirectory">Change Directory</a>
+<ul style="list-style:none;">
+<li><a href="#InteractiveMode">Interactive Mode</a></li>
+<li><a href="#BatchMode">Batch Mode</a></li>
+</ul></li>
+<li><a href="#ProgramPreferences">Program Preferences</a></li>
+<li><a href="#About">About</a></li>
+</ul></li>
+<li><a href="#Troubleshooting">Troubleshooting</a></li>
+</ul>
+<h2 id="Introduction">Introduction</h2>
+
+<p>The purpose of guiprep is to take Optical Character Recognition (OCR) output in the form of text files or rtf files, extract any formatting, rejoin end-of-line hyphenated words, filter out bad and undesirable characters, check for common scannos[*] and check them for zero byte files to help automate preparation of files for our site (<a href="https://www.pgdp.net">Distributed Proofreaders</a>). If the proofing images accompany the text, guiprep can rename the png files and optimize them. Guiprep supports queuing up several projects and processing them as a batch. Guiprep semi automates header and footer removal, including hooks to link in a text editor and image viewer to check the files.</p>
+
+<p style="padding-left: 2em;">*[A scanno is like a typo...only from a scanner instead of a typist.]</p>
+
+<h3 id="AboutTheSoftware">About the software</h3>
+
+<p>This manual is based on version .41e of guiprep.</p>
+
+<p>There is a history of modifications to the program in the installation package (changelog.html).  Guiprep was originally written by Steve Schulze (thundergnat). Please leave any questions or comments in the <a href="https://www.pgdp.net/phpBB3/viewtopic.php?f=13&amp;t=2237&amp;p=1237438">Guiprep forum</a> at <a href="https://www.pgdp.net/c/">Distributed Proofreaders</a>.</p>
+
+<p>Portions of this script are derived from
+<a href="http://search.cpan.org/author/SARGIE/RTF-Tokenizer-1.01/lib/RTF/Tokenizer.pm">RTF::Tokenizer</a> by Peter Sergeant.<br>
+For more information on the RTF file format, SEE: <a href="http://search.cpan.org/dist/RTF-Writer/lib/RTF/Cookbook.pod">The_RTF_Cookbook</a>
+by Sean M. Burke.</p>
+
+<p>The included pngcrush.exe is a windows/dos compiled version of
+pngcrush, a png file compression tool. It will losslesly reduce the
+size of png files. Most image creation programs do not optimally
+compress png files. Get the latest version of pngcrush.exe at <a href="http://sourceforge.net/project/showfiles.php?group_id=1689">sourceforge</a>
+(make sure you get the executable unless you are planning to compile it
+yourself) or go the the <a href="http://pmt.sourceforge.net/index.html">pngcrush home page</a> for more information. The version included with the
+script is the lowest common denominator version. If you have a MMX
+capable processor, a faster, MMX enabled version is available.
+Uncompress it and place it the pngcrush directory in the guiprep
+folder. Make sure the included readme text file is named "README.txt"
+so the help button can find it. Some distributions I have seen have the
+help file named just "README".</p>
+
+<p style="padding-top: 1em;">This software has no guarantees as to its fitness to do this or any
+other task. Any damages to your computer, data, your mental health or
+anything else as a result of using this software are your problem and
+not mine. If not satisfied, your purchase price will be cheerfully
+refunded.</p>
+
+<p>This program may be freely distributed, used, and modified. Reverse
+engineering is condoned and encouraged. If you come up with some really
+cool addition (or even just an idea) post it in github, and it may be
+included in future releases.</p>
+
+<h3 id="WhatsNew">What's New</h3>
+
+<ul><li>Version .41e<br />
+(By windymilla):
+<ul>
+<li>Remove FTP tab. Neither DP nor DPC support the use of the FTP tab.</li>
+<li>Make fcannos.bin platform independent (which was the only portion of guiprep that was not platform independent).</li>
+<li>Tidy declaration of Storable in fwordgen.</li>
+<li>Move scrollbar to right-hand side of Select Option tab.</li>
+<li>Remove pause from run_guiprep.bat.</li>
+<li>Filter form feeds from files. (Tesseract support.)</li>
+<li>Make "Convert Windows 1252 codepage glyphs 80-9F" default to off. (UTF-8.)</li>
+<li>Make removal of headers and footers utf safe.</li>
+<li>Adjust various messages to be more accurate.</li>
+<li>Minor bug fixes.</li>
+</ul>
+(By mannyack):
+<ul><li>Rewrite of the user guide and other documentation.</li></ul></li></ul>
+<br>
+
+For further history of changes, please see changelog.html in the distribution package.
+
+<h3 id="Installation">Installation</h3>
+
+<p>Installation is explained in the files INSTALL.md and UPGRADE.md in the distribution package. Please see those files for details.</p>
+
+<h2 id="OCROutput">OCR Output</h2>
+
+<p>There are two different dehyphenization routines. One works with a single set of files, the files with line breaks preserved; the format needed by the Distributed Proofreaders site. The other will use two sets of files, one set with line breaks and one set without. The two sets will yield better accuracy during dehyphenization at the expense of slightly longer processing time and more disk storage space. To do two set dehyphenization, save the text from ABByy FineReader (or possibly other OCR packages; should work as long as they produce standard, well formed rtf or text files) two times in two different directories. Within one directory, you will need two sub-directories "textw" and "textwo". The parent directory could be the project directory, or other. "textw" stands for "text with line breaks" and "textwo" stands for "text without line breaks". If you are only going to do single set dehyphenization, you only need to follow the instructions for the "textw" directory.</p>
+
+<h3 id="withRTF"><i>with</i> RTF Markup Extraction</h3>
+
+<p>In ABByy after all of your images are loaded and OCRed, select File
+=> Save Text As => RTF.</p>
+
+<div style="margin-left: 40px;"> &nbsp;<img
+ style="width: 304px; height: 256px;" alt="File menu=>Save As=>RTF Document" title=""
+ src="pics/guiprep_fr15_rtf.png"> </div>
+
+<p>In the dialog box that pops up navigate to the textw directory, or if the directory does not yet exist, create a textw directory in some appropriate parent directory using the <b>New Folder</b> button.</p>
+
+<div style="margin-left: 40px;"> &nbsp;<img
+ style="width: 782px; height: 302px;" alt="RTF save as, and options window to save with line breaks" title=""
+ src="pics/guiprep_fr15_rtfw.png"> </div>
+
+<p>In the "textw" directory, save the text with the settings: Save as type
+<b>Rich text Format</b> and <b>Create a separate file for each page</b>.
+In the options window, check <b>Keep page breaks</b> and <b>Keep line breaks and hyphens</b> and you can go either way on everything else, except that they should match the items checked in the textwo generation. You may choose to remove headers and footers in FineReader or not, as long as it matches what you choose in generating textwo. It is important to NOT remove headers &amp; footers in both the OCR program AND guiprep, you may do it in one or the other, or neither. It doesn't matter what the File name is set to, again, as long as it matches the name used in textwo generation.</p>
+
+<p>If the Options window is open, hit <b>OK</b>. Hit <b>Save</b>.</p>
+<br />
+<p>To generate the textwo files, go to the menu and hit File => Save As => RTF, as above, and then navigate to the textwo directory, or if the directory does not yet exist, create a textwo directory with the same parent as the textw directory using the <b>New Folder</b> button.</p>
+
+<div style="margin-left: 40px;"> &nbsp;<img
+ style="width: 783px; height: 302px;" alt="RTF save as, and options window to save without line breaks" title=""
+ src="pics/guiprep_fr15_rtfwo.png"> </div>
+
+<p>In the "textwo" directory, save the text with the settings: Save as
+type <b>Rich text Format</b> and <b>Create a separate file for each page</b>.
+In the options window, check <b>Keep page breaks</b> and uncheck <b>Keep line breaks and hyphens</b>. Make sure that all the other check boxes match what you used in generating the textw files, and use the same file name.</p>
+
+<p>If the Options window is open, hit <b>OK</b>. Hit <b>Save</b>.</p>
+
+<p>If you are creating textw and textwo files for the first time, save your OCR project so that you can regenerate the output files easily. That way you can experiment with different options.</p>
+
+<h3 id="withoutRTF"><i>without</i> RTF Markup Extraction</h3>
+
+<p>In ABByy after all of your images are loaded and OCRed, select File
+=> Save Text As => TXT</p>
+
+<div style="margin-left: 40px;"> &nbsp;<img
+ style="width: 278px; height: 286px;" alt="File menu=>Save As=>TXT Document" title=""
+ src="pics/guiprep_fr15_txt.png"> </div>
+
+<p>In the dialog box that pops up navigate to the textw directory, or if the directory does not yet exist, create a textw directory in some appropriate parent  directory using the <b>New Folder</b> button.</p>
+
+<div style="margin-left: 40px;"> &nbsp;<img
+ style="width: 783px; height: 302px;" alt="TXT save as, and options window to save with line breaks" title=""
+ src="pics/guiprep_fr15_txtw.png"> </div>
+
+<p>In the "textw" directory, save the text with the settings: Save as type
+<b>Text</b> and <b>Create a separate file for each page</b>.
+In the options window, use options exactly as they are shown in the illustration above, check <b>Keep line breaks</b> and <b>Insert blank line as paragraph separator</b>, and uncheck <b>Insert page break separator</b>. You may choose to remove headers and footers in FineReader or not, as long as it matches what you choose in generating textwo. It is important to NOT remove headers &amp; footers in both the OCR program AND guiprep, you may do it in one or the other, or neither. Use <b>Unicode(UTF-8)</b> for the <b>Encoding</b>, even if your file does not require that much sophistication, as our upload process is rapidly moving towards not accepting files that are not UTF-8 encoded. (In older versions of FineReader, this setting was called <b>Code Page</b>.) It doesn't matter what the File name is set to, as long as it matches the name used in textwo generation.</p>
+
+<p>If the Options window is open, hit <b>OK</b>. Hit <b>Save</b>.</p>
+
+<p>To generate the textwo files, go to the menu and hit File => Save As => TXT, as above, and then navigate to the textwo directory, or if the sub-directory does not yet exist, create a textwo directory with the same parent as the textw directory using the <b>New Folder</b> button.</p>
+
+<div style="margin-left: 40px;"> &nbsp;<img
+ style="width: 785px; height: 302px;" alt="TXT save as, and options window to save without line breaks" title=""
+ src="pics/guiprep_fr15_txtwo.png"> </div>
+
+<p>In the "textwo" directory, save the text with the same settings as for textw, except uncheck <b>Keep line breaks</b>. It doesn't matter what the File name is set to, again, as long as it matches the name used in textw generation.</p>
+
+<p>If the Options window is open, hit <b>OK</b>. Hit <b>Save</b>.</p>
+
+<p>If you are creating textw and textwo files for the first time, save your OCR project so that you can regenerate the output files easily. That way you can experiment with different options.</p>
+
+<h3 id="withoutDehyphenization"><i>without</i> RTF Markup Extraction <i>or</i> Dehyphenization</h3>
+
+<p>If you are using a different OCR package that can't save as rtf or do automatic line rejoining, you may need to skip those two functions. Save the files in a directory named "text" using the same settings as for textw without RTF extraction above. Uncheck both Extract and Dehyphenate under the Process Text tab.</p>
+
+<h2 id="QuickStartGuide">Quick Start Guide</h2>
+This section of the manual gives the basic flow through the guiprep process, without any of the advanced features. The advanced features are covered in the Detailed Functionality section below.
+<h3 id="DirectorySetup">Directory Setup</h3>
+<p>Guiprep expects to find textw and optionally the textwo with the same parent directory. The output of dehyphenization will be placed in the text directory, also with the same parent directory, which will be created if it is not present. If you are going to use guiprep to rename or optimize your png files, then there should also be a pngs directory as a sub-directory of the same parent directory, containing all the png files. If you are going to use guiprep to create a project zip file, then illustrations, covers and high resolution title page should be in the images sub-directory of the same parent directory.</p>
+<pre>
+Parent directory
+  ├ textw
+  ├ textwo (optional)
+  ├ text (will be created if not present)
+  ├ pngs (required if png file features are to be used)
+  └ images (only needed if you intend to create a project zip file through guiprep for upload to Distributed Proofreaders)
+</pre>
+
+<h3 id="Step1">Step 1: Starting Guiprep</h3>
+<p>If your computer runs Windows, there is a file in the distribution called run_guiprep.bat. Double-clicking on this file will start guiprep. (Older distributions of guiprep contained winprep.exe or run_guiprep???.bat [where ??? is the version number]. If you have any of these files on your computer, you should consider upgrading.)</p>
+
+<p>In all cases, you can start guiprep from a command prompt. Guiprep will only work properly if started in the guiprep directory, the one that was unzipped during installation. </p>
+<pre>cd &lt;guiprep directory&gt;
+perl guiprep.pl</pre>
+<p>For instance, on my computer I start the most recent version of guiprep with </p>
+<pre>cd \pgdp\guiprep
+perl guiprep.pl</pre>
+<p>(The change directory command may have a different syntax on your computer.)</p>
+
+<h3 id="Step2">Step 2: Select Options</h3>
+<p>When guiprep starts, it will open to the <b>Select Options</b> tab. Once you get the settings you want, you will need to look at this tab very infrequently.</p>
+
+<p><b>Default Markup</b> is only used if you are starting from rtf files, not for .txt files.</p>
+
+<p>In the first set of options:</p>
+<ul><li>Make sure that <b>Dehyphenate using German style hypens...</b> is not checked, unless your project uses them.</li>
+<li><b>Save hyphens.txt &amp; dehyphen.txt...</b> is primarily for debugging and should be unchecked unless requested by a support person.</li>
+<li>I recommend against using <b>Automatically Remove Headers...</b> and <b>Automatically Remove Footers...</b>. The automatic removal in guiprep blindly removes the top line (header) or bottom line (footer). You are better off using the <b>Headers &amp; Footers</b> tab or removing headers and footers in your OCR program. If you do use this feature, remember to leave your headers and footers in the text when you run your OCR--removing headers or footers in both places will usually lose line of text from the body of the pages.</li>
+<li><b>Build a standard upload batch...</b> If you are not going to make any further changes to the text before uploading, this might be helpful. Most CPs at least take a look at the guiprep output and may want to make changes.</li></ul>
+
+<p>In the scrollable list of options below that, the following are primarily of historical interest, and generally should be unchecked:</p>
+<ul><li><b>Convert Windows-1252 codepage glyphs 80-9F.</b></li>
+<li><b>Convert £ to "Pounds".</b></li>
+<li><b>Convert ¢ to "Cents".</b></li>
+<li><b>Convert § to "Section".</b></li>
+<li><b>Convert ° to "Degrees".</b></li></ul>
+<p>The bottom two options in each column will put curious messages of the form [*<i>blah blah</i>] in your text if they encounter anything they consider undesirable. (Yes, just one asterisk.) If you use them, consider resolving or at least removing these messages before uploading the book to the web-site. These messages are known to confuse P1s. The entries that cause these insertions are:</p>
+<ul><li><b>Mark possible missing spaces between word/sentences.</b></li>
+<li><b>Tidy up/mark dubious spaced curly quotes.</b></li>
+<li><b>Tidy up/mark dubious spaced quotes.</b></li>
+<li><b>Fix spaced close single curly quotes (not mark as unknown).</b></li></ul>
+<p>If you are working on a book that contains mathematics, then you may want to uncheck:</p>
+<ul><li><b>Convert solitary 1 to l.</b></li>
+<li><b>Convert solitary 0 to O.</b></li></ul>
+<p>All of the options are covered in the Detailed Functionality below.</p>
+
+<p>Once you have these options the way you want them, go to the <b>Change Directory</b> tab.</p>
+
+<h3 id="Step3">Step 3: Change Directory</h3>
+<p>If you have multiple disk volumes on your computer, select the drive containing the project you want to process.</p>
+
+<p>Ignore the right hand directory listing, it is used for batch processing which is not covered in this Quick Start Guide. For interactive mode, just focus on the left hand directory listing, underneath the title <b>Change To Directory</b>. In that list find your parent directory and open it. The directory list should now show textw and anything else you have put there, and the banner above the tabs should read: <b>Working from the <i>...your parent directory...</i> directory.</b></p>
+
+<p>Then go to the <b>Process Text</b> tab.</p>
+
+<h3 id="Step4">Step 4: Process Text</h3>
+<p>The options in the <b>Process Text</b> tab:</p>
+<ul><li><b>Extract Markup</b> is required if you are starting from .rtf files. If you are starting .txt this does nothing and can be set either way.</li>
+<li><b>Dehyphenate</b> is one of the main reasons we use this program. So use it.</li>
+<li><b>Rename Txt Files</b> -- OCR programs frequently put funky names on text files. This changes them to 001.txt, 002.txt, ... If you have already applied desirable names on your txt files (that match your png files) then you can skip this step. (I always do this.)</li>
+<li><b>Filter Files</b> contains more important stuff that continues the process started in dehyphenate.</li>
+<li><b>Fix Common Scannos</b> is essentially a part of <b>Filter Files</b>, they belong together.</li>
+<li><b>Fix Olde Engliſh</b> looks for things that might be the long s which was used in old English (ſ) and converts them to s. Don't use this option unless you know your project contains long s, because it will try to change f to s. If your book does contain long s, then this option is desirable.</li>
+<li><b>Convert to ISO 8859-1</b> -- Don't use this for books which will be represented in utf-8. Since Distributed Proofreaders has converted to utf-8, this should not be used on books that are targeted to go to Distributed Proofreaders.</li>
+<li><b>Rename Png Files</b> -- If png files are present, they are renamed to match the Txt File renaming mentioned above, i.e. 001.png, 002.png, ...</li>
+<li><b>Run Pngcrush</b> -- Pngcrush optimizes the png files for size without losing any information. There are other programs which will also optimize png files. It is important that png files get optimized before uploading to the Distributed Proofreaders web-site. If you don't do it here, then make sure you do it elsewhere before uploading.</li></ul>
+
+<p>At this point the status window in the lower left hand corner will have one of the two following messages.</p>
+<pre>Working in interactive mode.</pre>
+<p>This means that the processing will run in "interactive mode" rather than "batch mode", in the "Working from" directory at the top of the window.</p>
+<pre>Selected Directories to Process: ...</pre>
+<p>This means that the program is running in batch mode. It will work, but you won't be able to run <b>Headers &amp; Footers</b> or <b>Search</b> without first going to <b>Change Directory</b>. It also means that what is displayed in the "Working from" statement at the top of the screen is NOT indicative of what directory(ies) will be processed.</p>
+
+<p>Hit the <b>Start Processing</b> button and watch it run. If you are working on a large book, or you are running pngcrush, this can take some time, so run it in the background and go to the web site and do some proofing or formatting, or pick out a book to smooth read. Your project will be busy with your computer for a while.</p>
+<p>When the processing completes, the large log window will end with:</p>
+<pre>Finished all selected routines.</pre>
+
+<p>At this point you can use the <b>Search</b> tab or the <b>Headers &amp; Footers</b> tab, run some options on the <b>Process Text</b> tab that you skipped or exit the program.</p>
+
+<h2 id="DetailedFunctionality">Detailed Functionality</h2>
+<p>In this section, each tab will be examined in detail.</p>
+<h3 id="SelectOptions">Select Options</h3>
+<div style="margin-left: 40px;"> &nbsp;<img
+ style="width: 644px; height: 513px;" alt="Select Options tab" title=""
+ src="pics/guiprep_select_options.png"> </div>[[File:guiprep_select_options.png|Select Options]]
+
+<p>The Select Options tab will allow you to adjust the markup used for italics and bold extraction and set the options you want the filter routine to run. The other settings are all options for the filter routine. See discussion below under Filtering for suggestions and explanations for the various settings.</p>
+
+<ul><li><b>Save Settings</b> - Save your markup and selections from session to session.</li>
+<li><b>Default Markup</b> - Reset all the markup settings back to default.</li></ul>
+
+<h4>Markup Extraction Options</h4>
+
+<p>These options only apply to processing of .rtf files. If processing .txt files, they do nothing.</p>
+
+<ul><li><b>Extract Bold Markup</b> - If you don't have much bold text in your project you may want to disable this to cut down on false positives, especially for lower quality scans.</li>
+<li><b>Insert cell delimiters in tables</b> - If you have tables in your project, the script will try to keep the layout as much as it can. The cells usually will not come out exactly as the original, so you can add markers "|", between the cells to help the proofers align them.</li>
+<li><b>Extract sub/superscript markup</b> - Select whether to extract sub- and super-scripts while doing markup extraction.</li></ul>
+
+<h4>Other Processing Options</h4>
+
+<p>These options apply to .rtf input and .txt input.</p>
+
+<ul><li><b>Dehyphenate using German style hyphens; "="</b> - Option to dehyphenate German texts. If your book does not use German hyphenation, it would be best to uncheck this.</li>
+
+<li><b>Save hyphens.txt and dehyphen.txt ...</b> - This was implemented to assist with program debugging and troubleshooting. Unless you can think of a use for it, uncheck this except when requested by technical support.</li>
+
+<li><b>Automatic Header Removal</b> - This option automatically removes the first line of your text files, without considering content. If you are thinking about using it, I beg you to reconsider. The <b>Headers &amp; Footers</b> tab is much better.</li>
+
+<li><b>Automatic Footer Removal</b> - This option automatically removes the last line of your text files, without considering content. If you are thinking about using it, I beg you to reconsider. The <b>Headers &amp; Footers</b> tab is much better.</li>
+
+<li><b>Build a zip of the project files</b> - This creates a zip archive that could be uploaded to the site for proofreading. It will contain all of the files in the "text" and "pngs" directories (or whatever you changed it to on the <b>Program Preferences</b> tab) plus if it finds an "images" directory along with them (presumably containing illustrations), that will be included as well. It will be written to the same parent directory with the name of the parent directory used as the name of the zip file. If you intend to do further processing on your text files before uploading, you will need to replace them in the zip archive or skip this step and create the zip archive yourself. Or after editing your text files, you could rerun guiprep and just run this step. In my opinion, there are easier ways to create the project zip file.</li></ul>
+
+<h4>Filtering Options</h4>
+
+<div style="margin-left: 40px;"> &nbsp;<img
+ style="width: 721px; height: 732px;" alt="TXT save as, and options window to save without line breaks" title=""
+ src="pics/guiprep_select_options2.png"> </div>
+
+<p>The above illustration is the fully expanded area which displays as the last few lines on the <b>Select Options</b> tab. I widened it to avoid clipping text on some of the options with longer names. Most of these options are self explanatory, but there are comments. The options can all be selected or deselected independently.</p>
+
+<p>Filtering applies to .rtf and .txt files.</p>
+
+<p>As of now, the pattern substitution/filtering functions the script will perform are:</p>
+<ul>
+<li><b>Convert multiple spaces to single space.</b> - Highly recommended. Makes all of the other filtering more effective. Default on.</li>
+
+<li><b>Convert Windows-1252 codepage glyphs 80-9F.</b> - If your OCR output is utf-8, then do not use this option, it will misinterpret text. If you still are working with pre-utf-8 input, then this may be desirable. Default on.</li>
+
+<li><b>Remove end of line spaces.</b> - Recommended. Not a big deal either way but may make the proofers job easier. Will help later during rewrapping. Default on.</li>
+
+<li><b>Convert spaced hyphens to em dashes.</b> - Recommended. Correct behavior for most texts. Not recommended for math texts. Default on.</li>
+
+<li><b>Convert consecutive underscores to em dashes.</b> - Recommended. Correct behavior for most texts. Default on.</li>
+
+<li><b>Remove space on either side of hyphens.</b> - Highly recommended. Easily automated formatting fix. Correct behavior more than 99% of the time.Not recommended for math texts. Default on.</li>
+
+
+<li><b>Convert double commas to a singe double quote.</b> - Recommended. Usually correct behavior. Default on.</li>
+
+<li><b>Remove space on either side of em dashes.</b> - Highly recommended. Easily automated formatting fix. Correct behavior more than 99% of the time. Not recommended for math texts. Default on.</li>
+
+<li><b>Remove space before periods.</b> - Highly recommended. Easily automated formatting fix. Correct behavior more than 99% of the time. Default on.</li>
+
+<li><b>Remove space before exclamation points.</b> - Highly recommended. Easily automated formatting fix. Correct behavior more than 99% of the time. Default on.</li>
+
+<li><b>Remove space before question marks.</b> - Highly recommended. Easily automated formatting fix. Correct behavior more than 99% of the time. Default on.</li>
+
+<li><b>Remove space before semicolons.</b> - Highly recommended. Easily automated formatting fix. Correct behavior more than 99% of the time. Default on.</li>
+
+<li><b>Remove space before commas.</b> - Highly recommended. Easily automated formatting fix. Correct behavior more than 99% of the time. Default on.</li>
+
+<li><b>Remove space after opening, before closing brackets.</b> - Recommended. Easily automated formatting fix. Correct behavior most of the time. Default on.</li>
+
+<li><b>Ensure space before ellipses except after period.</b> - Recommended. Easily automated formatting fix. Correct behavior most of the time. Default on.</li>
+
+<li><b>Convert two adjacent single quotes to a single double quote.</b> - Highly recommended. Easily automated formatting fix. Correct behavior more than 99% of the time. Default on.</li>
+
+<li><b>Convert solitary 1 to I, if not at beginning of line, or if preceded by quotes.</b> - Recommended. Depends on text. For vast majority does much more good than harm. Default on. *See <a href="#Notes">note below</a>.</li>
+
+<li><b>Convert solitary lowercase l to I if preceded by space or quotes.</b> - Recommended. Depends on text. For vast majority does much more good than harm. Default on.</li>
+
+<li><b>Convert solitary 0 preceded by quotes to O.</b> - Recommended. Depends on text. For vast majority does much more good than harm. *See <a href="#Notes">note below</a>. Default on.</li>
+
+<li><b>Convert vulgar fractions (¼,½, ¾) to "1/4", "1/2" and "3/4".</b> - Your choice. Depends on book. Depends on your preference. Default on.</li>
+
+<li><b>Convert ² and ³ to "^2" and "^3".</b> - Your choice. Depends on book. Depends on your preference. Default on.</li>
+
+<li><b>Convert £ to "Pounds".</b> - Your choice. Depends on book. Depends on your preference. Default off. *See <a href="#Notes">note below</a>.</li>
+
+<li><b>Convert ¢ to "cents".</b> - Your choice. Depends on book. Depends on your preference. Default off. *See <a href="#Notes">note below</a>.</li>
+
+<li><b>Convert § to "Section".</b> - Your choice. Depends on book. Depends on your preference. Default off.</li>
+
+<li><b>Convert ° to "degrees".</b> - Your choice. Depends on book. Depends on your preference. Default off.</li>
+
+<li><b>Convert forward slash (/) at a word end to comma apostrophe(,').</b> - Your choice. Depends on book. Depends on your preference. Default on. (Will ignore slash after less than </.)</li>
+
+<li><b>Convert \v or \\ to w.</b> - Your choice. Fairly common scanno.  Depends on your preference. Default on.</li>
+
+<li><b>Convert solitary j or at end of word not proceeded by "a,e,n or u" to semicolon.</b> - Your choice. Depends on book. Depends on your preference. Default on.</li>
+
+<li><b>Convert 'tli' to 'th' if it is a the beginning of a word.</b> - Very highly recommended for English texts, especially if you are going to run the Scanno check. Recommended with caution for non-English. Default on.</li>
+
+<li><b>Convert 'tii' to 'th' if it is at the beginning of a word.</b> - Very highly recommended for English texts, especially if you are going to run the Scanno check. Recommended with caution for non-English. Default on.</li>
+
+<li><b>Convert 'tb' to 'th' if it is at the beginning of a word.</b> - Very highly recommended for English texts, especially if you are going to run the Scanno check. Recommended with caution for non-English. Default on.</li>
+
+<li><b>Convert string 'wli' to 'wh' if it is at the beginning of a word.</b> - Very highly recommended for English texts, especially if you are going to run the Scanno check. Recommended with caution for non-English. Default on.</li>
+
+<li><b>Convert 'wb' to 'wh' if it is at the beginning of a word.</b> - Very highly recommended for English texts, especially if you are going to run the Scanno check. Recommended with caution for non-English. Default on.</li>
+
+<li><b>Convert string 'rn' to 'm' if it is at the beginning of a word.</b> - Very highly recommended for English texts, especially if you are going to run the Scanno check. Recommended with caution for non-English. Default on.</li>
+
+<li><b>Convert string 'hl' to 'bl' if it is at the beginning of a word.</b> - Very highly recommended for English texts, especially if you are going to run the Scanno check. Recommended with caution for non-English. Default on.</li>
+
+<li><b>Convert string 'hr' to 'br' if it is at the beginning of a word.</b> - Very highly recommended for English texts, especially if you are going to run the Scanno check. Recommended with caution for non-English. Default on.</li>
+
+<li><b>Convert string 'rnp' to 'mp' in a word.</b> - Very highly recommended for English texts, especially if you are going to run the Scanno check. Recommended with caution for non-English. Default on.</li>
+
+<li><b>Convert vv at the beginning of a word to w.</b> - Recommended, default on.</li>
+
+<li><b>Convert !! at the beginning of a word to H.</b> - Recommended, default on.</li>
+
+<li><b>Convert initial X not followed by e to N.</b> - Also takes into account Roman Numerals, Recommended, default on.</li>
+
+<li><b>Convert ! inside a word to l.</b> - Recommended, default on.</li>
+
+<li><b>Convert '!! to 'll.</b> - Recommended, default on.</li>
+
+<li><b>Remove space before apostrophes.</b> - Recommended, default on.</li>
+
+<li><b>Convert '11 to 'll.</b> - Recommended, default on.</li>
+
+<li><b>Convert rnm in a word to mm.</b> - Recommended, default on.</li>
+
+<li><b>Convert string 'cb' to 'ch' in a word.</b> - Very highly recommended for English texts, especially if you are going to run the Scanno check. Recommended with caution for non-English. Default on.</li>
+
+<li><b>Convert string 'gbt' to 'ght' in a word.</b> - Very highly recommended for English texts, especially if you are going to run the Scanno check. Recommended with caution for non-English. Default on.</li>
+
+<li><b>Convert string '[ai]hle' to '[ai]ble' in a word.</b> - Very highly recommended for English texts, especially if you are going to run the Scanno check. Recommended with caution for non-English. Default on. [ai] means: either a or i .</li>
+
+<li><b>Convert cl at the end of a word to d.</b> - Recommended, default on.</li>
+
+<li><b>Convert pbt in a word to pht.</b> - Recommended, default on.</li>
+
+<li><b>Convert he to be if it follow to.</b> - Very highly recommended. Almost always correct behavior. Default on.</li>
+
+<li><b>Move punctuation outside of markup.</b> - Highly recommended if you have extracted markup. Otherwise not. Default on.</li>
+
+<li><b>Strip garbage punctuation from beginning of line.</b> - Recommended, default on.</li>
+
+<li><b>Remove empty lines from the top of page.</b> - Highly recommended. Easily automated formatting fix. Default on.</li>
+
+<li><b>Strip garbage punctuation from end of line.</b> - Recommended, default on.</li>
+
+<li><b>Convert multiple consecutive blank lines to a single.</b> - Recommended. Usually correct behavior. Easy to fix if not. Default on.</li>
+
+<li><b>If top line has nothing but digits, (page number) delete it.</b> - Recommended. Up to your personal preference. Default on.</li>
+
+<li><b>If bottom line has nothing but digits, (page number) delete it.</b> - Recommended. Up to your personal preference. Default on.</li>
+
+<li><b>Remove empty lines from the bottom of page.</b> - Highly recommended. Easily automated formatting fix. Default on.</li>
+
+<li><b>Mark possible missing spaces between word/sentences.</b> - Recommended, default on. *See <a href="#Notes">note below</a>.</li>
+
+<li><b>Tidy up/mark dubious spaced quotes.</b> - Tidies up if obvious, otherwise inserts flag. Recommended, default on. *See <a href="#Notes">note below</a>.</li>
+
+<li><b>Tidy up/mark dubious spaced curly quotes.</b> - Tidies up is obvious, otherwise inserts flag. Recommended, default on. *See <a href="#Notes">note below</a>.</li>
+
+<li><b>Fix spaced close single curly quotes (not mark as unknown).</b> - Recommended, default on. *See <a href="#Notes">note below</a>.</li>
+</ul>
+
+<h5 id="Notes">Notes</h5>
+<ul>
+<li>The "improbable character combination" filters (tli, rn, wli, hl, hr, rnp, cb, gbh, [ai]hle) DEFINITELY should be run if you intend to run Fix Common Scannos. Those filters reduce the number of checks that need to be done by scanno routine by 330 words yet effectively add several thousand.</li>
+
+<li>After ad hoc testing of about 50 texts pulled from PG at random, solitary I is about 90 times more likely than solitary 1. If instances at the beginning of lines are ignored, it rises to about 150 times. Pretty good odds I think.</li>
+
+<li>Solitary 0 (With nothing but space on either side) is automatically converted to O. This is non negotiable. Because of the way the dehyphenate subroutine works, if it encounters a solitary 0 in the text, it will delete the rest of the paragraph. I would rather have a few misconverted O's then deleted paragraphs. (It's not really the dehyphenate subroutines fault, it's more just a consequence of perls weak variable typing, but I digress.) This is not just my dehyphenate routine, aldarondo's has the same problem but doesn't trap it.</li>
+
+<li><b>£ to "Pounds"</b> uses some intelligence when it converts. It will move the "Pounds" to after the number. I.E. £30 will become '30 Pounds' not 'Pounds 30'.</li>
+
+<li><b>¢ converts to "cents"</b> unless it follows a solitary 1, in which case it converts to "cent".</li>
+
+<li>The last four options, <b>Mark possible missing spaces...</b>, <b>Tidy up/mark dubious spaced quotes</b>, <b>Tidy up/mark dubious spaced curly quotes</b> and <b>Fix spaced close single curly quotes...</b> will all insert notes in your text files if they are not sure of what to do. The format of the notes is [*<i>blah blah</i>] (note only one asterisk), where the message in the note is something like "Missing space?" or "Spaced quote." It is a good idea to edit your files and resolve these before sending them to the rounds. P1s have expressed confusion upon seeing such things.</li>
+</ul>
+
+<h3 id="ProcessText">Process Text</h3>
+<div style="margin-left: 40px;"> &nbsp;<img
+ style="width: 644px; height: 513px;" alt="Process Text tab" title=""
+ src="pics/guiprep_process_text.png"> </div>
+
+<h4>Processing Routines</h4>
+
+<p>This tab assumes that you have set your processing options in the <a href="#SelectOptions">Select Options</a> tab, and you have visited <a href="#ChangeDirectory">Change Directory</a> to either setup a directory for "interactive mode" processing, or selected one or more directories for batch processing. In this tab you can run the different routines on the text files. If you are starting with rtf files, you must run <b>Extract Markup</b> in order to generate the .txt files which are required for the following routines. And if you are starting from .rtf or from .txt files in "textw" and optionally "textwo", then you must run <b>Dehyphenate</b> to populate the "text" directory before running the other text processing routines. The routines which follow <b>Dehyphenate</b> and further process the text will expect to find a "text" directory populated with .txt files, regardless whether they are output from <b>Dehyphenate</b>, directly output from your OCR or come from elsewhere.</p>
+
+<p>Generally the user specifies all the routines to be used on a project and then starts processing. However it is conceivable that you could just specify one routine, process it, inspect the output, and then go on to the next. The routines are ordered on the page so that they will work optimally, so if you choose to run them individually, it is best to run them in order from top to bottom (skipping any you don't want).</p>
+
+<p>The <b>Extract Markup</b> routine expects to find the directory "textw" (and optionally "textwo") with rtf format files in them. It will extract the text and markup and put the extracted files in the same directory with a .txt extension.
+
+<p>The <b>Dehyphenate</b> routine expects to find the "textw" and optionally "textwo" directories populated with .txt files. Whether the .txt are as a result of the <b>Extract Markup</b> routine or .txt format files saved directly from OCR or you typed them in, is immaterial. It tries to reconnect words that are broken at the ends of lines. It will put the resulting dehyphenated files into a directory named "text", creating it if it doesn't already exist. **WARNING: any files with a .txt extension in the "text" directory when <b>Dehyphenate</b> runs WILL BE DELETED. WITHOUT WARNING OR ASKING.**</p>
+
+<p>The <b>Rename Txt Files</b> routine expects to find the "text" directory populated with .txt files. It renames the files into the format expected by the web-site, i.e. 001.txt, 002.txt, ... starting from whatever value is in <br>Renumber from<br> below.</p>
+
+<p>The <b>Filter Files</b> routine expects to find the "text" directory populated with .txt files. It applies the filtering options selected on the <a href="#SelectOptions">Select Options</a> tab.</p>
+
+<p>The <b>Fix Common Scannos</b> routine expects to find the "text" directory populated with .txt files. It contains a list of over 3000 common mis-scanned English words and corrects them. Many other commonly mis-scanned words would be corrected by the filtering replacements, and these are not duplicated on the included scanno list, so if you are trying to eliminate as many scannos as you can, make sure you run <b>Filter Files</b> as well. Some <a href="#FixCommonScannos">comments</a> below about this routine.</p>
+
+<p>The <b>Fix Olde Englifh</b> routine expects to find the "text" directory populated with .txt files. It looks for words that probably contained the Old English long s (ſ) but were OCRed with f. It replaces the offending f with s. This is valuable for use with very old texts that contain long s, however it is an abomination when used on text that do not contain long s, as it will try to convert words anyway. Use this routine ONLY on projects that are known to contain long s. USE WITH CARE.</p>
+
+<p>The <b>Fix Zero Byte</b> routine expects to find the "text" directory populated with .txt files. It looks for text files with no content (or just utf-8 BOM) and inserts [Blank Page].</p>
+
+<p><b>Convert to ISO-8859-1</b> expects to find the "text" directory populated with .txt files. This routine is not compatible with utf-8 output, so it should not be used. DO NOT USE. It is maintained for the time being for users who have not converted to utf-8, however expect it to be removed in a future release.</p>
+
+<p><b>Rename Png Files</b> does not process the text files. It expects to find the "pngs" directory (or other name specified in <a href="#ProgramPreferences">Program Preferences</a>) populated with your .png files. It will rename all of the .png files in the upload format, i.e. 001.png, 002.png, ... starting from whatever value is in <b>Renumber from</b> below.</p>
+
+<p><b>Run Pngcrush</b> expects to find the "pngs" directory (or other name specified in <a href="#ProgramPreferences">Program Preferences</a>) populated with your .png files. It will run pngcrush on each file to optimize the compression and reduce the size. The default settings will reduce the palette to the minimum necessary. It does save the original files in a directory " _pngsback_" so you can easily recover them. If interrupted part way through, it will pick up where it left off the next time you start it. As a consequence, if you interrupt it, the pngs directory WILL NOT have all of the files in it. Make sure you have the same number of text and png files before you upload them.</p>
+
+<p><b>Renumber from</b> is used by <b>Rename Txt Files</b> and <b>Rename Png Files</b> above.</p>
+
+<h5 id="FixCommonScannos">Fix Common Scannos</h5>
+
+<p>Some comments by the author of the program regarding the <b>Fix Common Scannos</b> routine:</p>
+
+<blockquote>
+<p>The word list was derived from Moby project data, cut for top 2000 frequency and word of 6 characters or less (to reduce size and assuming that longer words will be closely examined by the proofreaders). The resulting list was processed through perl scripts which generated scannos by replacement. This result was then filtered to eliminate valid words from the generated "error" list to eliminate false positives.</p>
+<p>The common scannos from gutcheck and PRTK were then added, as well as some additional scannos provided by numerous DP proofreaders.</p>
+<p>The resulting list was then tested against just over 1 million words of raw OCR output provided by charlz. Further false positives were discovered and removed. The actual hit rate for this code is about 1 scanno detected per 30k words of input text. The actual accuracy rate against the corpus provided by charlz is: 2 false positives out of 122 scannos detected, or 98.3% accurate. Seems worthwhile to me. :)</p></blockquote>
+
+<p>And more recently:</p>
+
+<blockquote><p>The scannos word list was pulled from the Distributed Proofreaders CVS site. There are approximately 3400 words in the scannos list (though the improbable letter combination filters make about 330 of them redundant).</p></blockquote>
+
+<p>The previous version of the manual had this statement:</p>
+
+<blockquote><p>If you come up with misscanned word that you think should be in the scanno list, let me know. Words that commonly are misscanned for each other (like bad / had or and / arid) are NOT good additions. Those are better off in Big_Bills' stealth scannos list.</p></blockquote>
+
+<p>I am not aware of a maintained entity named "Big_Bills' stealth scannos list". Big Bill is no longer active in Distributed Proofreaders.</p>
+
+<p>As to who to let know regarding additions, until we have a programmer who is dedicated to maintaining guiprep, it might be good to just keep a list of your own and wait.</p>
+
+<h4>Process Control</h4>
+
+<p>The <b>Start Processing</b> and <b>Stop Processing</b> buttons will start and stop processing. They detect whether batch processing or interactive processing was requested on the Change Directory tab and proceed appropriately.</p>
+
+<p><b>Make Backups</b> copies the .txt files in "text" to the directory "textback", creating the directory if it does not exist. <b>Load Backups</b> copies the same files back to "text".</p>
+
+<p><b>?</b> will pop a terse help message.</p>
+
+<p><b>Save Log</b> saves the session log (the large text area on the right of this window) to the file processlog.txt in the guiprep directory.</p>
+
+<p><b>Clear Status Box</b> will clear the messages from the status box (the large text area on the right hand side of the window).</p>
+
+<h3 id="Search">Search</h3>
+
+<div style="margin-left: 40px;"> &nbsp;<img
+ style="width: 644px; height: 513px;" alt="Search tab" title=""
+ src="pics/guiprep_search.png"> </div>
+
+<p>The <b>Search</b> tab only works in interactive mode, which means that it works in the directory identified in the banner above the tabs, "Working from the ... directory." In the illustration shown above from my computer, no searches will be possible without resetting the directory, because D:\PGDP\PM is the grandparent of many text directories, not the direct parent of them.</p>
+
+<p>The <b>Search</b> tab only works after <b>Dehyphenate</b> has run, and put the final .txt files in the text directory. (Any other of the <b>Process Text</b> routines may also run prior to search, or not. <b>Dehyphenate</b> is the only routine that <b>Search</b> has a dependency on.
+
+<p>The <b>Search</b> tab has search and replace functions that will search through the text files and display the files with the search term and allow you to modify them, if desired. It is handy to check for project specific scanning errors or to check up on synchronization errors during dehyphenization. (Search for '**'.) Maybe after you have done all your processing, you decide to check for comments inserted by the filtering options, search for '[*', and then resolve each problem. You can edit the text in the lower display portion of the window and it will be saved.</p>
+
+<p>There are some options to do case insensitive searching or search for whole words only to narrow down what the search function will find.</p>
+
+<p>When you perform a search, if the search text is found, the whole file it is in will be displayed in the text window with the found text highlighted and the cursor just before it. If the search text is not found in any of the remaining files, a message box will pop up informing you.</p>
+
+<p>The buttons are pretty self explanatory. The <b>Save Open File</b> button saves the text that is currently displayed in the window to the file, overwriting the original. (It appears the moving to another file by doing a search or hitting one of the other buttons will also save the open file, so this is only a convenience.) <b>Search</b> looks for the next occurrence of the search term. If you already have a text file open and press <b>Search</b>, it will proceed with the search starting from the open file. <b>Replace</b> substitutes the <b>Replacement Text</b> for the <b>Search Text</b> in the window, and saves the file. To cancel an in progress search, change the <b>Search Text</b>, that will reset the file index counter to the beginning. <b>Replace &amp; Search</b> (<b>R &amp; S</b>) just combines the <b>Replace</b> and <b>Search</b> buttons into one function call. <b>Replace All</b> will call <b>Replace</b> and <b>Search</b> until all of the files have been searched. <b>Replace All</b> uses the <b>Replacement</b> text, not one of the alternates. <b>Replace All</b> will reset the file index counter to zero before it starts so if you are performing a manual search, get halfway through the files and then press <b>Replace All</b>, it will start over again at the first file.</p>
+
+<p>The <b>Previous File</b> and <b>Next File</b> refer to the previous and next files in numerical order, not the previous and next search results. <b>See Image</b> will work if you have set up an image viewer on the <a href="#ProgramPreferences">Program Preferences</a> tab.</p>
+
+<h3 id="HeadersFooters">Headers &amp; Footers</h3>
+
+<div style="margin-left: 40px;"> &nbsp;<img
+ style="width: 644px; height: 513px;" alt="Headers &amp; Footers removal tab" title=""
+ src="pics/guiprep_headers_footers.png"> </div>[[File:guiprep_headers_footers.png|Headers &amp; Footers tab]]
+
+<p>The <b>Headers &amp; Footers</b> tab only works in interactive mode, which means that it works in the directory identified in the banner above the tabs, "Working from the ... directory." In the illustration above from my computer, work on headers and footers will not be possible without resetting the directory, because D:\PGDP\PM is the grandparent of many text directories, not a direct parent of a text directory.</p>
+
+<p>The <b>Headers &amp; Footers</b> tab only works after <b>Dehyphenate</b> has run, and put the .txt files in the text directory. Any other of the <b>Process Text</b> routines may also run prior to working on the headers and footers, or not. <b>Dehyphenate</b> is the only routine that <b>Headers &amp; Footers</b> has a dependency on.
+
+<p>In this tab, you can select or omit headers or footers to be deleted. This is a semi-automatic process.</p>
+
+<p>To get started, press the <b>Get Headers</b> or <b>Get Footers</b> button. Headers will sometimes contain the book title, or a page number, either of which you would want to remove. On the other hand, the first line on the first page of a chapter is frequently the chapter title, which should be kept. Look through the list of headers (or footers) and select the ones to be removed. Lines with a white background are selected for removal, lines with a dark background are not selected. If you are only keeping the top line on front matter pages and chapter heads, it may be quicker to hit <b>Select All</b> and then de-select the ones to be kept. Once you have the ones you want removed selected and the others not selected, hit <b>Remove Selected</b>. On a recent book, I found that FineReader had split many of the headers to two lines, so I iterated this process.
+
+<p><b>?</b> gives a terse help statement, and <b>Unselect All</b> and <b>Toggle Selection</b> should be obvious, and if you don't find them to be obvious, they are non-destructive, so play with them.</p>
+
+<p>There is a hidden feature of this page. If you have set up a text viewer and an image viewer on the <a href="#ProgramPreferences">Program Preferences</a> tab, then double clicking on a listed header or footer will pop-up the full text of the page in the desinated text viewer. (You could also edit and save the file, although if you do that, make sure to rerun <b>Get Headers</b> or <b>Get Footers</b> before hitting <b>Remove Selected</b>.) Similarly, if you left-click and then right-click on a listed header or footer, the png file will pop-up (if the pngs are in the "pngs" is a sibling of the text directory, or other name if it was specified on the <a href="#ProgramPreferences">Program Preferences</a> tab).</p>
+
+<p>If you accidently delete lines of text that you would have rather kept, you can always regenerate the "text" directory by rerunning the routines from the <b>Process Text</b> and regenerate "text" from "textw" (and optionally "textwo"). Alternatively, if you think it is likely that you will overdo the deleting of lines of text, you could start in <b>Process Text</b> and <b>Make Backups</b> before working in the <b>Headers &amp; Footers</b> tab.
+
+<p>Older releases of Guiprep ran under a program called winprep.exe. Winprep would not allow the invocation of external programs, so displaying the text of the full page or displaying the png would not work if you were using winprep. All recent releases have discontinued the use of winprep.</p>
+
+<p>If you use Irfanview, for best results, set View->Display options to 'Fit only big images to window'.</p>
+
+<p>If you use XnView, it's a little more complex. Go to Tools->Options->View and check 'Maximize view when open' and set 'Auto image size' to 'Fit image to window, large only.' Go to Tools->Options->Misc and check 'Remember last position/size'.</p>
+
+<blockquote><p>*Caveat* There is a bug in the command line parsing in XnView. If you have a directory with a space in the name, in the path to XnView (like 'Program Files' for instance), it will fail with a 'File not found' error. As long as there are no directories with spaces in the name in the path, it will work fine. Irfanview and other image viewers I have tested don't have this problem.</p></blockquote>
+
+<h3 id="ChangeDirectory">Change Directory</h3>
+
+<div style="margin-left: 40px;"> &nbsp;<img
+ style="width: 644px; height: 513px;" alt="Change directory tab" title=""
+ src="pics/guiprep_change_directory.png"> </div>
+
+<p>This section assumes that you have organized your directories as described in <a href="#DirectorySetup">Directory Setup</a>.</p>
+
+<p>In this section you will designate whether you are working in interactive mode or batch mode, although that designation will be implicit rather than explicit.</p>
+
+<h4 id="InteractiveMode">Interactive Mode</h4>
+<p>To work in interactive mode, ignore the right hand navigation window and only work in the one on the left, the one that has <b>Change To Directory:</b> written above it. In that navigation window, find your text or textw directory. To open a directory, double-click on it. Double click on ".." to go up one level in the directory hierarchy. You can also use the <b>Select Drive</b> drop down to select a different drive.</p>
+<p>When you have your the appropriate directory open, textw and any other sub-directories will be listed in the <b>Change To Directory:</b> list. Also, in the banner at the top which says <b>Working from the ... directory.</b>, your parent directory name will appear.</p>
+<p>At this point you can change to the <b>Process Text</b> tab, <b>Search</b> tab or <b>Headers &amp; Footers</b> tab and work on the project in any of those  tabs.</p>
+
+<h4 id="BatchMode">Batch Mode</h4>
+<p>To work in batch mode, navigate using the left hand navigation window (<b>Change To Directory:</b>) to get to the grandparent of your text or textw directories, in my case, D:\PGDP\PM. This navigation works exactly like finding your parent directory for interactive mode, except you are looking for the parent of the parent directory. Then in the right hand window (<b>Select Directories to Batch Process: (Optional)</b>), select the directories that you want to process. Clicking a directory name in this window will toggle it between selected (gray background) and not selected (white background).</p>
+<p>Once you have selected the directories you want to process, you may proceed to the <b>Process Text</b> tab. <b>Search</b> and <b>Headers &amp; Footers</b> do not work in batch mode, even if you have identified a batch which only contains one directory.</p>
+
+
+<h3 id="ProgramPreferences">Program Preferences</h3>
+
+<div style="margin-left: 40px;"> &nbsp;<img
+ style="width: 644px; height: 513px;" alt="Program preferences tab" title=""
+ src="pics/guiprep_program_prefs.png"> </div>
+
+<p>In the <b>Program Preferences</b> tab you can set some preferences which affect how the program looks and runs. You can change the color palette the the script uses, you can associate a text editor with the script to allow easy checking and editing of files while you are doing header removal and you can associate an image viewer to do side-by-side comparisons with text.</p>
+
+<p>This manual was produced with palette is Gray80. The original author also liked CornSilk2, PeachPuff2, Bisque2, CadetBlue3 and Ivory3. The original author also found some to be truly painful: chartruse1, IndianRed1, brown1 and DarkOrchid2. Ouch!</p>
+
+<p>You can now specify what the name of the directory containing your png files is on this tab. Default is "pngs" and is standard for users of our site. Avoid using directory names with spaces in them. And the current author would appreciate it if you would NOT use this feature, and stay with "pngs" as the name of the directory that contains your .png files. Having standard names for such things makes troubleshooting and technical support easier.</p>
+
+<p>For Windows users, you will probably want to use Wordpad or Notepad or some equivalent for your text editor. Irfanview or XnView or an equivalent for an image viewer.</p>
+
+<p>The default locations for notepad and wordpad are:</p>
+
+<p>Win 7, 8 (really?), 8.1 (you have to be kidding), 10:<br />
+<span style="padding-left: 2em;">C:\Windows\System32\notepad.exe</span><br />
+<span style="Padding-left: 2em;">C:\Program Files\Windows NT\Accessories\wordpad.exe</span></p>
+
+<p>Win XP (and many older versions):<br />
+<span style="padding-left: 2em;">C:\WINDOWS\Notepad.exe</span><br />
+<span style="padding-left: 2em;">C:\Program Files\Accessories\WORDPAD.EXE</span></p>
+
+<h3 id="About">About</h3>
+<div style="margin-left: 40px;"> &nbsp;<img
+ style="width: 644px; height: 513px;" alt="About tab" title=""
+ src="pics/guiprep_about.png"> </div>
+
+<h2 id="Troubleshooting">Troubleshooting</h2>
+
+<p>If you encounter problems with guiprep, please record the exact sequence of events that cause the problem, and see if it is repeatable.</p>
+
+<p>Edit the guiprep.bat file in the guiprep directory, and create a new line at the bottom with the word "PAUSE" (no quotes, but all caps is preferred). That will keep the Perl window open after guiprep quits. Copy any text out of that window after the error occurs.</p>
+
+<p>Once you have all this information together, please report the problem in the <a href="https://www.pgdp.net/phpBB3/viewtopic.php?f=13&amp;t=2237">guiprep forum</a> on Distributed Proofreaders. Please also mention the version of guiprep you are running (which should be in the title bar of guiprep), your Perl version and your operating system and version.</p>
+
+<h3>Known Issues</h3>
+
+<p>These were in the previous user guide. I don't know which are still outstanding or which have been resolved.</p>
+<ul>
+<li>If it warns that it can't find files or a directory, you probably selected the wrong directory as a working directory or you may being running in the wrong mode, (batch instead of interactive or vice versa) or possibly you have incorrect options selected. (Running extract when you don't have rtf files.) Remember, for interactive mode, the textw and textwo directories (and possibly text and pngs) should be visible in the change directory box. For batch mode, you need to select the parent directory of the textw and textwo directories.</li>
+
+<li>Warnings about the scannos file are a result of a missing or corrupted scannos.rc file. If you edit the file, be sure to follow the format shown.</li>
+
+<li>If you somehow get the window set larger than your desktop and can't get to an edge to resize it, delete the settings.rc file in the startup directory. That will reset all of the settings to defaults, which will reduce the window to 640x480 pixels. Alternately, you can edit the settings.rc file with a text editor and remove the line that starts: $geometry = .</li>
+
+<li>When viewing a file through the Headers tab, you may have an unexpected or wrong file open up. Due to the way list boxes are handled under Tk, you need to specifically select (left click) an entry before you can act on it (right click). If you haven't selected an entry, either the last entry in the list or the previous selection is defaulted to. The actual mouse pointer position is ignored on right click.</li>
+
+<li>Customized open and close markup markers are not sanity checked. The script will not check or care if you use inappropriate markers. For instance you can set both italics and bold to use the same markup, or, even worse, use a marker which will occur normally in the text. If you specify "the" and "and" or even "     " for your italics open and close markers, the script will uncomplainingly use them. Probably not a good idea.</li>
+
+<li>If you switch away from the Process text tab while a batch or job is running, it will automatically cancel the job to prevent contamination of other directories. Each tab has its own peculiarities about where it needs to run and if you try to switch to one while another is processing, it could cause problems.</li>
+</ul>
+</body>
+</html>
