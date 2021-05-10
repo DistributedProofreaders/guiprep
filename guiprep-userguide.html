@@ -34,7 +34,7 @@
 <li><a href="#SelectOptions">Select Options</a></li>
 <li><a href="#ProcessText">Process Text</a></li>
 <li><a href="#Search">Search</a></li>
-<li><a href="#HeadersFooters">Headers & Footers</a></li>
+<li><a href="#HeadersFooters">Headers &amp; Footers</a></li>
 <li><a href="#ChangeDirectory">Change Directory</a>
 <ul style="list-style:none;">
 <li><a href="#InteractiveMode">Interactive Mode</a></li>
@@ -55,9 +55,9 @@
 
 <p>This manual is based on version .41e of guiprep.</p>
 
-<p>There is a history of modifications to the program in the installation package (changelog.html).  Guiprep was originally written by Steve Schulze (thundergnat) and is now maintained by windymilla. Please leave any questions or comments in the <a href="https://www.pgdp.net/phpBB3/viewtopic.php?f=13&t=2237&p=1237438">Guiprep forum</a> at <a href="https://www.pgdp.net/c/">Distributed Proofreaders</a>.</p>
+<p>There is a history of modifications to the program in the installation package (changelog.html).  Guiprep was originally written by Steve Schulze (thundergnat). Please leave any questions or comments in the <a href="https://www.pgdp.net/phpBB3/viewtopic.php?f=13&amp;t=2237&amp;p=1237438">Guiprep forum</a> at <a href="https://www.pgdp.net/c/">Distributed Proofreaders</a>.</p>
 
-<p>Portions of this script are derived from 
+<p>Portions of this script are derived from
 <a href="http://search.cpan.org/author/SARGIE/RTF-Tokenizer-1.01/lib/RTF/Tokenizer.pm">RTF::Tokenizer</a> by Peter Sergeant.<br>
 For more information on the RTF file format, SEE: <a href="http://search.cpan.org/dist/RTF-Writer/lib/RTF/Cookbook.pod">The_RTF_Cookbook</a>
 by Sean M. Burke.</p>
@@ -89,7 +89,7 @@ included in future releases.</p>
 <h3 id="WhatsNew">What's New</h3>
 
 <ul><li>Version .41e<br />
-(By windymilla): 
+(By windymilla):
 <ul>
 <li>Remove FTP tab. Neither DP nor DPC support the use of the FTP tab.</li>
 <li>Make fcannos.bin platform independent (which was the only portion of guiprep that was not platform independent).</li>
@@ -133,7 +133,7 @@ For further history of changes, please see changelog.html in the distribution pa
 
 <p>In the "textw" directory, save the text with the settings: Save as type
 <b>Rich text Format</b> and <b>Create a separate file for each page</b>.
-In the options window, check <b>Keep page breaks</b> and <b>Keep line breaks and hyphens</b> and you can go either way on everything else, except that they should match the items checked in the textwo generation. You may choose to remove headers and footers in FineReader or not, as long as it matches what you choose in generating textwo. It is important to NOT remove headers & footers in both the OCR program AND guiprep, you may do it in one or the other, or neither. It doesn't matter what the File name is set to, again, as long as it matches the name used in textwo generation.</p>
+In the options window, check <b>Keep page breaks</b> and <b>Keep line breaks and hyphens</b> and you can go either way on everything else, except that they should match the items checked in the textwo generation. You may choose to remove headers and footers in FineReader or not, as long as it matches what you choose in generating textwo. It is important to NOT remove headers &amp; footers in both the OCR program AND guiprep, you may do it in one or the other, or neither. It doesn't matter what the File name is set to, again, as long as it matches the name used in textwo generation.</p>
 
 <p>If the Options window is open, hit <b>OK</b>. Hit <b>Save</b>.</p>
 <br />
@@ -168,7 +168,7 @@ In the options window, check <b>Keep page breaks</b> and uncheck <b>Keep line br
 
 <p>In the "textw" directory, save the text with the settings: Save as type
 <b>Text</b> and <b>Create a separate file for each page</b>.
-In the options window, use options exactly as they are shown in the illustration above, check <b>Keep line breaks</b> and <b>Insert blank line as paragraph separator</b>, and uncheck <b>Insert page break separator</b>. You may choose to remove headers and footers in FineReader or not, as long as it matches what you choose in generating textwo. It is important to NOT remove headers & footers in both the OCR program AND guiprep, you may do it in one or the other, or neither. Use <b>Unicode(UTF-8)</b> for the <b>Encoding</b>, even if your file does not require that much sophistication, as our upload process is rapidly moving towards not accepting files that are not UTF-8 encoded. (In older versions of FineReader, this setting was called <b>Code Page</b>.) It doesn't matter what the File name is set to, as long as it matches the name used in textwo generation.</p>
+In the options window, use options exactly as they are shown in the illustration above, check <b>Keep line breaks</b> and <b>Insert blank line as paragraph separator</b>, and uncheck <b>Insert page break separator</b>. You may choose to remove headers and footers in FineReader or not, as long as it matches what you choose in generating textwo. It is important to NOT remove headers &amp; footers in both the OCR program AND guiprep, you may do it in one or the other, or neither. Use <b>Unicode(UTF-8)</b> for the <b>Encoding</b>, even if your file does not require that much sophistication, as our upload process is rapidly moving towards not accepting files that are not UTF-8 encoded. (In older versions of FineReader, this setting was called <b>Code Page</b>.) It doesn't matter what the File name is set to, as long as it matches the name used in textwo generation.</p>
 
 <p>If the Options window is open, hit <b>OK</b>. Hit <b>Save</b>.</p>
 
@@ -200,15 +200,15 @@ Parent directory
   ├ pngs (required if png file features are to be used)
   └ images (only needed if you intend to create a project zip file through guiprep for upload to Distributed Proofreaders)
 </pre>
-    
+
 <h3 id="Step1">Step 1: Starting Guiprep</h3>
 <p>If your computer runs Windows, there is a file in the distribution called run_guiprep.bat. Double-clicking on this file will start guiprep. (Older distributions of guiprep contained winprep.exe or run_guiprep???.bat [where ??? is the version number]. If you have any of these files on your computer, you should consider upgrading.)</p>
 
 <p>In all cases, you can start guiprep from a command prompt. Guiprep will only work properly if started in the guiprep directory, the one that was unzipped during installation. </p>
-<pre>cd <guiprep directory>
+<pre>cd &lt;guiprep directory&gt;
 perl guiprep.pl</pre>
 <p>For instance, on my computer I start the most recent version of guiprep with </p>
-<pre>cd \pgdp\guiprep 
+<pre>cd \pgdp\guiprep
 perl guiprep.pl</pre>
 <p>(The change directory command may have a different syntax on your computer.)</p>
 
@@ -219,8 +219,8 @@ perl guiprep.pl</pre>
 
 <p>In the first set of options:</p>
 <ul><li>Make sure that <b>Dehyphenate using German style hypens...</b> is not checked, unless your project uses them.</li>
-<li><b>Save hyphens.txt & dehyphen.txt...</b> is primarily for debugging and should be unchecked unless requested by a support person.</li>
-<li>I recommend against using <b>Automatically Remove Headers...</b> and <b>Automatically Remove Footers...</b>. The automatic removal in guiprep blindly removes the top line (header) or bottom line (footer). You are better off using the <b>Headers & Footers</b> tab or removing headers and footers in your OCR program. If you do use this feature, remember to leave your headers and footers in the text when you run your OCR--removing headers or footers in both places will usually lose line of text from the body of the pages.</li>
+<li><b>Save hyphens.txt &amp; dehyphen.txt...</b> is primarily for debugging and should be unchecked unless requested by a support person.</li>
+<li>I recommend against using <b>Automatically Remove Headers...</b> and <b>Automatically Remove Footers...</b>. The automatic removal in guiprep blindly removes the top line (header) or bottom line (footer). You are better off using the <b>Headers &amp; Footers</b> tab or removing headers and footers in your OCR program. If you do use this feature, remember to leave your headers and footers in the text when you run your OCR--removing headers or footers in both places will usually lose line of text from the body of the pages.</li>
 <li><b>Build a standard upload batch...</b> If you are not going to make any further changes to the text before uploading, this might be helpful. Most CPs at least take a look at the guiprep output and may want to make changes.</li></ul>
 
 <p>In the scrollable list of options below that, the following are primarily of historical interest, and generally should be unchecked:</p>
@@ -264,13 +264,13 @@ perl guiprep.pl</pre>
 <pre>Working in interactive mode.</pre>
 <p>This means that the processing will run in "interactive mode" rather than "batch mode", in the "Working from" directory at the top of the window.</p>
 <pre>Selected Directories to Process: ...</pre>
-<p>This means that the program is running in batch mode. It will work, but you won't be able to run <b>Headers & Footers</b> or <b>Search</b> without first going to <b>Change Directory</b>. It also means that what is displayed in the "Working from" statement at the top of the screen is NOT indicative of what directory(ies) will be processed.</p>
+<p>This means that the program is running in batch mode. It will work, but you won't be able to run <b>Headers &amp; Footers</b> or <b>Search</b> without first going to <b>Change Directory</b>. It also means that what is displayed in the "Working from" statement at the top of the screen is NOT indicative of what directory(ies) will be processed.</p>
 
 <p>Hit the <b>Start Processing</b> button and watch it run. If you are working on a large book, or you are running pngcrush, this can take some time, so run it in the background and go to the web site and do some proofing or formatting, or pick out a book to smooth read. Your project will be busy with your computer for a while.</p>
 <p>When the processing completes, the large log window will end with:</p>
 <pre>Finished all selected routines.</pre>
 
-<p>At this point you can use the <b>Search</b> tab or the <b>Headers & Footers</b> tab, run some options on the <b>Process Text</b> tab that you skipped or exit the program.</p>
+<p>At this point you can use the <b>Search</b> tab or the <b>Headers &amp; Footers</b> tab, run some options on the <b>Process Text</b> tab that you skipped or exit the program.</p>
 
 <h2 id="DetailedFunctionality">Detailed Functionality</h2>
 <p>In this section, each tab will be examined in detail.</p>
@@ -300,9 +300,9 @@ perl guiprep.pl</pre>
 
 <li><b>Save hyphens.txt and dehyphen.txt ...</b> - This was implemented to assist with program debugging and troubleshooting. Unless you can think of a use for it, uncheck this except when requested by technical support.</li>
 
-<li><b>Automatic Header Removal</b> - This option automatically removes the first line of your text files, without considering content. If you are thinking about using it, I beg you to reconsider. The <b>Headers & Footers</b> tab is much better.</li>
+<li><b>Automatic Header Removal</b> - This option automatically removes the first line of your text files, without considering content. If you are thinking about using it, I beg you to reconsider. The <b>Headers &amp; Footers</b> tab is much better.</li>
 
-<li><b>Automatic Footer Removal</b> - This option automatically removes the last line of your text files, without considering content. If you are thinking about using it, I beg you to reconsider. The <b>Headers & Footers</b> tab is much better.</li>
+<li><b>Automatic Footer Removal</b> - This option automatically removes the last line of your text files, without considering content. If you are thinking about using it, I beg you to reconsider. The <b>Headers &amp; Footers</b> tab is much better.</li>
 
 <li><b>Build a zip of the project files</b> - This creates a zip archive that could be uploaded to the site for proofreading. It will contain all of the files in the "text" and "pngs" directories (or whatever you changed it to on the <b>Program Preferences</b> tab) plus if it finds an "images" directory along with them (presumably containing illustrations), that will be included as well. It will be written to the same parent directory with the name of the parent directory used as the name of the zip file. If you intend to do further processing on your text files before uploading, you will need to replace them in the zip archive or skip this step and create the zip archive yourself. Or after editing your text files, you could rerun guiprep and just run this step. In my opinion, there are easier ways to create the project zip file.</li></ul>
 
@@ -327,7 +327,7 @@ perl guiprep.pl</pre>
 <li><b>Convert spaced hyphens to em dashes.</b> - Recommended. Correct behavior for most texts. Not recommended for math texts. Default on.</li>
 
 <li><b>Convert consecutive underscores to em dashes.</b> - Recommended. Correct behavior for most texts. Default on.</li>
- 
+
 <li><b>Remove space on either side of hyphens.</b> - Highly recommended. Easily automated formatting fix. Correct behavior more than 99% of the time.Not recommended for math texts. Default on.</li>
 
 
@@ -535,7 +535,7 @@ perl guiprep.pl</pre>
 
 <p>The <b>Search</b> tab only works in interactive mode, which means that it works in the directory identified in the banner above the tabs, "Working from the ... directory." In the illustration shown above from my computer, no searches will be possible without resetting the directory, because D:\PGDP\PM is the grandparent of many text directories, not the direct parent of them.</p>
 
-<p>The <b>Search</b> tab only works after <b>Dehyphenate</b> has run, and put the final .txt files in the text directory. (Any other of the <b>Process Text</b> routines may also run prior to search, or not. <b>Dehyphenate</b> is the only routine that <b>Search</b> has a dependency on.</b>
+<p>The <b>Search</b> tab only works after <b>Dehyphenate</b> has run, and put the final .txt files in the text directory. (Any other of the <b>Process Text</b> routines may also run prior to search, or not. <b>Dehyphenate</b> is the only routine that <b>Search</b> has a dependency on.
 
 <p>The <b>Search</b> tab has search and replace functions that will search through the text files and display the files with the search term and allow you to modify them, if desired. It is handy to check for project specific scanning errors or to check up on synchronization errors during dehyphenization. (Search for '**'.) Maybe after you have done all your processing, you decide to check for comments inserted by the filtering options, search for '[*', and then resolve each problem. You can edit the text in the lower display portion of the window and it will be saved.</p>
 
@@ -543,19 +543,19 @@ perl guiprep.pl</pre>
 
 <p>When you perform a search, if the search text is found, the whole file it is in will be displayed in the text window with the found text highlighted and the cursor just before it. If the search text is not found in any of the remaining files, a message box will pop up informing you.</p>
 
-<p>The buttons are pretty self explanatory. The <b>Save Open File</b> button saves the text that is currently displayed in the window to the file, overwriting the original. (It appears the moving to another file by doing a search or hitting one of the other buttons will also save the open file, so this is only a convenience.) <b>Search</b> looks for the next occurrence of the search term. If you already have a text file open and press <b>Search</b>, it will proceed with the search starting from the open file. <b>Replace</b> substitutes the <b>Replacement Text</b> for the <b>Search Text</b> in the window, and saves the file. To cancel an in progress search, change the <b>Search Text</b>, that will reset the file index counter to the beginning. <b>Replace & Search</b> (<b>R & S</b>) just combines the <b>Replace</b> and <b>Search</b> buttons into one function call. <b>Replace All</b> will call <b>Replace</b> and <b>Search</b> until all of the files have been searched. <b>Replace All</b> uses the <b>Replacement</b> text, not one of the alternates. <b>Replace All</b> will reset the file index counter to zero before it starts so if you are performing a manual search, get halfway through the files and then press <b>Replace All</b>, it will start over again at the first file.</p>
+<p>The buttons are pretty self explanatory. The <b>Save Open File</b> button saves the text that is currently displayed in the window to the file, overwriting the original. (It appears the moving to another file by doing a search or hitting one of the other buttons will also save the open file, so this is only a convenience.) <b>Search</b> looks for the next occurrence of the search term. If you already have a text file open and press <b>Search</b>, it will proceed with the search starting from the open file. <b>Replace</b> substitutes the <b>Replacement Text</b> for the <b>Search Text</b> in the window, and saves the file. To cancel an in progress search, change the <b>Search Text</b>, that will reset the file index counter to the beginning. <b>Replace &amp; Search</b> (<b>R &amp; S</b>) just combines the <b>Replace</b> and <b>Search</b> buttons into one function call. <b>Replace All</b> will call <b>Replace</b> and <b>Search</b> until all of the files have been searched. <b>Replace All</b> uses the <b>Replacement</b> text, not one of the alternates. <b>Replace All</b> will reset the file index counter to zero before it starts so if you are performing a manual search, get halfway through the files and then press <b>Replace All</b>, it will start over again at the first file.</p>
 
 <p>The <b>Previous File</b> and <b>Next File</b> refer to the previous and next files in numerical order, not the previous and next search results. <b>See Image</b> will work if you have set up an image viewer on the <a href="#ProgramPreferences">Program Preferences</a> tab.</p>
 
-<h3 id="HeadersFooters">Headers & Footers</h3>
+<h3 id="HeadersFooters">Headers &amp; Footers</h3>
 
 <div style="margin-left: 40px;"> &nbsp;<img
- style="width: 644px; height: 513px;" alt="Headers & Footers removal tab" title=""
- src="pics/guiprep_headers_footers.png"> </div>[[File:guiprep_headers_footers.png|Headers & Footers tab]]
+ style="width: 644px; height: 513px;" alt="Headers &amp; Footers removal tab" title=""
+ src="pics/guiprep_headers_footers.png"> </div>[[File:guiprep_headers_footers.png|Headers &amp; Footers tab]]
 
-<p>The <b>Headers & Footers</b> tab only works in interactive mode, which means that it works in the directory identified in the banner above the tabs, "Working from the ... directory." In the illustration above from my computer, work on headers and footers will not be possible without resetting the directory, because D:\PGDP\PM is the grandparent of many text directories, not a direct parent of a text directory.</p>
+<p>The <b>Headers &amp; Footers</b> tab only works in interactive mode, which means that it works in the directory identified in the banner above the tabs, "Working from the ... directory." In the illustration above from my computer, work on headers and footers will not be possible without resetting the directory, because D:\PGDP\PM is the grandparent of many text directories, not a direct parent of a text directory.</p>
 
-<p>The <b>Headers & Footers</b> tab only works after <b>Dehyphenate</b> has run, and put the .txt files in the text directory. Any other of the <b>Process Text</b> routines may also run prior to working on the headers and footers, or not. <b>Dehyphenate</b> is the only routine that <b>Headers & Footers</b> has a dependency on.</b>
+<p>The <b>Headers &amp; Footers</b> tab only works after <b>Dehyphenate</b> has run, and put the .txt files in the text directory. Any other of the <b>Process Text</b> routines may also run prior to working on the headers and footers, or not. <b>Dehyphenate</b> is the only routine that <b>Headers &amp; Footers</b> has a dependency on.
 
 <p>In this tab, you can select or omit headers or footers to be deleted. This is a semi-automatic process.</p>
 
@@ -563,9 +563,9 @@ perl guiprep.pl</pre>
 
 <p><b>?</b> gives a terse help statement, and <b>Unselect All</b> and <b>Toggle Selection</b> should be obvious, and if you don't find them to be obvious, they are non-destructive, so play with them.</p>
 
-<p>There is a hidden feature of this page. If you have set up a text viewer and an image viewer on the <a href="#ProgramPreferences">Program Preferences</a> tab, then double clicking on a listed header or footer will pop-up the full text of the page in the desinated text viewer. (You could also edit and save the file, although if you do that, make sure to rerun <b>Get Headers</b> or <b>Get Footers</b> before hitting <b>Remove Selected</b>.) Similarly, if you left-click and then right-click on a listed header or footer, the png file will pop-up (if the pngs are in the "pngs" is a sibling of the text directory, or other name if it was specified on the <a href="#ProgramPreferences">Program Preferences</a> tab).<p>
+<p>There is a hidden feature of this page. If you have set up a text viewer and an image viewer on the <a href="#ProgramPreferences">Program Preferences</a> tab, then double clicking on a listed header or footer will pop-up the full text of the page in the desinated text viewer. (You could also edit and save the file, although if you do that, make sure to rerun <b>Get Headers</b> or <b>Get Footers</b> before hitting <b>Remove Selected</b>.) Similarly, if you left-click and then right-click on a listed header or footer, the png file will pop-up (if the pngs are in the "pngs" is a sibling of the text directory, or other name if it was specified on the <a href="#ProgramPreferences">Program Preferences</a> tab).</p>
 
-<p>If you accidently delete lines of text that you would have rather kept, you can always regenerate the "text" directory by rerunning the routines from the <b>Process Text</b> and regenerate "text" from "textw" (and optionally "textwo"). Alternatively, if you think it is likely that you will overdo the deleting of lines of text, you could start in <b>Process Text</b> and <b>Make Backups</b> before working in the <b>Headers & Footers</b> tab.</b>
+<p>If you accidently delete lines of text that you would have rather kept, you can always regenerate the "text" directory by rerunning the routines from the <b>Process Text</b> and regenerate "text" from "textw" (and optionally "textwo"). Alternatively, if you think it is likely that you will overdo the deleting of lines of text, you could start in <b>Process Text</b> and <b>Make Backups</b> before working in the <b>Headers &amp; Footers</b> tab.
 
 <p>Older releases of Guiprep ran under a program called winprep.exe. Winprep would not allow the invocation of external programs, so displaying the text of the full page or displaying the png would not work if you were using winprep. All recent releases have discontinued the use of winprep.</p>
 
@@ -587,12 +587,12 @@ perl guiprep.pl</pre>
 
 <h4 id="InteractiveMode">Interactive Mode</h4>
 <p>To work in interactive mode, ignore the right hand navigation window and only work in the one on the left, the one that has <b>Change To Directory:</b> written above it. In that navigation window, find your text or textw directory. To open a directory, double-click on it. Double click on ".." to go up one level in the directory hierarchy. You can also use the <b>Select Drive</b> drop down to select a different drive.</p>
-<p>When you have your the appropriate directory open, textw and any other sub-directories will be listed in the <b>Change To Directory:</b> list. Also, in the banner at the top which says <b>Working from the ... directory.</b>, your parent directory name will appear.<p>
-<p>At this point you can change to the <b>Process Text</b> tab, <b>Search</b> tab or <b>Headers & Footers</b> tab and work on the project in any of those  tabs.</p>
+<p>When you have your the appropriate directory open, textw and any other sub-directories will be listed in the <b>Change To Directory:</b> list. Also, in the banner at the top which says <b>Working from the ... directory.</b>, your parent directory name will appear.</p>
+<p>At this point you can change to the <b>Process Text</b> tab, <b>Search</b> tab or <b>Headers &amp; Footers</b> tab and work on the project in any of those  tabs.</p>
 
 <h4 id="BatchMode">Batch Mode</h4>
 <p>To work in batch mode, navigate using the left hand navigation window (<b>Change To Directory:</b>) to get to the grandparent of your text or textw directories, in my case, D:\PGDP\PM. This navigation works exactly like finding your parent directory for interactive mode, except you are looking for the parent of the parent directory. Then in the right hand window (<b>Select Directories to Batch Process: (Optional)</b>), select the directories that you want to process. Clicking a directory name in this window will toggle it between selected (gray background) and not selected (white background).</p>
-<p>Once you have selected the directories you want to process, you may proceed to the <b>Process Text</b> tab. <b>Search</b> and <b>Headers & Footers</b> do not work in batch mode, even if you have identified a batch which only contains one directory.</p>
+<p>Once you have selected the directories you want to process, you may proceed to the <b>Process Text</b> tab. <b>Search</b> and <b>Headers &amp; Footers</b> do not work in batch mode, even if you have identified a batch which only contains one directory.</p>
 
 
 <h3 id="ProgramPreferences">Program Preferences</h3>
@@ -630,7 +630,7 @@ perl guiprep.pl</pre>
 
 <p>Edit the guiprep.bat file in the guiprep directory, and create a new line at the bottom with the word "PAUSE" (no quotes, but all caps is preferred). That will keep the Perl window open after guiprep quits. Copy any text out of that window after the error occurs.</p>
 
-<p>Once you have all this information together, please report the problem in the <a href="https://www.pgdp.net/phpBB3/viewtopic.php?f=13&t=2237">guiprep forum</a> on Distributed Proofreaders. Please also mention the version of guiprep you are running (which should be in the title bar of guiprep), your Perl version and your operating system and version.</p>
+<p>Once you have all this information together, please report the problem in the <a href="https://www.pgdp.net/phpBB3/viewtopic.php?f=13&amp;t=2237">guiprep forum</a> on Distributed Proofreaders. Please also mention the version of guiprep you are running (which should be in the title bar of guiprep), your Perl version and your operating system and version.</p>
 
 <h3>Known Issues</h3>
 

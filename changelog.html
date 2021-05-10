@@ -8,7 +8,7 @@
 <span style="font-weight: bold;">Changelog History<br></span>
 <br>
 <br><span style="font-weight: bold;"><big>Version .41e</big></span>
-(By windymilla): 
+(By windymilla):
 <ul>
 <li>Remove FTP tab. Neither DP nor DPC support the use of the FTP tab.</li>
 <li>Make fcannos.bin platform independent (which was the only portion of guiprep that was not platform independent).</li>
@@ -26,7 +26,7 @@
 <br>
 
 <span style="font-weight: bold;"><big>Version .41d (396k)</big></span>
-(By windymilla): 
+(By windymilla):
 <ul>
 <li>Tidy up/mark dubious spaced curly quotes</li>
 <li>Fix spaced close single curly quotes (not mark as unknown)
@@ -35,18 +35,18 @@
 
 
 <span style="font-weight: bold;"><big>Version .41c</big></span>
-(By windymilla): 
+(By windymilla):
 <ul>
 <li>Treat a file containing just a BOM as empty so [Blank page] will be added</li>
 <li>Fix '.' not in @INC error reported by later Perl releases</li>
 </ul>
-</span><span style="font-weight: bold;"><big>Version .41b</big></span>
-(By wfarrell): 
+<span style="font-weight: bold;"><big>Version .41b</big></span>
+(By wfarrell):
 <ul>
 <li>Minor reformatting of guiprep source for readability</li>
 <li>Compatibility fix for later Perl releases (remove several uses of "defined" function)</li>
 </ul>
-</span><span style="font-weight: bold;"><big>Version .41 through .41a</big></span>
+<span style="font-weight: bold;"><big>Version .41 through .41a</big></span>
 <br>
 <br>
 (By grythumn): fix for directory lock problems when renaming
@@ -56,7 +56,7 @@
 (By Malcolm Farmer):
 <ul>
 <li>minor Typo fixes</li>
-<li>testart, ivstart & startpngcrush calls made Linux compatible</li>
+<li>testart, ivstart &amp; startpngcrush calls made Linux compatible</li>
 <li>Don't dehyphenate numbers (makes indexes work better)</li>
 <li>Page footers removal subroutine added</li>
 <li>merged in these options from rfrank's cpprep:
@@ -83,7 +83,7 @@
 Versions up to .40 were by Stephen Schultz:
 <br>
 <br>
-</span><span style="font-weight: bold;"><big>Version .40 (643k)</big></span>
+<span style="font-weight: bold;"><big>Version .40 (643k)</big></span>
 Argh. When I added the option to extract the small caps markup from the RTF files, I broke the handler for small caps if you WEREN'T extracting the markup. Fixed now.<br>
 <br>
 Modified how the Precessing functions displayed progress. They used to just print a dot to the screen for each page (file) that was completed. That worked fine as long as there weren't any problems. If the WAS a problem, it was extremely tedious to try to count the dots to figure out which file was causing it. Changed it to print an incremented counter mod 10. It will print the digits from 123456789012345... and so on. That should make it much easier to figure out which file causes a problem when one occurs.<br>
@@ -95,7 +95,7 @@ Tightened up a bunch of code in the font table and codepage handling code. Made 
 
 <br>
 <br>
-</span><span style="font-weight: bold;"><big>Version .39 (643k)</big></span>
+<span style="font-weight: bold;"><big>Version .39 (643k)</big></span>
 Added option to extract small caps markup from the rtf during the
 extraction routine. Markup will be added as &lt;sc&gt; .. &lt;/sc&gt;
 around the text that is marked as small caps in the RTF file. It
@@ -177,7 +177,7 @@ generation optional in the program. The files will be placed in the
 base directory of the project, (the directory that contains the textw,
 textwo, text and pngs directories.) They will be overwritten each time
 the dehyphenate routine is run.<br>
-<span style="font-weight: bold;"></span><br>
+<br>
 Messed around with the layout of the options page a bit. The layout
 manager I was using was very automatic, but I didn't like the staggered
 columns of checkboxes.<br>
