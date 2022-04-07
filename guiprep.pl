@@ -43,7 +43,6 @@ use Tk::Pane;
 use Tk::Checkbutton;
 use Tk::FileSelect;
 use Cwd;
-use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
 use Storable;
 if ($^O =~ /Win/) {require 'Win32API\File.pm'};
 use locale;
@@ -128,7 +127,7 @@ our @opt = (
 # $opt[51] = Search case insensitive
 # $opt[52] = Automatically Remove Headers during batch processing.
 # $opt[53] = Automatically Remove Footers during batch processing
-# $opt[54] = Build a standard upload batch and zip it to the project directory
+# $opt[54] = No longer used
 # $opt[55] = Convert cb in a word to ch.
 # $opt[56] = Convert gbt in a word to ght.
 # $opt[57] = Convert [ai]hle in a word to [ai]ble.
@@ -184,16 +183,6 @@ our $lastrundir;
 our $geometry = '640x480';
 our $separator;
 our ($interrupt, $batchmode, $bmessg);
-our $ftphostname = 'pgdp.net';
-our $ftpusername;
-our $ftppassword;
-our %ftpaccount;
-our @ftpbatch;
-our @ftpdirlist;
-our %ftpdircache;
-our $ftpdownloaddir;
-our $ftpinterrupt;
-our $ftphome;
 our $crushoptions = $gcrushoptions;
 our $search = 0;
 our $imagesdir = $gimagesdir;
@@ -217,15 +206,12 @@ my $runpngcrush;
 my $foundfile;
 my %seen = ();
 my $hyphen = '-';
-my $ftpscale = 1024;
 my $winver;
 my $startrnm = 1;
 
 do 'settings.rc';
 
 $opt[78] = 1;
-
-$ftphostname  = 'pgdp.net' if ($ftphostname eq 'pgdp01.archive.org'); # Temporary force change from old server.
 
 unless ($palette){$palette = $gpalette};
 
@@ -609,13 +595,6 @@ my $batchremove = $p2o4->Checkbutton(
 	-selectcolor => $checkboxcolor,
 	-text =>	"Automatically Remove Footers during batch processing. Be sure you understand the implications before enabling.",
 )->grid(-row=>5, -column =>1, -columnspan => 2, -padx => '5', -sticky => 'w');
-
-
-my $batchzip = $p2o4->Checkbutton(
-	-variable => 	\$opt[54],
-	-selectcolor => $checkboxcolor,
-	-text =>	"Build a standard upload batch and zip it to the project directory during batch processing.",
-)->grid(-row=>6, -column =>1, -columnspan => 2, -padx => '5', -sticky => 'w');
 
 my $p2o5 = $page2->Frame(-relief => 'groove', -borderwidth => 2
 )->pack(-side => 'top', -fill => 'both', -expand => 'y', -pady=>'4',-padx =>'2');
@@ -3627,16 +3606,6 @@ sub batch{
 			delfooters();
 			p1log("\nFinished automatic header removal.\n");
 			zero();
-		}
-		if ($opt[54]){
-			p1log("\nBuilding zip file of project files... - Please wait.\n");
-			$book->raise('page7');
-			$book->update;
-			ftpbuildbatch();
-			ftpbatchzip();
-			$book->raise('page1');
-			$book->update;
-			p1log("\nZip file done.\n");
 		}
 		chdir "..";
 		p1log("\nFinished batch processing files in $bdir directory.\n\n\n");
