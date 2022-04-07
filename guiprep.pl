@@ -211,6 +211,7 @@ my $helv = '-*-Helvetica-Medium-R-Normal--*-120-*-*-*-*-*-*';
 my $cour = '-*-Courier-Medium-R-Normal--*-140-*-*-*-*-*-*';
 my $courl = '-*-Courier-Medium-R-Normal--*-160-*-*-*-*-*-*';
 my $helvb = '-*-Helvetica-Medium-R-Bold--*-160-*-*-*-*-*-*';
+my $checkboxcolor = $^O =~ /Win/ ? 'white' : '#24baec';
 my $dirbox6;
 my $runpngcrush;
 my $foundfile;
@@ -306,7 +307,7 @@ BindMouseWheel($p1text);
 my $p1b1f = $p1buttonbar->Frame()->pack(-side => 'top',	-anchor => 'n',);
 my $p2cb28 = $p1b1f->Checkbutton(
 	-variable => 	\$opt[28],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	)->grid(-row=>1,-column=>1,-pady => '1');
 my $extract = $p1b1f->Button(
 	-command => 		sub {$interrupt = 0; xrtf();},
@@ -315,7 +316,7 @@ my $extract = $p1b1f->Button(
 )->grid(-row=>1,-column=>2,-pady => '1');
 my $p2cb29 = $p1b1f->Checkbutton(
 	-variable => 	\$opt[29],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 )->grid(-row=>2,-column=>1,-pady => '1');
 my $dehyphen = $p1b1f ->Button(
 	-command => 		sub {$interrupt = 0; dehyph();},
@@ -324,7 +325,7 @@ my $dehyphen = $p1b1f ->Button(
 )->grid(-row=>2,-column=>2,-pady => '1');
 my $p2cb32 = $p1b1f->Checkbutton(
 	-variable => 	\$opt[32],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 )->grid(-row=>3,-column=>1,-pady => '1');
 my $rename = $p1b1f->Button(
 	-command => 		sub {$interrupt = 0; nam();},
@@ -334,7 +335,7 @@ my $rename = $p1b1f->Button(
 
 my $p2cb30 = $p1b1f->Checkbutton(
 	-variable => 	\$opt[30],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 )->grid(-row=>4,-column=>1,-pady => '1');
 my $filter = $p1b1f ->Button(
 	-command => 		sub {$interrupt = 0; filt();},
@@ -343,7 +344,7 @@ my $filter = $p1b1f ->Button(
 )->grid(-row=>4,-column=>2,-pady => '1');
 my $p2cb31 = $p1b1f->Checkbutton(
 	-variable => 	\$opt[31],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 )->grid(-row=>5,-column=>1,-pady => '1');
 my $spellchk = $p1b1f ->Button(
 	-command => 		sub {$interrupt = 0; splchk();},
@@ -352,7 +353,7 @@ my $spellchk = $p1b1f ->Button(
 )->grid(-row=>5,-column=>2,-pady => '1');
 my $p2cb31 = $p1b1f->Checkbutton(
 	-variable => 	\$opt[66],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 )->grid(-row=>6,-column=>1,-pady => '1');
 my $spellchk = $p1b1f ->Button(
 	-command => 		sub {$interrupt = 0; englifh();},
@@ -361,7 +362,7 @@ my $spellchk = $p1b1f ->Button(
 )->grid(-row=>6,-column=>2,-pady => '1');
 my $p2cb33 = $p1b1f->Checkbutton(
 	-variable => 	\$opt[33],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 )->grid(-row=>7,-column=>1,-pady => '1');
 my $zero = $p1b1f ->Button(
 	-command => 	         sub {$interrupt = 0; zero();},
@@ -370,7 +371,7 @@ my $zero = $p1b1f ->Button(
 )->grid(-row=>7,-column=>2,-pady => '1');
 my $p2cb74 = $p1b1f->Checkbutton(
 	-variable => 	\$opt[74],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 )->grid(-row=>8,-column=>1,-pady => '1');
 my $rename = $p1b1f ->Button(
 	-command => 		sub {$interrupt = 0; conv();},
@@ -379,7 +380,7 @@ my $rename = $p1b1f ->Button(
 )->grid(-row=>8,-column=>2,-pady => '1');
 my $p2cb47 = $p1b1f->Checkbutton(
 	-variable => 	\$opt[47],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 )->grid(-row=>9,-column=>1,-pady => '1');
 my $pngrn = $p1b1f ->Button(
 	-command => 	         sub {$interrupt = 0; pngrename();},
@@ -388,7 +389,7 @@ my $pngrn = $p1b1f ->Button(
 )->grid(-row=>9,-column=>2,-pady => '1');
 my $p2cb49 = $p1b1f->Checkbutton(
 	-variable => 	\$opt[49],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 )->grid(-row=>10,-column=>1,-pady => '1');
 my $doall = $p1b1f->Button(
 	-command => 		sub {$interrupt = 0; $runpngcrush = 1; pngcrush();},
@@ -557,40 +558,40 @@ my $p2o4 = $page2->Frame(-relief => 'groove', -borderwidth => 2)->pack(-side => 
 
 my $p2cb23 = $p2o4->Checkbutton(
 	-variable => 	\$opt[23],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Extract Bold markup from rtf files.',
 )->grid(-row=>0, -column =>1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb61 = $p2o4->Checkbutton(
 	-variable => 	\$opt[61],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Insert cell delimiters, "|" in tables.',
 )->grid(-row=>0, -column =>2 ,-padx => '5', -sticky => 'w');
 
 
 my $p2cb67 = $p2o4->Checkbutton(
 	-variable => 	\$opt[67],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Extract sub/superscript markup',
 )->grid(-row=>1, -column =>1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb73 = $p2o4->Checkbutton(
 	-variable => 	\$opt[73],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Dehyphenate using German style hyphens; "="',
 	-command =>	sub{if ($opt[73]){$hyphen = "="}else{$hyphen = "-"}},
 )->grid(-row=>1, -column =>2 ,-padx => '5', -sticky => 'w');
 
 my $p2cb78 = $p2o4->Checkbutton(
 	-variable => 	\$opt[78],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Insert small caps markup during RTF extraction',
 	-command =>	sub{if ($opt[73]){$hyphen = "="}else{$hyphen = "-"}},
 )->grid(-row=>2, -column =>1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb77 = $p2o4->Checkbutton(
 	-variable => 	\$opt[77],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Save hyphens.txt & dehyphen.txt containing hyphenated and dehyphenated words from the dehyphenate routine.',
 	-command =>	sub{if ($opt[73]){$hyphen = "="}else{$hyphen = "-"}},
 )->grid(-row=>3, -column =>1, -columnspan => 2, -padx => '5', -sticky => 'w');
@@ -598,21 +599,21 @@ my $p2cb77 = $p2o4->Checkbutton(
 
 my $batchremove = $p2o4->Checkbutton(
 	-variable => 	\$opt[52],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	"Automatically Remove Headers during batch processing. Be sure you understand the implications before enabling.",
 )->grid(-row=>4, -column =>1, -columnspan => 2, -padx => '5', -sticky => 'w');
 
 
 my $batchremove = $p2o4->Checkbutton(
 	-variable => 	\$opt[53],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	"Automatically Remove Footers during batch processing. Be sure you understand the implications before enabling.",
 )->grid(-row=>5, -column =>1, -columnspan => 2, -padx => '5', -sticky => 'w');
 
 
 my $batchzip = $p2o4->Checkbutton(
 	-variable => 	\$opt[54],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	"Build a standard upload batch and zip it to the project directory during batch processing.",
 )->grid(-row=>6, -column =>1, -columnspan => 2, -padx => '5', -sticky => 'w');
 
@@ -628,13 +629,13 @@ my $grow = 0;
 
 my $p2cb0 = $p2opts->Checkbutton(
 	-variable => 	\$opt[0],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert multiple spaces to single space.',
 )->grid(-row => $grow, -column => 1, -padx => '5', -sticky => 'w');
 
 my $p2cb50 = $p2opts->Checkbutton(
 	-variable => 	\$opt[50],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert Windows-1252 codepage glyphs 80-9F.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -642,13 +643,13 @@ my $p2cb50 = $p2opts->Checkbutton(
 
 my $p2cb1 = $p2opts->Checkbutton(
 	-variable => 	\$opt[1],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Remove end of line spaces.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb36 = $p2opts->Checkbutton(
 	-variable => 	\$opt[36],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert spaced hyphens to em dashes.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -656,13 +657,13 @@ my $p2cb36 = $p2opts->Checkbutton(
 
 my $p2cb42 = $p2opts->Checkbutton(
 	-variable => 	\$opt[42],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert consecutive underscores to em dashes.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb2 = $p2opts->Checkbutton(
 	-variable => 	\$opt[2],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Remove space on either side of hyphens.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -670,13 +671,13 @@ my $p2cb2 = $p2opts->Checkbutton(
 
 my $p2cb60 = $p2opts->Checkbutton(
 	-variable => 	\$opt[60],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert double commas to double quote.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb3 = $p2opts->Checkbutton(
 	-variable => 	\$opt[3],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Remove space on either side of emdashes.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -684,13 +685,13 @@ my $p2cb3 = $p2opts->Checkbutton(
 
 my $p2cb4 = $p2opts->Checkbutton(
 	-variable => 	\$opt[4],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Remove space before periods.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb5 = $p2opts->Checkbutton(
 	-variable => 	\$opt[5],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Remove space before exclamation points.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -698,13 +699,13 @@ my $p2cb5 = $p2opts->Checkbutton(
 
 my $p2cb6 = $p2opts->Checkbutton(
 	-variable => 	\$opt[6],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Remove space before question marks.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb7 = $p2opts->Checkbutton(
 	-variable => 	\$opt[7],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Remove space before semicolons.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -712,13 +713,13 @@ my $p2cb7 = $p2opts->Checkbutton(
 
 my $p2cb8 = $p2opts->Checkbutton(
 	-variable => 	\$opt[8],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Remove space before commas.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb41 = $p2opts->Checkbutton(
 	-variable => 	\$opt[41],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Remove space after open, before closing brackets.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -726,14 +727,14 @@ my $p2cb41 = $p2opts->Checkbutton(
 
 my $p2cb9 = $p2opts->Checkbutton(
 	-variable => 	\$opt[9],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Ensure space before ellipsis(except after period).',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
 my $p2cb10 = $p2opts->Checkbutton(
 	-variable => 	\$opt[10],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert two single quotes to one double.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -743,7 +744,7 @@ my $p2cb10 = $p2opts->Checkbutton(
 
 my $p2cb12 = $p2opts->Checkbutton(
 	-variable => 	\$opt[12],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert solitary 1 to I.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
@@ -751,7 +752,7 @@ my $p2cb12 = $p2opts->Checkbutton(
 
 my $p2cb37 = $p2opts->Checkbutton(
 	-variable => 	\$opt[37],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert solitary lower case l to I.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -759,14 +760,14 @@ my $p2cb37 = $p2opts->Checkbutton(
 
 my $p2cb13 = $p2opts->Checkbutton(
 	-variable => 	\$opt[13],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert solitary 0 to O.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
 my $p2cb14 = $p2opts->Checkbutton(
 	-variable => 	\$opt[14],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert vulgar fractions (¼,½,¾) to written out.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -775,7 +776,7 @@ my $p2cb14 = $p2opts->Checkbutton(
 
 my $p2cb15 = $p2opts->Checkbutton(
 	-variable => 	\$opt[15],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert ² and ³ to ^2 and ^3.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
@@ -783,7 +784,7 @@ my $p2cb15 = $p2opts->Checkbutton(
 
 my $p2cb38 = $p2opts->Checkbutton(
 	-variable => 	\$opt[38],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert £ to "Pounds".',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -794,14 +795,14 @@ my $p2cb38 = $p2opts->Checkbutton(
 
 my $p2cb39 = $p2opts->Checkbutton(
 	-variable => 	\$opt[39],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert ¢ to "cents".',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
 my $p2cb40 = $p2opts->Checkbutton(
 	-variable => 	\$opt[40],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert § to "Section".',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -810,13 +811,13 @@ my $p2cb40 = $p2opts->Checkbutton(
 
 my $p2cb24 = $p2opts->Checkbutton(
 	-variable => 	\$opt[24],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert ° to "degrees".',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb45 = $p2opts->Checkbutton(
 	-variable => 	\$opt[45],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert forward slash to comma apostrophe.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -824,13 +825,13 @@ my $p2cb45 = $p2opts->Checkbutton(
 
 my $p2cb59 = $p2opts->Checkbutton(
 	-variable => 	\$opt[59],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert \v or \\\\ to w.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb46 = $p2opts->Checkbutton(
 	-variable => 	\$opt[46],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert solitary j to semicolon.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -839,13 +840,13 @@ my $p2cb46 = $p2opts->Checkbutton(
 
 my $p2cb16 = $p2opts->Checkbutton(
 	-variable => 	\$opt[16],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert tli at the beginning of a word to th.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb11 = $p2opts->Checkbutton(
 	-variable => 	\$opt[11],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert tii at the beginning of a word to th.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -855,14 +856,14 @@ my $p2cb11 = $p2opts->Checkbutton(
 
 my $p2cb25 = $p2opts->Checkbutton(
 	-variable => 	\$opt[25],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert tb at the beginning of a word to th.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
 my $p2cb26 = $p2opts->Checkbutton(
 	-variable => 	\$opt[26],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert wli at the beginning of a word to wh.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -871,14 +872,14 @@ my $p2cb26 = $p2opts->Checkbutton(
 
 my $p2cb27 = $p2opts->Checkbutton(
 	-variable => 	\$opt[27],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert wb at the beginning of a word to wh.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
 my $p2cb17 = $p2opts->Checkbutton(
 	-variable => 	\$opt[17],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert rn at the beginning of a word to m.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -886,13 +887,13 @@ my $p2cb17 = $p2opts->Checkbutton(
 
 my $p2cb34 = $p2opts->Checkbutton(
 	-variable => 	\$opt[34],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert hl at the beginning of a word to bl.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb35 = $p2opts->Checkbutton(
 	-variable => 	\$opt[35],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert hr at the beginning of a word to br.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -900,13 +901,13 @@ my $p2cb35 = $p2opts->Checkbutton(
 
 my $p2cb43 = $p2opts->Checkbutton(
 	-variable => 	\$opt[43],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert rnp in a word to mp.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb68 = $p2opts->Checkbutton(
 	-variable => 	\$opt[68],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert vv at the beginning of a word to w.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -914,13 +915,13 @@ my $p2cb68 = $p2opts->Checkbutton(
 
 my $p2cb69 = $p2opts->Checkbutton(
 	-variable => 	\$opt[69],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert !! at the beginning of a word to H',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb70 = $p2opts->Checkbutton(
 	-variable => 	\$opt[70],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert initial X not followed by e to N.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -929,13 +930,13 @@ my $p2cb70 = $p2opts->Checkbutton(
 
 my $p2cb71 = $p2opts->Checkbutton(
 	-variable => 	\$opt[71],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert ! inside a word to l.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb72 = $p2opts->Checkbutton(
 	-variable => 	\$opt[72],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert \'!! to \'ll.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -943,13 +944,13 @@ my $p2cb72 = $p2opts->Checkbutton(
 
 my $p2cb80 = $p2opts->Checkbutton(
 	-variable => 	\$opt[80],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Remove space before  apostrophes.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb81 = $p2opts->Checkbutton(
 	-variable => 	\$opt[81],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert \'11 to \'ll.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -958,14 +959,14 @@ my $p2cb81 = $p2opts->Checkbutton(
 
 my $p2cb65 = $p2opts->Checkbutton(
 	-variable => 	\$opt[65],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert rnm in a word to mm.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
 my $p2cb55 = $p2opts->Checkbutton(
 	-variable => 	\$opt[55],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert cb in a word to ch.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -973,14 +974,14 @@ my $p2cb55 = $p2opts->Checkbutton(
 
 my $p2cb56 = $p2opts->Checkbutton(
 	-variable => 	\$opt[56],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert gbt in a word to ght.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
 my $p2cb57 = $p2opts->Checkbutton(
 	-variable => 	\$opt[57],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert [ai]hle in a word to [ai]ble.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -989,14 +990,14 @@ my $p2cb57 = $p2opts->Checkbutton(
 
 my $p2cb63 = $p2opts->Checkbutton(
 	-variable => 	\$opt[63],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert cl at the end of a word to d.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
 my $p2cb64 = $p2opts->Checkbutton(
 	-variable => 	\$opt[64],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert pbt in a word to pht.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -1004,14 +1005,14 @@ my $p2cb64 = $p2opts->Checkbutton(
 
 my $p2cb58 = $p2opts->Checkbutton(
 	-variable => 	\$opt[58],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert he to be if it follows to.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
 my $p2cb44 = $p2opts->Checkbutton(
 	-variable => 	\$opt[44],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Move punctuation outside of markup.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -1021,14 +1022,14 @@ my $p2cb44 = $p2opts->Checkbutton(
 
 my $p2cb75 = $p2opts->Checkbutton(
 	-variable => 	\$opt[75],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Strip garbage punctuation from beginning of line.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
 my $p2cb18 = $p2opts->Checkbutton(
 	-variable => 	\$opt[18],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Remove empty lines at top of page.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -1037,14 +1038,14 @@ my $p2cb18 = $p2opts->Checkbutton(
 
 my $p2cb76 = $p2opts->Checkbutton(
 	-variable => 	\$opt[76],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Strip garbage punctuation from end of line.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
 my $p2cb19 = $p2opts->Checkbutton(
 	-variable => 	\$opt[19],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Convert multi consecutive blank lines to single.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -1053,13 +1054,13 @@ my $p2cb19 = $p2opts->Checkbutton(
 
 my $p2cb20 = $p2opts->Checkbutton(
 	-variable => 	\$opt[20],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Remove top line if number.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb21 = $p2opts->Checkbutton(
 	-variable => 	\$opt[21],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Remove bottom line if number.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -1068,14 +1069,14 @@ my $p2cb21 = $p2opts->Checkbutton(
 
 my $p2cb22 = $p2opts->Checkbutton(
 	-variable => 	\$opt[22],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Remove empty lines from bottom of page.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
 my $p2cb79 = $p2opts->Checkbutton(
 	-variable => 	\$opt[79],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Remove HTML markup (bold, italics, smallcap).',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -1084,14 +1085,14 @@ my $p2cb79 = $p2opts->Checkbutton(
 
 my $p2cb82 = $p2opts->Checkbutton(
 	-variable => 	\$opt[82],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Tidy up/mark dubious spaced quotes.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 
 my $p2cb83 = $p2opts->Checkbutton(
 	-variable => 	\$opt[83],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Mark possible missing spaces between word/sentences.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
@@ -1099,13 +1100,13 @@ my $p2cb83 = $p2opts->Checkbutton(
 
 my $p2cb84 = $p2opts->Checkbutton(
 	-variable => 	\$opt[84],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Tidy up/mark dubious spaced curly quotes.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 my $p2cb85 = $p2opts->Checkbutton(
 	-variable => 	\$opt[85],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text =>	'Fix spaced close single curly quotes (not mark as unknown).',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -1741,13 +1742,13 @@ my $searchsavebutton = $p8f2->Button(
 
 my $p8cb51 = $p8f2->Checkbutton(
 	-variable => 	\$opt[51],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text => 	'Case Insensitive'
 )->pack(-side => 'left', -anchor => 'n', -pady => '1');
 
 my $p8cb53 = $p8f2->Checkbutton(
 	-variable => 	\$opt[62],
-	-selectcolor => 'white',
+	-selectcolor => $checkboxcolor,
 	-text => 	'Whole word only'
 )->pack(-side => 'left', -anchor => 'n', -pady => '1');
 
