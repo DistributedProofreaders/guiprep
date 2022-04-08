@@ -602,8 +602,6 @@ my $p2o5 = $page2->Frame(-relief => 'groove', -borderwidth => 2
 my $p2opts = $p2o5->Scrolled('Pane', -scrollbars => 'e'
 )->pack(-side => 'top', -anchor => 'n', -fill => 'both', -expand => 'y', -pady=>'6',-padx =>'2');
 
-BindMouseWheel($p2opts);
-
 my $grow = 0;
 
 my $p2cb0 = $p2opts->Checkbutton(
