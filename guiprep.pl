@@ -599,7 +599,7 @@ my $batchremove = $p2o4->Checkbutton(
 my $p2o5 = $page2->Frame(-relief => 'groove', -borderwidth => 2
 )->pack(-side => 'top', -fill => 'both', -expand => 'y', -pady=>'4',-padx =>'2');
 
-my $p2opts = $p2o5->Scrolled('Pane', -scrollbars => 'e'
+my $p2opts = $p2o5->Scrolled('Pane', -scrollbars => 'ose'
 )->pack(-side => 'top', -anchor => 'n', -fill => 'both', -expand => 'y', -pady=>'6',-padx =>'2');
 
 my $grow = 0;
