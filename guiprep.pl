@@ -1310,7 +1310,7 @@ my $p4rframe =  $p4mframe->Frame()->pack(-side => 'left', -anchor => 'n', -expan
 
 my $dirbox = $p4rframe->Scrolled('Listbox',
 	-label => "Change To Directory:",
-	-scrollbars =>		'osoe',
+	-scrollbars =>		'ose',
 	-width =>		'35',
 	-height =>		'12',
 	-background =>		'white',
@@ -1322,7 +1322,7 @@ my $pdrframe =  $p4mframe->Frame()->pack(-side => 'right', -anchor => 'n', -expa
 
 $dirbox6 = $p4mframe->Scrolled('Listbox',
 	-label => "Select Directories To Batch Process: (Optional)",
-	-scrollbars =>		'osoe',
+	-scrollbars =>		'ose',
 	-width =>		'35',
 	-height =>		'12',
 	-background =>		'white',
