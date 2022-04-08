@@ -540,7 +540,10 @@ my $supsclose = $p2o3->Entry(
 	  )->pack(-side => 'right', -anchor => 'ne');
 $supsclose->insert(0, $supclose);
 
-my $p2o4 = $page2->Frame(-relief => 'groove', -borderwidth => 2)->pack(-side => 'top', -fill => 'x', -pady => '2', -padx =>'2');
+my $p2o4f = $page2->Frame(-relief => 'groove', -borderwidth => 2)->pack(-side => 'top', -fill => 'x', -pady => '2', -padx =>'2');
+
+my $p2o4 = $p2o4f->Scrolled('Pane', -scrollbars => 'os'
+)->pack(-side => 'top', -anchor => 'n', -fill => 'both', -expand => 'y', -pady=>'6',-padx =>'2');
 
 my $p2cb23 = $p2o4->Checkbutton(
 	-variable => 	\$opt[23],
