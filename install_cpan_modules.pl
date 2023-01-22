@@ -6,8 +6,10 @@ my @modules = (
     "File::HomeDir",
 
     # Needed for user interface
+    "Tcl",
     "Tk",
     "Tk::ToolBar",
+    "Tcl::pTk",
 
     # Needed for word frequency harmonics
     "Text::LevenshteinXS",
@@ -22,9 +24,39 @@ my @modules = (
     "LWP::UserAgent",
 );
 
-# Windows-specific modules
+# Windows-specific modules and file editing
 if ( $^O eq 'MSWin32' ) {
     push @modules, "Win32::Unicode::Process";
+
+    # If your Tcl location is non-default, please adjust this path here!
+    my $filename = 'C:/Tcl/lib/tclConfig.sh';
+
+    my $data = read_file($filename);
+    my $regex = qr/([A-Z_=]+[']+[{]*[-L]*[-I]*)([\/]*[A-Z]+[:]*[\\\/]+BawtBuilds\/TclDistribution\/TclDistribution\-[\d.a]*\/Windows\/[x64|x86]+\/Release\/[Install|Build]+\/Tcl)/mp;
+    # If your Tcl location is non-default, please adjust this path here!
+    $data =~ s/$regex/$1C:\/Tcl/g;
+    write_file($filename, $data);
+}
+
+sub read_file {
+    my ($filename) = @_;
+
+    open my $in, '<:encoding(UTF-8)', $filename or die "Could not open '$filename' for reading $!";
+    local $/ = undef;
+    my $all = <$in>;
+    close $in;
+
+    return $all;
+}
+
+sub write_file {
+    my ($filename, $content) = @_;
+
+    open my $out, '>:encoding(UTF-8)', $filename or die "Could not open '$filename' for writing $!";;
+    print $out $content;
+    close $out;
+
+    return;
 }
 
 # Command to use to run cpanm, default to the command directly

@@ -23,6 +23,14 @@ recommended Perl interpreter as that is what the developers have tested, it
 supports the latest version of Perl, and includes all necessary Perl modules.
 It can coexist along side other interpreters.
 
+This also uses [BAWT Tcl](https://www.tcl3d.org/bawt/download.html#tclbi), which
+is a freely-available and open source version of Tcl for Windows. As of January
+2023, a bug in the Tcl installer causes a configuration file to have an
+error. The script to install CPAN modules below attempts to detect if this error
+is present, and adjusts the file accordingly. If you change the location of your
+Tcl installation away from the default, you may need to adjust the CPAN
+modules install script as well.
+
 _If you have an existing Perl distribution installed (including if you are
 hoping to use the Perl distributed with a previous release of other tools),
 read [Other Perl distributions](#other-perl-distributions) before following
@@ -37,29 +45,37 @@ Unless you are confident with editing `.bat` files and altering the system
 PATH variable, please use the recommended instructions and directory names
 below. 
 
-_Note that you must do step 6, even if you have done it previously, as
+_Note that you must do step 8, even if you have done it previously, as
 the version of Guiprep you are installing may require additional Perl modules
 to any previous versions._
 
 1. Download [Strawberry Perl](http://strawberryperl.com/).
 2. Double click the downloaded file to install Strawberry Perl. It is
    recommended that you install in the default folder `c:\Strawberry`.
-3. Download the latest release (the zip file) from the
-   [Guiprep releases](https://github.com/DistributedProofreaders/guiprep/releases) page.
-4. Unzip guiprep zip file to some location on your computer (double
+3. Download [BAWT Tcl](https://www.tcl3d.org/bawt/download.html#tclbi). You will
+   need to choose the latest non-alpha version of the "batteries included"
+   edition. As of January 2023, this is the Tcl 8.6.13 Batteries Included
+   version, either 32 or 64 bit. Your computer is most likely 64-bit, but if
+   that version does not work, you can uninstall it and retry with the 32-bit
+   version.
+4. Double click the downloaded file to install Tcl. It is
+   recommended that you install in the default folder `C:\Tcl`.
+5. Download the latest release (the zip file) from the [Guiprep
+   releases](https://github.com/DistributedProofreaders/guiprep/releases) page.
+6. Unzip guiprep zip file to some location on your computer (double
    click the zip file). A common place for this is `c:\guiprep` although it can
    be placed anywhere.
-5. Using File Explorer, navigate to the `guiprep` folder you unzipped earlier.
-6. Double click the file `install_cpan_modules.pl`. This should display a
+7. Using File Explorer, navigate to the `guiprep` folder you unzipped earlier.
+8. Double click the file `install_cpan_modules.pl`. This should display a
    command window listing the Perl modules as it installs them. Note that this
    can take several minutes to complete.
    If instead, Windows says it does not know how to run that file, or it opens
    the file in a text editor like Notepad, you will need to re-associate `.pl` 
    files with the Perl program/app. Follow the steps in the footnote below[^1],
    then return to re-try this step.
-7. Double click the `run_guiprep.bat` file in the same folder, and Guiprep
+9. Double click the `run_guiprep.bat` file in the same folder, and Guiprep
    should start up and be ready for use.
-8. See the [Guiguts Windows Installation](https://www.pgdp.net/wiki/PPTools/Guiguts/Install)
+10. See the [Guiguts Windows Installation](https://www.pgdp.net/wiki/PPTools/Guiguts/Install)
    wiki page for information on installing an image viewer to display scans
    during search or header and footer removal. Aspell is not used by this program.
    
@@ -170,34 +186,46 @@ You can accept the defaults it presents to you.
 
 ### Perl & Perl modules
 
-Using Terminal.app, use Homebrew to install Perl and cpanm:
+Using Terminal.app, use Homebrew to install Perl, cpanm, and Tcl: 
 
 ```
 brew install perl
 brew pin perl
 brew install cpanm
+brew install tcl-tk
+```
+
+After running this last command, homebrew will note that `tcl-tk is keg only`,
+and then tell you, based on your specific computer's settings, the command you
+need to run if you need to have `tcl-tk` first in your `PATH`. It will be
+something like the following, and you need to run that in your terminal next.
+
+```
+echo 'export PATH="/opt/homebrew/opt/tcl-tk/bin:$PATH"' >> ~/.zshrc
+```
+
+From there, you need one more homebrew package. 
+
+*Note that the bwidget package, required here, is pending acceptance into
+upstream homebrew. Once that is completed, there will be no need to use the
+willcohen/core tap. For anyone who adds this tap, at that point you can simply
+untap using* `brew untap willcohen/core`, *then reinstall from main homebrew
+with* `brew uninstall bwidget` *and* `brew install bwidget`.
+
+```
+brew tap willcohen/core
+brew install bwidget
 ```
 
 Close Terminal.app and reopen it to ensure that the brew-installed perl is on
-your path. Then install all the necessary [Perl modules](#perl-modules). This
-is most easily done by running the helper script:
+your path. Then install all the necessary [Perl modules](#perl-modules). This is
+most easily done by running the helper script:
 
 ```
 perl install_cpan_modules.pl
 ```
 
-### XQuartz
-
-[XQuartz](https://www.xquartz.org/) is an X11 windows manager. If you don't
-have it installed already, you can either download and install it manually
-via the link _or_ install it with Homebrew using:
-
-```
-brew cask install xquartz
-```
-
-After you install XQuartz, you must **log out and back in** before Guiprep can
-use it as the X11 server.
+*Note that XQuartz.app is no longer necessary.*
 
 ### Starting Guiprep
 
@@ -240,8 +268,10 @@ Guiguts requires the following Perl modules to be installed via CPAN. Guiprep
 requires some of these, but possibly not all of them. For compatibility, we install
 all of them.
 
+* Tcl 
 * Tk
 * Tk::ToolBar
+* Tcl::pTk
 * Text::LevenshteinXS
 * File::Which
 * Image::Size

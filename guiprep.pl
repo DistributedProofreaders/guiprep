@@ -16,32 +16,31 @@ my $currentver = '.41e';
 # It provides hooks to link in your favorite text editor and image viewer to help with the preparation process.
 #
 # For more details about use and operation, see the HTML user guide included with the program.
-#
-# This program may be freely used, copied, modified and distributed. Reverse engineering strictly encouraged.
-#
-# This software has no guarantees as to its fitness to do this or any other task.
-#
-# Any damages to your computer, your data, your mental health or anything else as a result of using this software
-# are your problem and not mine. If not satisfied, your purchase price will be cheerfully refunded.
-#
-# For modifications, see the changelog
 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 
-use 5.008;
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+# For modifications, see the changelog.
+
+use v5.10.1;
 use strict;
 use Tk;
-use Tk::widgets qw(Button Label Frame);
-use Tk::Balloon;
-use Tk::DialogBox;
-use Tk::NoteBook;
-use Tk::LabEntry;
-use Tk::BrowseEntry;
-use Tk::ROText;
-use Tk::TextUndo;
-use Tk::Pane;
-use Tk::Checkbutton;
-use Tk::FileSelect;
+use Tcl::pTk;
+use Tcl::pTk::ttkBrowseEntry;
+use Tcl::pTk::TextUndo;
+use Tcl::pTk::Pane;
+
 use Cwd;
 use Storable;
 if ($^O =~ /Win/) {require 'Win32API\File.pm'};
@@ -161,7 +160,18 @@ our @opt = (
 # $opt[84] = Tidy up/mark dubious spaced curly quotes
 # $opt[85] = Fix spaced close single curly quotes (not mark as unknown)
 
-our $gpalette = 'grey80';
+our $gtheme;
+
+if ($^O =~ /Win/){
+	$gtheme = 'vista';
+}elsif ($^O =~ /linux/){
+	$gtheme = 'default'
+}elsif ($^O =~ /darwin/){
+	$gtheme = 'aqua'
+}else{
+	$gtheme = 'default'
+}
+
 our $gcrushoptions =  '-bit_depth 1 -reduce ';
 our $gimagesdir = 'pngs';
 
@@ -172,7 +182,7 @@ our $boldopen = $gboldopen;
 our $boldclose = $gboldclose;
 our $supopen = $gsupopen;
 our $supclose = $gsupclose;
-our $palette = $gpalette;
+our $gtheme = $gtheme;
 our $editstart;
 our $viewerstart;
 our $linelength;
@@ -180,7 +190,7 @@ our @deletelines;
 our $headersel;
 our $startdir = getpwd();
 our $lastrundir;
-our $geometry = '640x480';
+our $geometry = '1024x768';
 our $separator;
 our ($interrupt, $batchmode, $bmessg);
 our $crushoptions = $gcrushoptions;
@@ -195,12 +205,6 @@ our @searchfilelist = ();
 
 # End Global vars ####################################################################################
 $SIG{ALRM} = 'IGNORE';	# ignore any watchdog timer alarms. subroutine that take a long time to complete can trip it
-my $shelv = '-*-Helvetica-Medium-R-Normal--*-100-*-*-*-*-*-*';
-my $helv = '-*-Helvetica-Medium-R-Normal--*-120-*-*-*-*-*-*';
-my $cour = '-*-Courier-Medium-R-Normal--*-140-*-*-*-*-*-*';
-my $courl = '-*-Courier-Medium-R-Normal--*-160-*-*-*-*-*-*';
-my $helvb = '-*-Helvetica-Medium-R-Bold--*-160-*-*-*-*-*-*';
-my $checkboxcolor = $^O =~ /Win/ ? 'white' : '#24baec';
 my $dirbox6;
 my $runpngcrush;
 my $foundfile;
@@ -212,8 +216,8 @@ my $startrnm = 1;
 do 'settings.rc';
 
 $opt[78] = 1;
-
-unless ($palette){$palette = $gpalette};
+my $theme;
+unless ($theme){$theme = $gtheme};
 
 if ($^O =~ /Win/){
 	$separator = '\\';
@@ -231,170 +235,185 @@ our $pwd = getpwd();
 my $main = MainWindow->new(
 	-title =>		'Guiprep Pre-processing Toolkit - '.$currentver,
 );
+my $int = $main->interp;
 
 # Set window size (pixels) the script TRIES to open with.
 $main->geometry($geometry);
 
 # Set the minimum window size.
-$main->minsize(qw(600 480));
+$main->minsize(qw(1024 768));
 
-# Set an interesting palette color combo.
-$main->setPalette("$palette");
+# Set an interesting theme color combo.
+$main->ttkSetTheme("$theme");
 
-my $mainbframe = $main->Frame()->pack(-anchor => 'nw');
+my $mainbframe = $main->ttkFrame()->pack(-anchor => 'nw');
 
 my $bottomlabel = $mainbframe->Label(
 	-text => "Working from the $pwd directory.",
-	-font => '-*-Helvetica-Medium-R-Normal--*-160-*-*-*-*-*-*'
 )->pack(-anchor => 'nw');
 
-my $maintopframe = $main->Frame(
+my $maintopframe = $main->ttkFrame(
 )->pack(-anchor => 'n', -expand => 'y', -fill => 'both');
 
-my $book = $maintopframe->NoteBook( -ipadx => 6, -ipady => 6);
+my $book = $maintopframe->ttkNotebook();# -ipadx => 6, -ipady => 6);
 
-my $page2 = $book->add("page2", -label => "Select Options", -raisecmd => sub {$interrupt = 1;chdir $pwd;});
-my $page1 = $book->add("page1", -label => "Process Text", -raisecmd => \&updateblist);
-my $page8 = $book->add("page8", -label => "Search", -raisecmd => sub{$interrupt = 1; searchclear(); $filesearchindex1 = 1;
-									@searchfilelist=(); $main->update; $main->Busy; searchincdec(); $main->Unbusy;});
-my $page3 = $book->add("page3", -label => "Headers & Footers", -raisecmd => sub {emptybox(); $interrupt = 1;chdir $pwd;});
-my $page4 = $book->add("page4", -label => "Change Directory", -raisecmd => sub {$interrupt = 1;chdir $pwd;});
-my $page6 = $book->add("page6", -label => "Program Prefs", -raisecmd => sub {$interrupt = 1;chdir $pwd;});
-my $page5 = $book->add("page5", -label => "About", -raisecmd => sub {$interrupt = 1;chdir $pwd;});
+$main->bind('<<NotebookTabChanged>>',
+	sub{
+
+		for ($book->tab($book->select())->[7]) {
+		if ('Select Options') { sub {print "Select Options";$interrupt = 1;chdir $pwd;} }
+		elsif ('Process Text') { \&updateblist }
+		elsif ('Search') {
+			sub{$interrupt = 1; searchclear(); $filesearchindex1 = 1;
+			@searchfilelist=(); $main->update; $main->Busy; searchincdec(); $main->Unbusy;}
+		}
+		elsif ('Headers & Footers') { sub {emptybox(); $interrupt = 1;chdir $pwd;} }
+		elsif ('Change Directory') { sub {$interrupt = 1;chdir $pwd;} }
+		elsif ('Program Prefs') { sub {$interrupt = 1;chdir $pwd;} }
+		elsif ('About') { sub {$interrupt = 1;chdir $pwd;} }
+		else { sub {$interrupt = 1;chdir $pwd;} }
+		}});
+
+# Note: the order of these pages is set this way to set the order of the pages
+# in the UI selector. This differs from the numeric order originally declared,
+# and is intentional.
+
+my $page2 = $book->ttkFrame();
+my $page1 = $book->ttkFrame();
+my $page8 = $book->ttkFrame();
+my $page3 = $book->ttkFrame();
+my $page4 = $book->ttkFrame();
+my $page6 = $book->ttkFrame();
+my $page5 = $book->ttkFrame();
+
+$book->add($page2, -text => "Select Options");
+$book->add($page1, -text => "Process Text");
+$book->add($page8, -text => "Search");
+$book->add($page3, -text => "Headers & Footers");
+$book->add($page4, -text => "Change Directory");
+$book->add($page6, -text => "Program Prefs");
+$book->add($page5, -text => "About");
 
 ## Page 1 layout ##################################################################################################################
 my $p1text;
 
-my $p1buttonbar = $page1->Frame(
+my $p1buttonbar = $page1->ttkFrame(
 )->pack(-side => 'left',
 	-anchor => 'n',
 	-pady => '4',
 );
 
-my $p1tframe = $page1->Frame(
+my $p1tframe = $page1->ttkFrame(
 )->pack(-side => 'right',
 	-anchor => 'n',
 	-padx => '5',
 	-pady => '4',
 	-fill => 'both',
-	-expand => 'both'
+	-expand => '1'
 );
 
 $p1text = $p1tframe->Scrolled('ROText',
 	-scrollbars =>		'oe',
  	-wrap => 		'word',
- 	-background =>		'white',
- 	-font =>		'-*-Helvetica-Medium-R-Normal--*-120-*-*-*-*-*-*',
- )->pack(-side => 'top', -anchor => 'n', -fill => 'both', -expand => 'both' );
+ )->pack(-side => 'top', -anchor => 'n', -fill => 'both', -expand => '1' );
 
 BindMouseWheel($p1text);
 
 # Make a frame to hold controls
-my $p1b1f = $p1buttonbar->Frame()->pack(-side => 'top',	-anchor => 'n',);
-my $p2cb28 = $p1b1f->Checkbutton(
+my $p1b1f = $p1buttonbar->ttkFrame()->pack(-side => 'top',	-anchor => 'n',);
+my $p2cb28 = $p1b1f->ttkCheckbutton(
 	-variable => 	\$opt[28],
-	-selectcolor => $checkboxcolor,
 	)->grid(-row=>1,-column=>1,-pady => '1');
-my $extract = $p1b1f->Button(
+my $extract = $p1b1f->ttkButton(
 	-command => 		sub {$interrupt = 0; xrtf();},
 	-text =>		'Extract Markup',
 	-width =>		'17'
 )->grid(-row=>1,-column=>2,-pady => '1');
-my $p2cb29 = $p1b1f->Checkbutton(
+my $p2cb29 = $p1b1f->ttkCheckbutton(
 	-variable => 	\$opt[29],
-	-selectcolor => $checkboxcolor,
 )->grid(-row=>2,-column=>1,-pady => '1');
-my $dehyphen = $p1b1f ->Button(
+my $dehyphen = $p1b1f ->ttkButton(
 	-command => 		sub {$interrupt = 0; dehyph();},
 	-text =>		'Dehyphenate',
 	-width =>		'17'
 )->grid(-row=>2,-column=>2,-pady => '1');
-my $p2cb32 = $p1b1f->Checkbutton(
+my $p2cb32 = $p1b1f->ttkCheckbutton(
 	-variable => 	\$opt[32],
-	-selectcolor => $checkboxcolor,
 )->grid(-row=>3,-column=>1,-pady => '1');
-my $rename = $p1b1f->Button(
+my $rename = $p1b1f->ttkButton(
 	-command => 		sub {$interrupt = 0; nam();},
 	-text =>		'Rename Txt Files',
 	-width =>		'17'
 )->grid(-row=>3,-column=>2,-pady => '1');
 
-my $p2cb30 = $p1b1f->Checkbutton(
+my $p2cb30 = $p1b1f->ttkCheckbutton(
 	-variable => 	\$opt[30],
-	-selectcolor => $checkboxcolor,
 )->grid(-row=>4,-column=>1,-pady => '1');
-my $filter = $p1b1f ->Button(
+my $filter = $p1b1f ->ttkButton(
 	-command => 		sub {$interrupt = 0; filt();},
 	-text =>		'Filter Files',
 	-width =>		'17'
 )->grid(-row=>4,-column=>2,-pady => '1');
-my $p2cb31 = $p1b1f->Checkbutton(
+my $p2cb31 = $p1b1f->ttkCheckbutton(
 	-variable => 	\$opt[31],
-	-selectcolor => $checkboxcolor,
 )->grid(-row=>5,-column=>1,-pady => '1');
-my $spellchk = $p1b1f ->Button(
+my $spellchk = $p1b1f ->ttkButton(
 	-command => 		sub {$interrupt = 0; splchk();},
 	-text =>		'Fix Common Scannos',
 	-width =>		'17'
 )->grid(-row=>5,-column=>2,-pady => '1');
-my $p2cb31 = $p1b1f->Checkbutton(
+my $p2cb31 = $p1b1f->ttkCheckbutton(
 	-variable => 	\$opt[66],
-	-selectcolor => $checkboxcolor,
 )->grid(-row=>6,-column=>1,-pady => '1');
-my $spellchk = $p1b1f ->Button(
+my $spellchk = $p1b1f ->ttkButton(
 	-command => 		sub {$interrupt = 0; englifh();},
 	-text =>		'Fix Olde Englifh',
 	-width =>		'17'
 )->grid(-row=>6,-column=>2,-pady => '1');
-my $p2cb33 = $p1b1f->Checkbutton(
+my $p2cb33 = $p1b1f->ttkCheckbutton(
 	-variable => 	\$opt[33],
-	-selectcolor => $checkboxcolor,
 )->grid(-row=>7,-column=>1,-pady => '1');
-my $zero = $p1b1f ->Button(
+my $zero = $p1b1f ->ttkButton(
 	-command => 	         sub {$interrupt = 0; zero();},
 	-text =>		'Fix Zero Byte Files',
 	-width =>		'17'
 )->grid(-row=>7,-column=>2,-pady => '1');
-my $p2cb74 = $p1b1f->Checkbutton(
+my $p2cb74 = $p1b1f->ttkCheckbutton(
 	-variable => 	\$opt[74],
-	-selectcolor => $checkboxcolor,
 )->grid(-row=>8,-column=>1,-pady => '1');
-my $rename = $p1b1f ->Button(
+my $rename = $p1b1f ->ttkButton(
 	-command => 		sub {$interrupt = 0; conv();},
 	-text =>		'Convert to ISO 8859-1',
 	-width =>		'17'
 )->grid(-row=>8,-column=>2,-pady => '1');
-my $p2cb47 = $p1b1f->Checkbutton(
+my $p2cb47 = $p1b1f->ttkCheckbutton(
 	-variable => 	\$opt[47],
-	-selectcolor => $checkboxcolor,
 )->grid(-row=>9,-column=>1,-pady => '1');
-my $pngrn = $p1b1f ->Button(
+my $pngrn = $p1b1f ->ttkButton(
 	-command => 	         sub {$interrupt = 0; pngrename();},
 	-text =>		'Rename Png Files',
 	-width =>		'17'
 )->grid(-row=>9,-column=>2,-pady => '1');
-my $p2cb49 = $p1b1f->Checkbutton(
+my $p2cb49 = $p1b1f->ttkCheckbutton(
 	-variable => 	\$opt[49],
-	-selectcolor => $checkboxcolor,
 )->grid(-row=>10,-column=>1,-pady => '1');
-my $doall = $p1b1f->Button(
+my $doall = $p1b1f->ttkButton(
 	-command => 		sub {$interrupt = 0; $runpngcrush = 1; pngcrush();},
 	-text =>		'Run Pngcrush',
 	-width =>		'17'
 )->grid(-row=>10,-column=>2,-pady => '1');
-my $p1b9f = $p1buttonbar->Frame(
+my $p1b9f = $p1buttonbar->ttkFrame(
 )->pack(-side => 'top', -anchor => 'ne',);
 $p1b9f->Label(
 	-text =>'Renumber From'
 )->grid(-row=>0,-column=>1,-pady => '1');
 my $renamest = $p1b9f->Entry(
 	-width => 6,
-	-background => 'white',
 	-textvariable => \$startrnm,
 	-validate => 'all',
 	-vcmd => sub{return 0 if $_[0] =~ /\D/; return 1;}
 )->grid(-row=>0,-column=>2,-pady => '1');
-my $batchbut = $p1b9f->Button(
+my $batchbut = $p1b9f->ttkButton(
 	-command =>	sub{
 				if (my @blist = $dirbox6->curselection){
 					$interrupt = 0;
@@ -407,39 +426,39 @@ my $batchbut = $p1b9f->Button(
 	-text =>		'Start Processing',
 	-width =>		'12'
 )->grid(-row=>1,-column=>2,-pady => '1');
-my $p2cb51 = $p1b9f->Button(
+my $p2cb51 = $p1b9f->ttkButton(
 	-command =>		\&tbackup,
 	-text =>		'Make Backups',
 	-width =>		'12'
 )->grid(-row=>1,-column=>1,-pady => '1');
-my $p1b10f = $p1buttonbar->Frame()->pack(-side => 'top', -anchor => 'ne',);
-my $intbut = $p1b10f->Button(
+my $p1b10f = $p1buttonbar->ttkFrame()->pack(-side => 'top', -anchor => 'ne',);
+my $intbut = $p1b10f->ttkButton(
 	-command =>		sub {$interrupt = 1},
 	-text =>		'Stop Processing',
 	-width =>		'12'
 )->grid(-row=>2,-column=>2,-pady => '1');
-my $revert = $p1b10f->Button(
+my $revert = $p1b10f->ttkButton(
 	-command =>		\&revert,
 	-text =>		'Load Backups',
 	-width =>		'12'
 )->grid(-row=>2,-column=>1,-pady => '1');
-my $p1b11f = $p1buttonbar->Frame()->pack(-anchor => 'n',-side => 'top');
-my $pthelpbut = $p1b11f ->Button(
+my $p1b11f = $p1buttonbar->ttkFrame()->pack(-anchor => 'n',-side => 'top');
+my $pthelpbut = $p1b11f ->ttkButton(
 	-command => 		\&pthelp,
 	-text =>		'?',
 	-width =>		'2'
 )->pack(-side => 'left', -pady => '1');
- my $savebut = $p1b11f ->Button(
+ my $savebut = $p1b11f ->ttkButton(
 	-command => 		\&saveptlog,
 	-text =>		'Save log',
 	-width =>		'7'
 )->pack(-side => 'left', -pady => '1',-padx =>'1');
- my $clearbut = $p1b11f ->Button(
+ my $clearbut = $p1b11f ->ttkButton(
 	-command => 		\&clear,
 	-text =>		'Clear log',
 	-width =>		'7'
 )->pack(-side => 'left', -pady => '1',-padx =>'1');
-my $p4blabelframe = $p1buttonbar->Frame()->pack(-anchor => 'n', -side => 'top',	-expand=>'y', -fill => 'y');
+my $p4blabelframe = $p1buttonbar->ttkFrame()->pack(-anchor => 'n', -side => 'top',	-expand=>'y', -fill => 'y');
 
 $bmessg = "No Directory Selected.";
 
@@ -447,7 +466,6 @@ my $p4bflabel = $p4blabelframe->Scrolled('ROText',
  	-scrollbars =>		'oe',
  	-wrap => 		'word',
  	-width => 		'23',
- 	-font =>		'-*-Helvetica-Medium-R-Normal--*-110-*-*-*-*-*-*',
  )->pack(-side => 'top', -anchor => 'n', -fill => 'y', -expand => 'y', -padx => '2',-pady =>'2');
  BindMouseWheel($p4bflabel);
 
@@ -458,263 +476,224 @@ $p4bflabel->insert('insert',"$bmessg");
 ## Page 2 layout ##################################################################################################################
 my $p2toplabel = $page2 -> Label(
 	-text => "Select options for the markup extraction and filtering routines.\n",
-	-font => $helvb)->pack;
+)->pack;
 
-my $p2buttons = $page2->Frame()->pack(-side => 'top',  -pady => '2', -anchor => 'n');
+my $p2buttons = $page2->ttkFrame()->pack(-side => 'top',  -pady => '2', -anchor => 'n');
 
-my $savesettings = $p2buttons ->Button(
+my $savesettings = $p2buttons ->ttkButton(
 	-command => 		\&save,
 	-text =>		'Save Settings',
 	-width =>		'15'
 )->pack(-side => 'left', -padx => '10');
 
-my $defaults = $p2buttons ->Button(
+my $defaults = $p2buttons ->ttkButton(
 	-command => 		\&defaults,
 	-text =>		'Default Markup',
 	-width =>		'15'
 )->pack(-side => 'left', -padx => '15');
 
-my $blanklab = $p2buttons->Label(-text =>'Zero Byte Text', -font => $helvb)->pack(-side => 'right', -anchor => 'ne');
+my $blanklab = $p2buttons->Label(-text =>'Zero Byte Text')->pack(-side => 'right', -anchor => 'ne');
 
 my $blank = $p2buttons->Entry(
 	 -relief => 'sunken',
-	 -background => 'white',
 	 -width =>	'30',
-	 -font => 	$helvb,
 	  )->pack(-side => 'right', -anchor => 'ne');
 
 $blank->insert(0, $zerobytetext);
 
 # Make a frame to contain all the widgets.
-my $p2o1 = $page2->Frame()->pack(-side => 'top', -fill => 'x', -pady => '5', -anchor => 'n');
+my $p2o1 = $page2->ttkFrame()->pack(-side => 'top', -fill => 'x', -pady => '5', -anchor => 'n');
 
 my $italopen = $p2o1->Entry(
 	 -relief => 'sunken',
-	 -background => 'white',
-	 -font => 	$helvb,
 	  )->pack(-side => 'left', -anchor => 'n');
 $italopen->insert(0, $italicsopen);
 
-my $itolab = $p2o1->Label(-text =>' Italics open', -font => $helvb)->pack(-side => 'left', -anchor => 'nw');
+my $itolab = $p2o1->Label(-text =>' Italics open')->pack(-side => 'left', -anchor => 'nw');
 
-my $itclab = $p2o1->Label(-text =>' Italics close', -font => $helvb)->pack(-side => 'right', -anchor => 'nw');
+my $itclab = $p2o1->Label(-text =>' Italics close')->pack(-side => 'right', -anchor => 'nw');
 
 my $italclose = $p2o1->Entry(
 	 -relief => 'sunken',
-	 -background => 'white',
-	 -font => 	$helvb,
 	  )->pack(-side => 'right', -anchor => 'n');
 $italclose->insert(0, $italicsclose);
 
-my $p2o2 = $page2->Frame()->pack(-side => 'top', -fill => 'x', -pady => '5', -anchor => 'n');
+my $p2o2 = $page2->ttkFrame()->pack(-side => 'top', -fill => 'x', -pady => '5', -anchor => 'n');
 my $bopen = $p2o2->Entry(
 	 -relief => 'sunken',
-	 -background => 'white',
-	 -font => 	$helvb,
 	  )->pack(-side => 'left', -anchor => 'nw');
 $bopen->insert(0, $boldopen);
-my $bolab = $p2o2->Label(-text =>' Bold open', -font => $helvb)->pack(-side => 'left', -anchor => 'nw');
+my $bolab = $p2o2->Label(-text =>' Bold open')->pack(-side => 'left', -anchor => 'nw');
 
-my $boclab = $p2o2->Label(-text =>' Bold close  ', -font => $helvb)->pack(-side => 'right', -anchor => 'ne');
+my $boclab = $p2o2->Label(-text =>' Bold close  ')->pack(-side => 'right', -anchor => 'ne');
 my $bclose = $p2o2->Entry(
 	 -relief => 'sunken',
-	 -background => 'white',
-	 -font => 	$helvb,
 	  )->pack(-side => 'right', -anchor => 'ne');
 $bclose->insert(0, $boldclose);
 
-my $p2o3 = $page2->Frame()->pack(-side => 'top', -fill => 'x', -pady => '5', -anchor => 'n');
+my $p2o3 = $page2->ttkFrame()->pack(-side => 'top', -fill => 'x', -pady => '5', -anchor => 'n');
 my $supsopen = $p2o3->Entry(
 	 -relief => 'sunken',
-	 -background => 'white',
-	 -font => 	$helvb,
 	  )->pack(-side => 'left', -anchor => 'nw');
 $supsopen->insert(0, $supopen);
-my $supolab = $p2o3->Label(-text =>' Superscript open', -font => $helvb)->pack(-side => 'left', -anchor => 'nw');
+my $supolab = $p2o3->Label(-text =>' Superscript open')->pack(-side => 'left', -anchor => 'nw');
 
-my $supclab = $p2o3->Label(-text =>' Superscript close  ', -font => $helvb)->pack(-side => 'right', -anchor => 'ne');
+my $supclab = $p2o3->Label(-text =>' Superscript close  ')->pack(-side => 'right', -anchor => 'ne');
 my $supsclose = $p2o3->Entry(
 	 -relief => 'sunken',
-	 -background => 'white',
-	 -font => 	$helvb,
 	  )->pack(-side => 'right', -anchor => 'ne');
 $supsclose->insert(0, $supclose);
 
-my $p2o4f = $page2->Frame(-relief => 'groove', -borderwidth => 2)->pack(-side => 'top', -fill => 'x', -pady => '2', -padx =>'2');
+my $p2o4f = $page2->ttkFrame()->pack(-side => 'top', -fill => 'both', -expand => 'y', -pady => '2', -padx =>'2');
 
-my $p2o4 = $p2o4f->Scrolled('Pane', -scrollbars => 'os'
+my $p2o4 = $p2o4f->Scrolled('Pane', -scrollbars => 'osoe',
 )->pack(-side => 'top', -anchor => 'n', -fill => 'both', -expand => 'y', -pady=>'6',-padx =>'2');
 
-my $p2cb23 = $p2o4->Checkbutton(
+my $p2cb23 = $p2o4->ttkCheckbutton(
 	-variable => 	\$opt[23],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Extract Bold markup from rtf files.',
 )->grid(-row=>0, -column =>1 ,-padx => '5', -sticky => 'w');
 
-my $p2cb61 = $p2o4->Checkbutton(
+my $p2cb61 = $p2o4->ttkCheckbutton(
 	-variable => 	\$opt[61],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Insert cell delimiters, "|" in tables.',
 )->grid(-row=>0, -column =>2 ,-padx => '5', -sticky => 'w');
 
 
-my $p2cb67 = $p2o4->Checkbutton(
+my $p2cb67 = $p2o4->ttkCheckbutton(
 	-variable => 	\$opt[67],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Extract sub/superscript markup',
 )->grid(-row=>1, -column =>1 ,-padx => '5', -sticky => 'w');
 
-my $p2cb73 = $p2o4->Checkbutton(
+my $p2cb73 = $p2o4->ttkCheckbutton(
 	-variable => 	\$opt[73],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Dehyphenate using German style hyphens; "="',
 	-command =>	sub{if ($opt[73]){$hyphen = "="}else{$hyphen = "-"}},
 )->grid(-row=>1, -column =>2 ,-padx => '5', -sticky => 'w');
 
-my $p2cb78 = $p2o4->Checkbutton(
+my $p2cb78 = $p2o4->ttkCheckbutton(
 	-variable => 	\$opt[78],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Insert small caps markup during RTF extraction',
 	-command =>	sub{if ($opt[73]){$hyphen = "="}else{$hyphen = "-"}},
 )->grid(-row=>2, -column =>1 ,-padx => '5', -sticky => 'w');
 
-my $p2cb77 = $p2o4->Checkbutton(
+my $p2cb77 = $p2o4->ttkCheckbutton(
 	-variable => 	\$opt[77],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Save hyphens.txt & dehyphen.txt containing hyphenated and dehyphenated words from the dehyphenate routine.',
 	-command =>	sub{if ($opt[73]){$hyphen = "="}else{$hyphen = "-"}},
 )->grid(-row=>3, -column =>1, -columnspan => 2, -padx => '5', -sticky => 'w');
 
 
-my $batchremove = $p2o4->Checkbutton(
+my $batchremove = $p2o4->ttkCheckbutton(
 	-variable => 	\$opt[52],
-	-selectcolor => $checkboxcolor,
 	-text =>	"Automatically Remove Headers during batch processing. Be sure you understand the implications before enabling.",
 )->grid(-row=>4, -column =>1, -columnspan => 2, -padx => '5', -sticky => 'w');
 
 
-my $batchremove = $p2o4->Checkbutton(
+my $batchremove = $p2o4->ttkCheckbutton(
 	-variable => 	\$opt[53],
-	-selectcolor => $checkboxcolor,
 	-text =>	"Automatically Remove Footers during batch processing. Be sure you understand the implications before enabling.",
 )->grid(-row=>5, -column =>1, -columnspan => 2, -padx => '5', -sticky => 'w');
 
-my $p2o5 = $page2->Frame(-relief => 'groove', -borderwidth => 2
-)->pack(-side => 'top', -fill => 'both', -expand => 'y', -pady=>'4',-padx =>'2');
+my $p2o5 = $page2->ttkFrame()->pack(-after => $p2o4, -side => 'top', -fill => 'both', -expand => 'y', -pady=>'4',-padx =>'2');
 
-my $p2opts = $p2o5->Scrolled('Pane', -scrollbars => 'ose'
+my $p2opts = $p2o5->Scrolled('Pane', -scrollbars => 'osoe'
 )->pack(-side => 'top', -anchor => 'n', -fill => 'both', -expand => 'y', -pady=>'6',-padx =>'2');
 
 my $grow = 0;
 
-my $p2cb0 = $p2opts->Checkbutton(
+my $p2cb0 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[0],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert multiple spaces to single space.',
 )->grid(-row => $grow, -column => 1, -padx => '5', -sticky => 'w');
 
-my $p2cb50 = $p2opts->Checkbutton(
+my $p2cb50 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[50],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert Windows-1252 codepage glyphs 80-9F.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 ++$grow;
 
-my $p2cb1 = $p2opts->Checkbutton(
+my $p2cb1 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[1],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Remove end of line spaces.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-my $p2cb36 = $p2opts->Checkbutton(
+my $p2cb36 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[36],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert spaced hyphens to em dashes.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 ++$grow;
 
-my $p2cb42 = $p2opts->Checkbutton(
+my $p2cb42 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[42],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert consecutive underscores to em dashes.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-my $p2cb2 = $p2opts->Checkbutton(
+my $p2cb2 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[2],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Remove space on either side of hyphens.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 ++$grow;
 
-my $p2cb60 = $p2opts->Checkbutton(
+my $p2cb60 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[60],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert double commas to double quote.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-my $p2cb3 = $p2opts->Checkbutton(
+my $p2cb3 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[3],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Remove space on either side of emdashes.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 ++$grow;
 
-my $p2cb4 = $p2opts->Checkbutton(
+my $p2cb4 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[4],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Remove space before periods.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-my $p2cb5 = $p2opts->Checkbutton(
+my $p2cb5 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[5],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Remove space before exclamation points.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 ++$grow;
 
-my $p2cb6 = $p2opts->Checkbutton(
+my $p2cb6 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[6],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Remove space before question marks.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-my $p2cb7 = $p2opts->Checkbutton(
+my $p2cb7 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[7],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Remove space before semicolons.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 ++$grow;
 
-my $p2cb8 = $p2opts->Checkbutton(
+my $p2cb8 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[8],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Remove space before commas.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-my $p2cb41 = $p2opts->Checkbutton(
+my $p2cb41 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[41],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Remove space after open, before closing brackets.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 ++$grow;
 
-my $p2cb9 = $p2opts->Checkbutton(
+my $p2cb9 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[9],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Ensure space before ellipsis(except after period).',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
-my $p2cb10 = $p2opts->Checkbutton(
+my $p2cb10 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[10],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert two single quotes to one double.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -722,49 +701,43 @@ my $p2cb10 = $p2opts->Checkbutton(
 ++$grow;
 
 
-my $p2cb12 = $p2opts->Checkbutton(
+my $p2cb12 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[12],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert solitary 1 to I.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
 
-my $p2cb37 = $p2opts->Checkbutton(
+my $p2cb37 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[37],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert solitary lower case l to I.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 ++$grow;
 
-my $p2cb13 = $p2opts->Checkbutton(
+my $p2cb13 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[13],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert solitary 0 to O.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
-my $p2cb14 = $p2opts->Checkbutton(
+my $p2cb14 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[14],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert vulgar fractions (¼,½,¾) to written out.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 ++$grow;
 
 
-my $p2cb15 = $p2opts->Checkbutton(
+my $p2cb15 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[15],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert ² and ³ to ^2 and ^3.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
 
-my $p2cb38 = $p2opts->Checkbutton(
+my $p2cb38 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[38],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert £ to "Pounds".',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -773,60 +746,52 @@ my $p2cb38 = $p2opts->Checkbutton(
 
 
 
-my $p2cb39 = $p2opts->Checkbutton(
+my $p2cb39 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[39],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert ¢ to "cents".',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
-my $p2cb40 = $p2opts->Checkbutton(
+my $p2cb40 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[40],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert § to "Section".',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 
 ++$grow;
 
-my $p2cb24 = $p2opts->Checkbutton(
+my $p2cb24 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[24],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert ° to "degrees".',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-my $p2cb45 = $p2opts->Checkbutton(
+my $p2cb45 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[45],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert forward slash to comma apostrophe.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 ++$grow;
 
-my $p2cb59 = $p2opts->Checkbutton(
+my $p2cb59 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[59],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert \v or \\\\ to w.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-my $p2cb46 = $p2opts->Checkbutton(
+my $p2cb46 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[46],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert solitary j to semicolon.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 
 ++$grow;
 
-my $p2cb16 = $p2opts->Checkbutton(
+my $p2cb16 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[16],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert tli at the beginning of a word to th.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-my $p2cb11 = $p2opts->Checkbutton(
+my $p2cb11 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[11],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert tii at the beginning of a word to th.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -834,165 +799,143 @@ my $p2cb11 = $p2opts->Checkbutton(
 ++$grow;
 
 
-my $p2cb25 = $p2opts->Checkbutton(
+my $p2cb25 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[25],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert tb at the beginning of a word to th.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
-my $p2cb26 = $p2opts->Checkbutton(
+my $p2cb26 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[26],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert wli at the beginning of a word to wh.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 ++$grow;
 
 
-my $p2cb27 = $p2opts->Checkbutton(
+my $p2cb27 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[27],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert wb at the beginning of a word to wh.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
-my $p2cb17 = $p2opts->Checkbutton(
+my $p2cb17 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[17],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert rn at the beginning of a word to m.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 ++$grow;
 
-my $p2cb34 = $p2opts->Checkbutton(
+my $p2cb34 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[34],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert hl at the beginning of a word to bl.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-my $p2cb35 = $p2opts->Checkbutton(
+my $p2cb35 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[35],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert hr at the beginning of a word to br.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 ++$grow;
 
-my $p2cb43 = $p2opts->Checkbutton(
+my $p2cb43 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[43],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert rnp in a word to mp.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-my $p2cb68 = $p2opts->Checkbutton(
+my $p2cb68 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[68],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert vv at the beginning of a word to w.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 ++$grow;
 
-my $p2cb69 = $p2opts->Checkbutton(
+my $p2cb69 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[69],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert !! at the beginning of a word to H',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-my $p2cb70 = $p2opts->Checkbutton(
+my $p2cb70 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[70],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert initial X not followed by e to N.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 
 ++$grow;
 
-my $p2cb71 = $p2opts->Checkbutton(
+my $p2cb71 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[71],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert ! inside a word to l.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-my $p2cb72 = $p2opts->Checkbutton(
+my $p2cb72 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[72],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert \'!! to \'ll.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 ++$grow;
 
-my $p2cb80 = $p2opts->Checkbutton(
+my $p2cb80 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[80],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Remove space before  apostrophes.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-my $p2cb81 = $p2opts->Checkbutton(
+my $p2cb81 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[81],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert \'11 to \'ll.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 
 ++$grow;
 
-my $p2cb65 = $p2opts->Checkbutton(
+my $p2cb65 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[65],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert rnm in a word to mm.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
-my $p2cb55 = $p2opts->Checkbutton(
+my $p2cb55 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[55],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert cb in a word to ch.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 ++$grow;
 
-my $p2cb56 = $p2opts->Checkbutton(
+my $p2cb56 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[56],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert gbt in a word to ght.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
-my $p2cb57 = $p2opts->Checkbutton(
+my $p2cb57 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[57],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert [ai]hle in a word to [ai]ble.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 ++$grow;
 
 
-my $p2cb63 = $p2opts->Checkbutton(
+my $p2cb63 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[63],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert cl at the end of a word to d.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
-my $p2cb64 = $p2opts->Checkbutton(
+my $p2cb64 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[64],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert pbt in a word to pht.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 ++$grow;
 
-my $p2cb58 = $p2opts->Checkbutton(
+my $p2cb58 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[58],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert he to be if it follows to.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
-my $p2cb44 = $p2opts->Checkbutton(
+my $p2cb44 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[44],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Move punctuation outside of markup.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -1000,93 +943,81 @@ my $p2cb44 = $p2opts->Checkbutton(
 ++$grow;
 
 
-my $p2cb75 = $p2opts->Checkbutton(
+my $p2cb75 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[75],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Strip garbage punctuation from beginning of line.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
-my $p2cb18 = $p2opts->Checkbutton(
+my $p2cb18 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[18],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Remove empty lines at top of page.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 ++$grow;
 
 
-my $p2cb76 = $p2opts->Checkbutton(
+my $p2cb76 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[76],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Strip garbage punctuation from end of line.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
-my $p2cb19 = $p2opts->Checkbutton(
+my $p2cb19 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[19],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Convert multi consecutive blank lines to single.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 
 ++$grow;
 
-my $p2cb20 = $p2opts->Checkbutton(
+my $p2cb20 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[20],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Remove top line if number.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-my $p2cb21 = $p2opts->Checkbutton(
+my $p2cb21 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[21],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Remove bottom line if number.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 
 ++$grow;
 
-my $p2cb22 = $p2opts->Checkbutton(
+my $p2cb22 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[22],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Remove empty lines from bottom of page.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 
-my $p2cb79 = $p2opts->Checkbutton(
+my $p2cb79 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[79],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Remove HTML markup (bold, italics, smallcap).',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 
 ++$grow;
 
-my $p2cb82 = $p2opts->Checkbutton(
+my $p2cb82 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[82],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Tidy up/mark dubious spaced quotes.',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
 
-my $p2cb83 = $p2opts->Checkbutton(
+my $p2cb83 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[83],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Mark possible missing spaces between word/sentences.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
 ++$grow;
 
-my $p2cb84 = $p2opts->Checkbutton(
+my $p2cb84 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[84],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Tidy up/mark dubious spaced curly quotes.',
 )->grid(-row => $grow, -column => 1 ,-padx => '5', -sticky => 'w');
 
-my $p2cb85 = $p2opts->Checkbutton(
+my $p2cb85 = $p2opts->ttkCheckbutton(
 	-variable => 	\$opt[85],
-	-selectcolor => $checkboxcolor,
 	-text =>	'Fix spaced close single curly quotes (not mark as unknown).',
 )->grid(-row => $grow, -column => 2 ,-padx => '5', -sticky => 'w');
 
@@ -1100,10 +1031,10 @@ my $p2cb85 = $p2opts->Checkbutton(
 my $p3toplabel = $page3 -> Label(
 	-text => "Select the lines to delete - lines with a white background will be deleted\n" .
 	         "Double click a line to view text. Left click then right click to view image",
-	-font => $helvb)->pack;
+	)->pack;
 
 # Make a frame to contain  the widgets.
-my $optlist = $page3->Frame()->pack(-side => 'top', -fill => 'both', -expand => 'both');
+my $optlist = $page3->ttkFrame()->pack(-side => 'top', -fill => 'both', -expand => '1');
 # Create the balloon widget used by the tooltips.
 my $b = $optlist->Balloon(
 	-state => 		'balloon',
@@ -1111,25 +1042,25 @@ my $b = $optlist->Balloon(
 );
 
 # Make a subframe for row one of buttons and populate it.
-my $buttonbar1 = $optlist->Frame()->pack(-anchor=>'n',-expand=>'no', -fill => 'none');
+my $buttonbar1 = $optlist->ttkFrame()->pack(-anchor=>'n',-expand=>'no', -fill => 'none');
 
 # Populate it with buttons.
 
-my $gethbut = $buttonbar1 ->Button(
+my $gethbut = $buttonbar1 ->ttkButton(
 	-command =>  		\&getheaders,
 	-text =>		'Get Headers',
 	-width =>		'15'
 )->pack(-side => 'left');
 
 
-my $getfbut = $buttonbar1 ->Button(
+my $getfbut = $buttonbar1 ->ttkButton(
 	-command =>  		\&getfooters,
 	-text =>		'Get Footers',
 	-width =>		'15'
 )->pack(-side => 'left');
 
 
-my $headhelpbut = $buttonbar1 ->Button(
+my $headhelpbut = $buttonbar1 ->ttkButton(
 	-command =>  		\&helphr,
 	-text =>		'?',
 	-width =>		'2'
@@ -1140,18 +1071,18 @@ my $headhelpbut = $buttonbar1 ->Button(
 
 # now for row 2
 
-my $buttonbar2 = $optlist->Frame()->pack(-anchor=>'n',-expand=>'no', -fill => 'none');
+my $buttonbar2 = $optlist->ttkFrame()->pack(-anchor=>'n',-expand=>'no', -fill => 'none');
 
 
 
-my $allbut = $buttonbar2 ->Button(
+my $allbut = $buttonbar2 ->ttkButton(
 	-command =>  		\&setall,
 	-text =>		'Select All',
 	-width =>		'15'
 )->pack(-side => 'left');
 
 
-my $nonebut = $buttonbar2 ->Button(
+my $nonebut = $buttonbar2 ->ttkButton(
 	-command =>		\&clearall,
 	-text =>		'Unselect All',
 	-width =>		'15'
@@ -1159,13 +1090,13 @@ my $nonebut = $buttonbar2 ->Button(
 
 
 
-my $togglebut = $buttonbar2 ->Button(
+my $togglebut = $buttonbar2 ->ttkButton(
 	-command =>		\&toggle,
 	-text =>		'Toggle Selection',
 	-width =>		'15'
 )->pack(-side => 'left');
 
-my $okbut = $buttonbar2 ->Button(
+my $okbut = $buttonbar2 ->ttkButton(
 	-command => 		\&ok,
 	-text =>		'Remove Selected',
 	-width =>		'15'
@@ -1210,9 +1141,8 @@ $b->attach($getfbut,
 # Add a listbox to display all of the headers/footers.
 my $lbox = $optlist->Scrolled('Listbox',
 	-scrollbars =>		'oe',
-	-background =>		'white',
 	-selectmode =>		'multiple'
-)->pack(-anchor=>'nw', -fill => 'both',-expand=>'both',  -padx => '5', -pady => '5');
+)->pack(-anchor=>'nw', -fill => 'both',-expand=>'1',  -padx => '5', -pady => '5');
 
 BindMouseWheel($lbox);
 $lbox->eventAdd('<<edit>>' =>  '<Double-Button-1>');
@@ -1271,21 +1201,21 @@ $lbox->bind('<<view>>', sub {
 
 ## Page 4 layout ##################################################################################################################
 
-my $p4topframe1 = $page4->Frame()->pack(-side => 'top', -anchor => 'n');
+my $p4topframe1 = $page4->ttkFrame()->pack(-side => 'top', -anchor => 'n');
 
- my $cdhelpbut = $p4topframe1->Button(
+ my $cdhelpbut = $p4topframe1->ttkButton(
 	-command =>  		\&helpcd,
 	-text =>		'?',
 	-width =>		'2'
 )->pack(-side => 'left', -anchor => 'n', -pady => '5', -padx => '15');
 
-my $p4topframe = $page4->Frame(-height => '5')->pack(-side => 'top', -anchor => 'nw');
+my $p4topframe = $page4->ttkFrame(-height => '5')->pack(-side => 'top', -anchor => 'nw');
 
 if ($^O =~ /Win/){
 	my $drv;
 	my $drive = substr(getpwd(),0,3);
 	my @drivelist = getdrives();
-	my $drives = $p4topframe->BrowseEntry(
+	my $drives = $p4topframe->ttkBrowseEntry(
 		-label => "Select Drive",
 		-variable => 	\$drive,
 		-state => 	'readonly',
@@ -1297,38 +1227,35 @@ if ($^O =~ /Win/){
     	foreach $drv(@drivelist) {$drives->insert("end", $drv)};
 }
 
-my $p4lframe =  $page4->Frame()->pack(-side => 'top', -anchor => 'n');
+my $p4lframe =  $page4->ttkFrame()->pack(-side => 'top', -anchor => 'n');
 
 my $tdirlabel = $p4lframe->ROText(
-	-font => 	$helvb,
 	-relief => 	'flat',
 	-height => '1',
 )->pack(-side => 'top', -anchor => 'n', -padx => '5');
 
 $tdirlabel->insert('end',$pwd);
 
-my $p4mframe =  $page4->Frame()->pack(-side => 'top', -anchor => 'n', -expand=>'y', -fill =>'y', );
+my $p4mframe =  $page4->ttkFrame()->pack(-side => 'top', -anchor => 'n', -expand=>'y', -fill =>'y', );
 
-my $p4rframe =  $p4mframe->Frame()->pack(-side => 'left', -anchor => 'n', -expand=>'y', -fill =>'y', );
+my $p4rframe =  $p4mframe->ttkFrame()->pack(-side => 'left', -anchor => 'n', -expand=>'y', -fill =>'y', );
 
 my $dirbox = $p4rframe->Scrolled('Listbox',
 	-label => "Change To Directory:",
 	-scrollbars =>		'ose',
 	-width =>		'35',
 	-height =>		'12',
-	-background =>		'white',
 	-selectmode =>		'single'
 )->pack(-side => 'top', -anchor=> 'n', -padx => '15', -pady => '25', -expand=>'y', -fill =>'y', );
 BindMouseWheel($dirbox);
 
-my $pdrframe =  $p4mframe->Frame()->pack(-side => 'right', -anchor => 'n', -expand=>'y', -fill =>'y', );
+my $pdrframe =  $p4mframe->ttkFrame()->pack(-side => 'right', -anchor => 'n', -expand=>'y', -fill =>'y', );
 
 $dirbox6 = $p4mframe->Scrolled('Listbox',
 	-label => "Select Directories To Batch Process: (Optional)",
 	-scrollbars =>		'ose',
 	-width =>		'35',
 	-height =>		'12',
-	-background =>		'white',
 	-selectmode =>		'multiple'
 )->pack(-side => 'top', -anchor=> 'n', -padx => '15', -pady => '25', -expand=>'y', -fill =>'y', );
 BindMouseWheel($dirbox6);
@@ -1350,14 +1277,12 @@ $dirbox->bind('<<Change>>', sub {
 
 ## Page 5 layout ##################################################################################################################
 
-my $p5frame =  $page5->Frame->pack(-side => 'top', -anchor => 'n', -padx => '10',-pady => '10', -expand =>'both',-fill=>'both');
+my $p5frame =  $page5->ttkFrame()->pack(-side => 'top', -anchor => 'n', -padx => '10',-pady => '10', -expand =>'1',-fill=>'both');
  my $p5rframetext = $p5frame->Scrolled('ROText',
  	-scrollbars =>		'oe',
- 	-background => 		'white',
  	-wrap => 		'word',
- 	-font =>		'helv',
  	-height =>		'24',
- )->pack(-expand =>'both',-fill=>'both');
+ )->pack(-expand =>'1',-fill=>'both');
  BindMouseWheel($p5rframetext);
 
   $p5rframetext->insert('end',"\n".'The guiprep pre-processing toolkit.   Written by Stephen Schulze.'.
@@ -1372,116 +1297,72 @@ my $p5frame =  $page5->Frame->pack(-side => 'top', -anchor => 'n', -padx => '10'
  	 "\n\n\n".
  	 '  For more details about use and operation, see the HTML user guide included with the program.'.
  	 "\n\n".
- 	"  This program may be freely used, copied, modified and distributed. Reverse engineering strictly encouraged.\n\nThis software has ".
- 	'no guarantees as to its fitness to do this or any other task.'.
- 	"\n".
- 	'Any damages to your computer, your data, your mental health or anything else as a result of using this software '.
- 	'are your problem and not mine. If not satisfied, your purchase price will be cheerfully refunded.'
+	'  This program is free software; you can redistribute it and/or modify '.
+    'it under the terms of the GNU General Public License as published by '.
+	'the Free Software Foundation; either version 2 of the License, or '.
+    '(at your option) any later version.'.
+	 "\n\n".
+    '  This program is distributed in the hope that it will be useful, '.
+    'but WITHOUT ANY WARRANTY; without even the implied warranty of '.
+    'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the '.
+    'GNU General Public License for more details.'.
+	 "\n\n".
+	'  You should have received a copy of the GNU General Public License '.
+	'along with this program; if not, write to the Free Software '.
+	'Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA'
  	);
 
 ##########################################################################################################################
 
 ## Page 6 layout #########################################################################################################
 
-my $p6bframe = $page6->Frame()->pack(-side => 'top', -anchor => 'n');
+my $p6bframe = $page6->ttkFrame()->pack(-side => 'top', -anchor => 'n');
 
-my $p6bframe1 = $p6bframe->Frame()->pack(-side =>'left', -anchor => 'nw');
+my $p6bframe1 = $p6bframe->ttkFrame()->pack(-side =>'left', -anchor => 'nw');
 
 my $b6blbl = $p6bframe1->Label(
-	-text => 	"Try a different color scheme.\nDouble click on a palette to use it.\n(Warning, some are truly putrid.)",
+	-text => 	"Try a different color scheme.\nDouble click on a theme to use it.\n",
 )->pack(-side => 'top');
-my $palletlabel = $p6bframe1->Label(-text=>"Current palette - $palette")->pack(-side => 'top',-pady=>5);
+my $palletlabel = $p6bframe1->Label(-text=>"Current theme - $theme")->pack(-side => 'top',-pady=>5);
 
-my $defcolor = $p6bframe1->Button(
+my $defcolor = $p6bframe1->ttkButton(
 	-command =>		sub{
-					$palette = $gpalette;
-					$main->setPalette("$palette");
-					$palletlabel->configure(-text=>"Current palette - $palette");
+					$theme = $gtheme;
+					$main->ttkSetTheme("$theme");
+					#$themelabel->configure(-text=>"Current theme - $theme");
 				},
-	-text =>		'Default palette',
+	-text =>		'Default theme',
 	-width =>		'15'
 )->pack(-side => 'top');
 
-my $p6list = $p6bframe1->Scrolled(qw/Listbox -width 20 -height 8 -scrollbars e -background white/
+my $p6list = $p6bframe1->Scrolled(qw/Listbox -width 20 -height 8 -scrollbars oe/
 )->pack(-side =>'left', -padx => '5', -pady => '2');
 
 BindMouseWheel($p6list);
     $p6list->bind('<Double-1>' =>
-        sub  {				# palette selection code stolen directly from widgets examples included with perl
+        sub  {				# theme selection code stolen directly from widgets examples included with perl
 		$p6list->Busy;
-		$_[0]->setPalette($_[0]->get('active'));
-		$palette = $_[0]->get('active');
-		$palletlabel->configure(-text=>"Current palette - $palette");
+		$_[0]->ttkSetTheme($_[0]->get('active'));
+		$theme = $_[0]->get('active');
+		$palletlabel->configure(-text=>"Current theme - $theme");
 		$p6list->Unbusy;
 	    },
     );
-	# Ooooo... look at all the pretty colors.....
-$p6list->insert(0, qw/gray60 gray70 gray80 gray85 gray90
-gray95 snow1 snow2 snow3 snow4 seashell1 seashell2 seashell3 seashell4
-AntiqueWhite1 AntiqueWhite2 AntiqueWhite3 AntiqueWhite4 bisque1
-bisque2 bisque3 bisque4 PeachPuff1 PeachPuff2 PeachPuff3 PeachPuff4
-NavajoWhite1 NavajoWhite2 NavajoWhite3 NavajoWhite4 LemonChiffon1
-LemonChiffon2 LemonChiffon3 LemonChiffon4 cornsilk1 cornsilk2
-cornsilk3 cornsilk4 ivory1 ivory2 ivory3 ivory4 honeydew1 honeydew2
-honeydew3 honeydew4 LavenderBlush1 LavenderBlush2 LavenderBlush3
-LavenderBlush4 MistyRose1 MistyRose2 MistyRose3 MistyRose4 azure1
-azure2 azure3 azure4 SlateBlue1 SlateBlue2 SlateBlue3 SlateBlue4
-RoyalBlue1 RoyalBlue2 RoyalBlue3 RoyalBlue4 blue1 blue2 blue3 blue4
-DodgerBlue1 DodgerBlue2 DodgerBlue3 DodgerBlue4 SteelBlue1 SteelBlue2
-SteelBlue3 SteelBlue4 DeepSkyBlue1 DeepSkyBlue2 DeepSkyBlue3
-DeepSkyBlue4 SkyBlue1 SkyBlue2 SkyBlue3 SkyBlue4 LightSkyBlue1
-LightSkyBlue2 LightSkyBlue3 LightSkyBlue4 SlateGray1 SlateGray2
-SlateGray3 SlateGray4 LightSteelBlue1 LightSteelBlue2 LightSteelBlue3
-LightSteelBlue4 LightBlue1 LightBlue2 LightBlue3 LightBlue4 LightCyan1
-LightCyan2 LightCyan3 LightCyan4 PaleTurquoise1 PaleTurquoise2
-PaleTurquoise3 PaleTurquoise4 CadetBlue1 CadetBlue2 CadetBlue3
-CadetBlue4 turquoise1 turquoise2 turquoise3 turquoise4 cyan1 cyan2
-cyan3 cyan4 DarkSlateGray1 DarkSlateGray2 DarkSlateGray3
-DarkSlateGray4 aquamarine1 aquamarine2 aquamarine3 aquamarine4
-DarkSeaGreen1 DarkSeaGreen2 DarkSeaGreen3 DarkSeaGreen4 SeaGreen1
-SeaGreen2 SeaGreen3 SeaGreen4 PaleGreen1 PaleGreen2 PaleGreen3
-PaleGreen4 SpringGreen1 SpringGreen2 SpringGreen3 SpringGreen4 green1
-green2 green3 green4 chartreuse1 chartreuse2 chartreuse3 chartreuse4
-OliveDrab1 OliveDrab2 OliveDrab3 OliveDrab4 DarkOliveGreen1
-DarkOliveGreen2 DarkOliveGreen3 DarkOliveGreen4 khaki1 khaki2 khaki3
-khaki4 LightGoldenrod1 LightGoldenrod2 LightGoldenrod3 LightGoldenrod4
-LightYellow1 LightYellow2 LightYellow3 LightYellow4 yellow1 yellow2
-yellow3 yellow4 gold1 gold2 gold3 gold4 goldenrod1 goldenrod2
-goldenrod3 goldenrod4 DarkGoldenrod1 DarkGoldenrod2 DarkGoldenrod3
-DarkGoldenrod4 RosyBrown1 RosyBrown2 RosyBrown3 RosyBrown4 IndianRed1
-IndianRed2 IndianRed3 IndianRed4 sienna1 sienna2 sienna3 sienna4
-burlywood1 burlywood2 burlywood3 burlywood4 wheat1 wheat2 wheat3
-wheat4 tan1 tan2 tan3 tan4 chocolate1 chocolate2 chocolate3 chocolate4
-firebrick1 firebrick2 firebrick3 firebrick4 brown1 brown2 brown3
-brown4 salmon1 salmon2 salmon3 salmon4 LightSalmon1 LightSalmon2
-LightSalmon3 LightSalmon4 orange1 orange2 orange3 orange4 DarkOrange1
-DarkOrange2 DarkOrange3 DarkOrange4 coral1 coral2 coral3 coral4
-tomato1 tomato2 tomato3 tomato4 OrangeRed1 OrangeRed2 OrangeRed3
-OrangeRed4 red1 red2 red3 red4 DeepPink1 DeepPink2 DeepPink3 DeepPink4
-HotPink1 HotPink2 HotPink3 HotPink4 pink1 pink2 pink3 pink4 LightPink1
-LightPink2 LightPink3 LightPink4 PaleVioletRed1 PaleVioletRed2
-PaleVioletRed3 PaleVioletRed4 maroon1 maroon2 maroon3 maroon4
-VioletRed1 VioletRed2 VioletRed3 VioletRed4 magenta1 magenta2 magenta3
-magenta4 orchid1 orchid2 orchid3 orchid4 plum1 plum2 plum3 plum4
-MediumOrchid1 MediumOrchid2 MediumOrchid3 MediumOrchid4 DarkOrchid1
-DarkOrchid2 DarkOrchid3 DarkOrchid4 purple1 purple2 purple3 purple4
-MediumPurple1 MediumPurple2 MediumPurple3 MediumPurple4 thistle1
-thistle2 thistle3 thistle4/);
 
- # end colors
+my @themes = $book->ttkThemes;
+$p6list->insert('end', @themes);
 
-my $p6bframe2 = $p6bframe->Frame()->pack(-side =>'right', -anchor => 'ne', -padx=>'15');
+my $p6bframe2 = $p6bframe->ttkFrame()->pack(-side =>'right', -anchor => 'ne', -padx=>'15');
 
 my $p6pngsdirlbl = $p6bframe2->Label(
 	-text => "Name of directory under your project directory\nwhere your PNG images are located.",
 )->pack(-padx =>'10');
 
 my $p6pngsdirentry = $p6bframe2->Entry(
-	-background => 'white',
 	-width =>	'35',
 )->pack();
 
-my $chpngsdirbut = $p6bframe2->Button(
+my $chpngsdirbut = $p6bframe2->ttkButton(
 	-command =>		sub{$imagesdir = $p6pngsdirentry->get; save();},
 	-text =>		'OK',
 	-width =>		'6'
@@ -1489,9 +1370,9 @@ my $chpngsdirbut = $p6bframe2->Button(
 
 $p6pngsdirentry->insert(0,"$imagesdir");
 
-my $p6bbframe = $page6->Frame()->pack();
+my $p6bbframe = $page6->ttkFrame()->pack();
 
-my $editsel = $p6bbframe->Button(
+my $editsel = $p6bbframe->ttkButton(
 	-command =>		\&editorsel,
 	-text =>		'Setup Text Editor',
 	-width =>		'15'
@@ -1500,12 +1381,11 @@ my $editsel = $p6bbframe->Button(
 my $editlabel = $p6bbframe->ROText(
 	-height => '4',
 	-relief => 'flat',
-	-font => '-*-Helvetica-Medium-R-Normal--*-120-*-*-*-*-*-*',
 )->pack(-side => 'left',-pady => '1');
 
-my $p6bcframe = $page6->Frame()->pack();
+my $p6bcframe = $page6->ttkFrame()->pack();
 
-my $viewsel = $p6bcframe->Button(
+my $viewsel = $p6bcframe->ttkButton(
 	-command =>		\&viewersel,
 	-text =>		'Setup Image Viewer',
 	-width =>		'15'
@@ -1514,7 +1394,6 @@ my $viewsel = $p6bcframe->Button(
 my $viewlabel = $p6bcframe->ROText(
 	-height => '4',
 	-relief => 'flat',
-	-font => '-*-Helvetica-Medium-R-Normal--*-120-*-*-*-*-*-*',
 )->pack(-side => 'left');
 
 $editlabel->insert('end',"\nBrowse to find text editor. Wordpad or Notepad or equivalent for Windows.\n");
@@ -1532,18 +1411,16 @@ if ($viewerstart){
 	$viewlabel->insert('end',"No image viewer is selected.");
 }
 
-my $p6crushframe = $page6->Frame()->pack(-side => 'top', -anchor => 'n');
+my $p6crushframe = $page6->ttkFrame()->pack(-side => 'top', -anchor => 'n');
 
 my $crushentry = $p6crushframe->Entry(
 	 -relief => 'sunken',
-	 -background => 'white',
-	 -font => 	$helv,
 	 -width => 	'46',
 )->pack(-side => 'left', -anchor => 'n',-pady => '12');
 
 my $crushlab = $p6crushframe->Label(-text =>"Pngcrush\noptions")->pack(-side => 'left', -anchor => 'n',-pady => '5');
 
-my $crushdefaults = $p6crushframe->Button(
+my $crushdefaults = $p6crushframe->ttkButton(
 	-command =>		sub {$crushoptions = $gcrushoptions;
 					$crushentry->delete(0,'end');
 					$crushentry->insert(0, $crushoptions);},
@@ -1551,22 +1428,21 @@ my $crushdefaults = $p6crushframe->Button(
 	-width =>		'20'
 )->pack(-side => 'left', -padx => '5', -pady => '3');
 
-my $crushreadme = $p6crushframe->Button(
+my $crushreadme = $p6crushframe->ttkButton(
 	-command =>		sub {testart($startdir.$separator."pngcrush".$separator."README.txt")},
 
 	-text =>		'View Pngcrush Help',
 	-width =>		'20'
 )->pack(-side => 'left', -padx => '5', -pady => '5');
 
-my $p6crushlframe = $page6->Frame()->pack(-side => 'top', -anchor => 'n');
+my $p6crushlframe = $page6->ttkFrame()->pack(-side => 'top', -anchor => 'n');
 
 my $crushlab1 = $p6crushlframe->Scrolled('ROText',
 	-scrollbars => 'oe',
 	-wrap => 'word',
-	-background => 'white',
 	-height => '6')->pack(-side => 'top', -anchor => 'n',-pady => '4');
 
-$crushlab1->insert('end', "-bit_depth 1 converts the file to single bit color (black & white).\n\n-reduce reduces the color palette ".
+$crushlab1->insert('end', "-bit_depth 1 converts the file to single bit color (black & white).\n\n-reduce reduces the color theme ".
 	"to only contain colors actually used in the image.\n\n".
 	"You can use nearly any of the standard options, a few will not work very well because of the way the script handles files. ".
 	"For instance the -d (output directory) will definitely cause problems, as will -e (output extension). Most of the rest can be ".
@@ -1618,7 +1494,7 @@ sub viewersel{
 ###########################################################################################################
 # page 8 Search & Replace.
 
-my $p8f1 = $page8->Frame()->pack(-side => 'top', -anchor => 'n',-pady=>'2');
+my $p8f1 = $page8->ttkFrame()->pack(-side => 'top', -anchor => 'n',-pady=>'2');
 
 my $searchlabel = $p8f1->Label(
 	-text =>	'Search Text',
@@ -1626,18 +1502,16 @@ my $searchlabel = $p8f1->Label(
 )->pack(-side => 'left', -anchor => 'n', -padx => '1');
 
 my $searchentry = $p8f1->Entry(
-	-background => 'white',
 	-width => 	'50',
-	-font => $cour,
 )->pack(-side => 'left', -anchor => 'n', -padx => '6',-pady => '4');
 
-my $searchbutton1 = $p8f1->Button(
+my $searchbutton1 = $p8f1->ttkButton(
 	-command => 		sub {$interrupt = 0; search();},
 	-text =>		'Search',
 	-width =>		'12'
 )->pack(-side => 'left', -padx => '6', -anchor => 'n');
 
-my $p8f01 = $page8->Frame()->pack(-side => 'top', -anchor => 'n',-pady=>'2');
+my $p8f01 = $page8->ttkFrame()->pack(-side => 'top', -anchor => 'n',-pady=>'2');
 
 my $replacelabel = $p8f01->Label(
 	-text =>	'Replacement',
@@ -1645,24 +1519,22 @@ my $replacelabel = $p8f01->Label(
 )->pack(-side => 'left', -anchor => 'n', -padx => '1');
 
 my $replaceentry1 = $p8f01->Entry(
-	-background => 'white',
 	-width => 	'50',
-	-font => $cour,
 )->pack(-side => 'left', -anchor => 'n', -padx => '6',-pady => '4');
 
-my $replacebutton1 = $p8f01->Button(
+my $replacebutton1 = $p8f01->ttkButton(
 	-command => 		sub {$interrupt = 0; replace($replaceentry1->get);},
 	-text =>		'Replace',
 	-width =>		'7'
 )->pack(-side => 'left', -padx => '2', -anchor => 'nw');
 
-my $rsbutton1 = $p8f01->Button(
+my $rsbutton1 = $p8f01->ttkButton(
 	-command => 		sub {$interrupt = 0; replace($replaceentry1->get); search();},
 	-text =>		'R & S',
 	-width =>		'7'
 )->pack(-side => 'left', -padx => '2', -anchor => 'n');
 
-my $p8f02 = $page8->Frame()->pack(-side => 'top', -anchor => 'n',-pady=>'2');
+my $p8f02 = $page8->ttkFrame()->pack(-side => 'top', -anchor => 'n',-pady=>'2');
 
 my $replacelabel2 = $p8f02->Label(
 	-text =>	'Alternate 1',
@@ -1670,24 +1542,22 @@ my $replacelabel2 = $p8f02->Label(
 )->pack(-side => 'left', -anchor => 'n', -padx => '1');
 
 my $replaceentry2 = $p8f02->Entry(
-	-background => 'white',
 	-width => 	'50',
-	-font => $cour,
 )->pack(-side => 'left', -anchor => 'n', -padx => '6',-pady => '4');
 
-my $replacebutton2 = $p8f02->Button(
+my $replacebutton2 = $p8f02->ttkButton(
 	-command => 		sub {$interrupt = 0; replace($replaceentry2->get);},
 	-text =>		'Replace',
 	-width =>		'7'
 )->pack(-side => 'left', -padx => '2', -anchor => 'nw');
 
-my $rsbutton2 = $p8f02->Button(
+my $rsbutton2 = $p8f02->ttkButton(
 	-command => 		sub {$interrupt = 0; replace($replaceentry2->get); search();},
 	-text =>		'R & S',
 	-width =>		'7'
 )->pack(-side => 'left', -padx => '2', -anchor => 'n');
 
-my $p8f03 = $page8->Frame()->pack(-side => 'top', -anchor => 'n',-pady=>'2');
+my $p8f03 = $page8->ttkFrame()->pack(-side => 'top', -anchor => 'n',-pady=>'2');
 
 my $replacelabel3 = $p8f03->Label(
 	-text =>	'Alternate 2',
@@ -1695,71 +1565,66 @@ my $replacelabel3 = $p8f03->Label(
 )->pack(-side => 'left', -anchor => 'n', -padx => '1');
 
 my $replaceentry3 = $p8f03->Entry(
-	-background => 'white',
 	-width => 	'50',
-	-font => $cour,
 )->pack(-side => 'left', -anchor => 'n', -padx => '6',-pady => '4');
 
-my $replacebutton3 = $p8f03->Button(
+my $replacebutton3 = $p8f03->ttkButton(
 	-command => 		sub {$interrupt = 0; replace($replaceentry3->get);},
 	-text =>		'Replace',
 	-width =>		'7'
 )->pack(-side => 'left', -padx => '2', -anchor => 'nw');
 
-my $rsbutton3 = $p8f03->Button(
+my $rsbutton3 = $p8f03->ttkButton(
 	-command => 		sub {$interrupt = 0; replace($replaceentry3->get); search();},
 	-text =>		'R & S',
 	-width =>		'7'
 )->pack(-side => 'left', -padx => '2', -anchor => 'n');
 
-my $p8f2 = $page8->Frame()->pack(-side => 'top', -anchor => 'n');
+my $p8f2 = $page8->ttkFrame()->pack(-side => 'top', -anchor => 'n');
 
-my $searchsavebutton = $p8f2->Button(
+my $searchsavebutton = $p8f2->ttkButton(
 	-command => 		sub {$interrupt = 0; searchsave();},
 	-text =>		'Save Open File',
 	-width =>		'12'
 )->pack(-side => 'left', -pady => '1', -padx => '2', -anchor => 'nw');
 
-my $p8cb51 = $p8f2->Checkbutton(
+my $p8cb51 = $p8f2->ttkCheckbutton(
 	-variable => 	\$opt[51],
-	-selectcolor => $checkboxcolor,
 	-text => 	'Case Insensitive'
 )->pack(-side => 'left', -anchor => 'n', -pady => '1');
 
-my $p8cb53 = $p8f2->Checkbutton(
+my $p8cb53 = $p8f2->ttkCheckbutton(
 	-variable => 	\$opt[62],
-	-selectcolor => $checkboxcolor,
 	-text => 	'Whole word only'
 )->pack(-side => 'left', -anchor => 'n', -pady => '1');
 
 my $searchfile = $p8f2->ROText(
 	-relief => 'flat',
-	-font => '-*-Helvetica-Medium-R-Normal--*-140-*-*-*-*-*-*',
 	-height => '1',
 	-width => '20',
 )->pack(-side => 'left', -anchor => 'n', -padx => '4', -pady => '4');
 
-my $replaceallbutton = $p8f2->Button(
+my $replaceallbutton = $p8f2->ttkButton(
 	-command => 		sub {$interrupt = 0; replaceall();},
 	-text =>		'Replace All',
 	-width =>		'12'
 )->pack(-side => 'left', -pady => '1', -padx => '2', -anchor => 'nw');
 
-my $p8f5 = $page8->Frame()->pack(-side => 'top', -anchor => 'n');
+my $p8f5 = $page8->ttkFrame()->pack(-side => 'top', -anchor => 'n');
 
-my $decfilebutton = $p8f5->Button(
+my $decfilebutton = $p8f5->ttkButton(
 	-command => 		sub {$filesearchindex1--; searchincdec();},
 	-text =>		'<-- Previous File',
 	-width =>		'14'
 )->pack(-side => 'left', -pady => '4', -padx => '10', -anchor => 'n');
 
-my $incfilebutton = $p8f5->Button(
+my $incfilebutton = $p8f5->ttkButton(
 	-command => 		sub {$filesearchindex1++; searchincdec();},
 	-text =>		'Next File -->',
 	-width =>		'14'
 )->pack(-side => 'left', -pady => '4', -padx => '10', -anchor => 'n');
 
-my $searchfileslist = $p8f5->BrowseEntry(
+my $searchfileslist = $p8f5->ttkBrowseEntry(
 		-label => "Go to File -",
 		-variable => 	\$filesearchindex1,
 		-state => 	'readonly',
@@ -1768,7 +1633,7 @@ my $searchfileslist = $p8f5->BrowseEntry(
 		-browsecmd => 	\&searchincdec,
 )->pack(-anchor => 'n', -side => 'left', -padx => '10', -pady => '8');
 
-my $seefilebutton = $p8f5->Button(
+my $seefilebutton = $p8f5->ttkButton(
 	-command => 		sub {
 				my $file = $searchfilelist[$filesearchindex];
 				$file =~ s/(?<=\.)txt$/png/;
@@ -1780,17 +1645,18 @@ my $seefilebutton = $p8f5->Button(
 	-width =>		'14'
 )->pack(-side => 'left', -pady => '4', -padx => '10', -anchor => 'n');
 
-my $p8f3 = $page8->Frame()->pack(-side => 'top', -anchor => 'n',-expand =>'both', -fill => 'both');
+my $p8f3 = $page8->ttkFrame()->pack(-side => 'top', -anchor => 'n',-expand =>'1', -fill => 'both');
 
 my $displaybox = $p8f3->Scrolled('TextUndo',
 	-scrollbars => 'osoe',
-	-background => 'white',
 	-width => 	'100',
-	-font => $courl,
 	-height => 	'30',
 	-wrap => 	'word',
-)->pack(-side => 'top', -anchor => 'n', -padx => '6',-pady => '6', -expand =>'both', -fill => 'both');
-$displaybox->tagConfigure('highlight', background => 'yellow');
+)->pack(-side => 'top', -anchor => 'n', -padx => '6',-pady => '6', -expand =>'1', -fill => 'both');
+
+# pre-pTk, background was set to 'yellow' but pTk doesn't support that
+#$displaybox->tagConfigure('highlight', background => 'yellow');
+
 BindMouseWheel($displaybox);
 
 ###########################################################################################################
@@ -1799,7 +1665,7 @@ BindMouseWheel($displaybox);
 
 $book->pack(
 	 -anchor => 'nw',
-	 -expand => 'both',
+	 -expand => '1',
 	 -fill => 'both',
 	 -padx => 5,
 	 -pady => 5,
@@ -3152,7 +3018,7 @@ sub save{
 	print SAVE (');',"\n\n");
 	$savethis = $pwd; $savethis =~ s/\\$/\\\\/g;
 	print SAVE ('$lastrundir   = \'',$savethis,'\';',"\n");
-	print SAVE ('$palette      = \'',$palette,'\';',"\n");
+	print SAVE ('$theme      = \'',$theme,'\';',"\n");
 	$savethis = $editstart; $savethis =~ s/\\$/\\\\/g;
 	print SAVE ('$editstart    = \'',$savethis,'\';',"\n");
 	$savethis = $viewerstart; $savethis =~ s/\\$/\\\\/g;
@@ -3451,7 +3317,7 @@ sub delfooters {
 
 sub helphr{
 	my $cdhelpbox = $main->messageBox(-title => "Help with Header Removal", -type => "OK", -icon => 'question',
-	-message => '   Click on Get Headers to get a list showing the fisrts line from each file in the text directory. '.
+	-message => '   Click on Get Headers to get a list showing the first line from each file in the text directory. '.
         'Get Footers will show the last line from each file.Check each line and if you would like to remove it, select it.'.
         'Selected lines will have a white background. '.
 	'Alternately you can use the Select All, Unselect All and Toggle Selection buttons to make bulk changes to the '.
@@ -3538,7 +3404,6 @@ sub chdirectory{
     	$bottomlabel->destroy;
    	$bottomlabel = $mainbframe->Label(
 		-text => "Working from the $pwd directory.",
-		-font => '-*-Helvetica-Medium-R-Normal--*-160-*-*-*-*-*-*'
 )->pack(-anchor => 'nw');
     	$lbox->delete(0, 'end');
     	save();
@@ -3821,7 +3686,7 @@ sub searchfiles{
 
 	$main->messageBox(
 		-icon => 'error', 					# Let user know
-		-message => "No more occurances of text string \"".$searchentry->get."\" found.",
+		-message => "No more occurrences of text string \"".$searchentry->get."\" found.",
 		-title => 'Text not found.',
 		-type => 'Ok',
 	);
@@ -4262,4 +4127,3 @@ sub betagreek{
 	$phrase =~ s/\x{03CD}/y\//g;
 	return fromgreektr($phrase)
 }
-
