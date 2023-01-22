@@ -28,13 +28,13 @@ my @modules = (
 if ( $^O eq 'MSWin32' ) {
     push @modules, "Win32::Unicode::Process";
 
-    # If your ActiveTcl location is non-default, please adjust this path here!
-    my $filename = 'C:/ActiveTcl/lib/tclConfig.sh';
+    # If your Tcl location is non-default, please adjust this path here!
+    my $filename = 'C:/Tcl/lib/tclConfig.sh';
 
     my $data = read_file($filename);
-    my $regex = qr/([A-Za-z_=]+[']+[-L]*[-I]*)(C:\\TEMP\\ActiveState----------------------------------------please-run-the-install-script----------------------------------------\\)([include]*[lib]*)/mp;
-    # If your ActiveTcl location is non-default, please adjust this path here!
-    $data =~ s/$regex/$1C:\\ActiveTcl\\$3/g;
+    my $regex = qr/([A-Z_=]+[']+[{]*[-L]*[-I]*)([\/]*[A-Z]+[:]*[\\\/]+BawtBuilds\/TclDistribution\/TclDistribution\-[\d.a]*\/Windows\/[x64|x86]+\/Release\/[Install|Build]+\/Tcl)/mp;
+    # If your Tcl location is non-default, please adjust this path here!
+    $data =~ s/$regex/$1C:\/Tcl/g;
     write_file($filename, $data);
 }
 

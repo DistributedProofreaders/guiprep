@@ -23,12 +23,12 @@ recommended Perl interpreter as that is what the developers have tested, it
 supports the latest version of Perl, and includes all necessary Perl modules.
 It can coexist along side other interpreters.
 
-This also uses [ActiveTcl](https://www.activestate.com/products/tcl/), which is
-the best current version of Tcl available for Windows. As of January 2023, a bug
-in the ActiveTcl installer causes a configuration file to have an error. The
-script to install CPAN modules below attempts to detect if this error is
-present, and adjusts the file accordingly. If you change the location of your
-ActiveTcl installation away from the default, you may need to adjust the CPAN
+This also uses [BAWT Tcl](https://www.tcl3d.org/bawt/download.html#tclbi), which
+is a freely-available and open source version of Tcl for Windows. As of January
+2023, a bug in the Tcl installer causes a configuration file to have an
+error. The script to install CPAN modules below attempts to detect if this error
+is present, and adjusts the file accordingly. If you change the location of your
+Tcl installation away from the default, you may need to adjust the CPAN
 modules install script as well.
 
 _If you have an existing Perl distribution installed (including if you are
@@ -52,9 +52,14 @@ to any previous versions._
 1. Download [Strawberry Perl](http://strawberryperl.com/).
 2. Double click the downloaded file to install Strawberry Perl. It is
    recommended that you install in the default folder `c:\Strawberry`.
-3. Download [ActiveTcl](https://www.activestate.com/products/tcl/).
-4. Double click the downloaded file to install ActiveTcl. It is
-   recommended that you install in the default folder `C:\ActiveTcl`.
+3. Download [BAWT Tcl](https://www.tcl3d.org/bawt/download.html#tclbi). You will
+   need to choose the latest non-alpha version of the "batteries included"
+   edition. As of January 2023, this is the Tcl 8.6.13 Batteries Included
+   version, either 32 or 64 bit. Your computer is most likely 64-bit, but if
+   that version does not work, you can uninstall it and retry with the 32-bit
+   version.
+4. Double click the downloaded file to install Tcl. It is
+   recommended that you install in the default folder `C:\Tcl`.
 5. Download the latest release (the zip file) from the [Guiprep
    releases](https://github.com/DistributedProofreaders/guiprep/releases) page.
 6. Unzip guiprep zip file to some location on your computer (double
@@ -181,7 +186,7 @@ You can accept the defaults it presents to you.
 
 ### Perl & Perl modules
 
-Using Terminal.app, use Homebrew to install Perl, cpanm, and Tcl:
+Using Terminal.app, use Homebrew to install Perl, cpanm, and Tcl: 
 
 ```
 brew install perl
@@ -190,9 +195,31 @@ brew install cpanm
 brew install tcl-tk
 ```
 
+After running this last command, homebrew will note that `tcl-tk is keg only`,
+and then tell you, based on your specific computer's settings, the command you
+need to run if you need to have `tcl-tk` first in your `PATH`. It will be
+something like the following, and you need to run that in your terminal next.
+
+```
+echo 'export PATH="/opt/homebrew/opt/tcl-tk/bin:$PATH"' >> ~/.zshrc
+```
+
+From there, you need one more homebrew package. 
+
+*Note that the bwidget package, required here, is pending acceptance into
+upstream homebrew. Once that is completed, there will be no need to use the
+willcohen/core tap. For anyone who adds this tap, at that point you can simply
+untap using* `brew untap willcohen/core`, *then reinstall from main homebrew
+with* `brew uninstall bwidget` *and* `brew install bwidget`.
+
+```
+brew tap willcohen/core
+brew install bwidget
+```
+
 Close Terminal.app and reopen it to ensure that the brew-installed perl is on
-your path. Then install all the necessary [Perl modules](#perl-modules). This
-is most easily done by running the helper script:
+your path. Then install all the necessary [Perl modules](#perl-modules). This is
+most easily done by running the helper script:
 
 ```
 perl install_cpan_modules.pl

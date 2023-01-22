@@ -259,17 +259,24 @@ my $book = $maintopframe->ttkNotebook();# -ipadx => 6, -ipady => 6);
 
 $main->bind('<<NotebookTabChanged>>',
 	sub{
+
 		for ($book->tab($book->select())->[7]) {
-				if ('Select Options') { sub {print "Select Options";$interrupt = 1;chdir $pwd;} }
-				elsif ('Process Text') { \&updateblist }
-		        elsif ('Search') { sub{$interrupt = 1; searchclear(); $filesearchindex1 = 1;
-									@searchfilelist=(); $main->update; $main->Busy; searchincdec(); $main->Unbusy;} }
-			    elsif ('Headers & Footers') { sub {emptybox(); $interrupt = 1;chdir $pwd;} }
-                elsif ('Change Directory') { sub {$interrupt = 1;chdir $pwd;} }
-                elsif ('Program Prefs') { sub {$interrupt = 1;chdir $pwd;} }
-                elsif ('About') { sub {$interrupt = 1;chdir $pwd;} }
-                else { sub {$interrupt = 1;chdir $pwd;} }
+		if ('Select Options') { sub {print "Select Options";$interrupt = 1;chdir $pwd;} }
+		elsif ('Process Text') { \&updateblist }
+		elsif ('Search') {
+			sub{$interrupt = 1; searchclear(); $filesearchindex1 = 1;
+			@searchfilelist=(); $main->update; $main->Busy; searchincdec(); $main->Unbusy;}
+		}
+		elsif ('Headers & Footers') { sub {emptybox(); $interrupt = 1;chdir $pwd;} }
+		elsif ('Change Directory') { sub {$interrupt = 1;chdir $pwd;} }
+		elsif ('Program Prefs') { sub {$interrupt = 1;chdir $pwd;} }
+		elsif ('About') { sub {$interrupt = 1;chdir $pwd;} }
+		else { sub {$interrupt = 1;chdir $pwd;} }
 		}});
+
+# Note: the order of these pages is set this way to set the order of the pages
+# in the UI selector. This differs from the numeric order originally declared,
+# and is intentional.
 
 my $page2 = $book->ttkFrame();
 my $page1 = $book->ttkFrame();
@@ -279,13 +286,13 @@ my $page4 = $book->ttkFrame();
 my $page6 = $book->ttkFrame();
 my $page5 = $book->ttkFrame();
 
-my $page2c = $book->add($page2, -text => "Select Options");
-my $page1c = $book->add($page1, -text => "Process Text");
-my $page8c = $book->add($page8, -text => "Search");
-my $page3c = $book->add($page3, -text => "Headers & Footers");
-my $page4c = $book->add($page4, -text => "Change Directory");
-my $page6c = $book->add($page6, -text => "Program Prefs");
-my $page5c = $book->add($page5, -text => "About");
+$book->add($page2, -text => "Select Options");
+$book->add($page1, -text => "Process Text");
+$book->add($page8, -text => "Search");
+$book->add($page3, -text => "Headers & Footers");
+$book->add($page4, -text => "Change Directory");
+$book->add($page6, -text => "Program Prefs");
+$book->add($page5, -text => "About");
 
 ## Page 1 layout ##################################################################################################################
 my $p1text;
@@ -1220,8 +1227,6 @@ if ($^O =~ /Win/){
     	foreach $drv(@drivelist) {$drives->insert("end", $drv)};
 }
 
-# TODO: END HERE
-
 my $p4lframe =  $page4->ttkFrame()->pack(-side => 'top', -anchor => 'n');
 
 my $tdirlabel = $p4lframe->ROText(
@@ -1648,7 +1653,10 @@ my $displaybox = $p8f3->Scrolled('TextUndo',
 	-height => 	'30',
 	-wrap => 	'word',
 )->pack(-side => 'top', -anchor => 'n', -padx => '6',-pady => '6', -expand =>'1', -fill => 'both');
-#$displaybox->tagConfigure('highlight', background => 'yellow'); #background => 'yellow'
+
+# pre-pTk, background was set to 'yellow' but pTk doesn't support that
+#$displaybox->tagConfigure('highlight', background => 'yellow');
+
 BindMouseWheel($displaybox);
 
 ###########################################################################################################
