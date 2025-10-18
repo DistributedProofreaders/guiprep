@@ -1,5 +1,12 @@
 # Guiprep
 
+> [!WARNING]
+> Guiprep is **no longer being actively maintained**.
+> Users are recommended to use
+> [Guiguts version 2](https://github.com/DistributedProofreaders/guiguts-py) instead.
+> See the Guiguts v2 [Content Providing Menu](https://www.pgdp.net/wiki/PPTools/Guiguts/Guiguts_2_Manual/Content_Providing_Menu)
+> for more information.
+
 Guiprep is a Perl/Tk text and image processor designed for preparing public
 domain material to be proofread by 
 [Distributed Proofreaders](https://www.pgdp.net).
